@@ -13,10 +13,17 @@ echo \
   $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
+# Setup docker
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+## Check VERSION OF DOCKER
+```bash
+docker -v
 ```
 ## CREATE DATABASE BY USING DOCKER:
 - Step 1: Open Terminal in this directory
-- Step 2: docker compose up -d
+- Step 2: sudo docker compose up -d
 - Step 3: sudo docker exec -it tutor_system mysql - root -p
 - **Note:** Password: admin123
 ## CONNECT DATABASE BY USING DBEAVER
