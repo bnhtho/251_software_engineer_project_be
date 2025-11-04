@@ -1,0 +1,14 @@
+services:
+  mysql:
+    image: mysql
+    container_name: tutor_system
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_DATABASE: tutor_system
+      TZ: Asia/Ho_Chi_Minh
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306" #Nếu cổng 3306 có ứng dụng chạy thì đổi
+    volumes:
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
