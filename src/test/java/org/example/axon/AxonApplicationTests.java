@@ -1,13 +1,13 @@
-package HCMUT.TutorSytem;
+package org.example.axon;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TutorSytemApplicationTests {
+class AxonApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }
