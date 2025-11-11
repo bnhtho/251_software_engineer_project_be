@@ -283,8 +283,8 @@ VALUES
 (2, 'CS101',   'Programming Fundamentals',    'CSE',             'Lập trình cơ bản C/C++.',                 NULL),
 (3, 'PHYS101', 'Physics I',                   'Physics',         'Cơ học, nhiệt học cơ bản.',              NULL);
 
--- 6) Học liệu (bảng tên `Table`)
-INSERT INTO `Table`
+-- 6) Học liệu (bảng tên `library`)
+INSERT INTO `library`
 (id, `name`, catagory, author, `subject`, url, uploaded_date, uploaded_by)
 VALUES
 (1, 'Calculus I - Lecture Notes', 'Notes',     'Dept. of Math', 'MATH101', 'https://library.hcmut.edu.vn/calc1.pdf',  NOW(), 2),
