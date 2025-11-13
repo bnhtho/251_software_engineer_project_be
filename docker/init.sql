@@ -51,7 +51,7 @@ CREATE TABLE `datacore` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Bảng tài liệu (tên là "Table" theo diagram, dùng backtick để tránh trùng keyword)
-CREATE TABLE `Table` (
+CREATE TABLE `library` (
   `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name`          VARCHAR(255)    NOT NULL,
   `catagory`      VARCHAR(100)    NULL,  -- (category)
