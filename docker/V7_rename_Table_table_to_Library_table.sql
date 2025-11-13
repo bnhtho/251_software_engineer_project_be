@@ -1,6 +1,3 @@
--- Đổi tên bảng
-RENAME TABLE `Table` TO `library`;
-
 -- Đổi 'catagory' -> 'category', bỏ cột text 'subject', thêm FK tới subject(id)
 ALTER TABLE `library`
   CHANGE COLUMN `catagory` `category` VARCHAR(100) NULL,

@@ -14,14 +14,4 @@ CREATE TABLE `tutor_profile_subject` (
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 2) (Tuỳ chọn) migrate dữ liệu từ cột cũ subject_id sang bảng phụ
-INSERT INTO `tutor_profile_subject` (`tutor_profile_id`, `subject_id`)
-SELECT `id`, `subject_id` FROM `tutor_profile` WHERE `subject_id` IS NOT NULL;
-
--- 3) Bỏ quan hệ cũ 1–N: drop cột subject_id ở tutor_profile
-ALTER TABLE `tutor_profile`
-  DROP FOREIGN KEY `fk_tutor_profile_subject`,
-  DROP COLUMN `subject_id`;
-
-
 SET FOREIGN_KEY_CHECKS = 1;
