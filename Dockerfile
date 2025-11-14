@@ -1,3 +1,4 @@
+# -------------- Stage 0  ------------
 # ========= STAGE 1: BUILD với Maven Wrapper (mvnw) + Java 21 =========
 FROM eclipse-temurin AS build
 WORKDIR /app
@@ -21,11 +22,11 @@ WORKDIR /app
 # Copy JAR từ stage build
 COPY --from=build /app/target/*.jar app.jar
 
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 EXPOSE 8080
+# Set quyền file config
+RUN mkdir -p /etc/mysql/conf.d
+COPY mysql-conf/charset.cnf /etc/mysql/conf.d/charset.cnf
+RUN chmod 644 /etc/mysql/conf.d/charset.cnf
 
-# Chạy entrypoint → chờ DB → chạy app
-ENTRYPOINT ["/entrypoint.sh"]
+# End
