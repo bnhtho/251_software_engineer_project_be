@@ -42,8 +42,6 @@ services:
     command: ["java", "-jar", "/app/app.jar"]  # <-- thay cho entrypoint.sh
     networks:
       - tutor_net
-
-
 volumes:
   db_data:
 
