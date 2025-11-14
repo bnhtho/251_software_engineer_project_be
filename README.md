@@ -31,7 +31,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 > Vui lòng **drop database** cũ trước khi build để tránh xung đột như duplicate , hay table đã có sẵn từ phiên bản cũ
 
 ## Kết nối Database trong Mysql với DBeaver
--   Bước 1 1: Mở DBeaver -> New Connection --> Chọn MySQL
+-   Bước 1: Mở DBeaver -> New Connection --> Chọn MySQL
 -   Bước 2: Thay port from 3306 sang 3307
 -   Bước 3: Click vào **Driver properties**, tìm **allowPublicKeyRetrieval**, thay từ **false** sang **true** 
 
