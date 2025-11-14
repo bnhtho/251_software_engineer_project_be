@@ -28,7 +28,7 @@ sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 ## Lưu ý
-> Vui lòng **drop database** cũ trước khi chạy script để tránh xung đột như duplicate , hay table đã có sẵn
+> Vui lòng **drop database** cũ trước khi build để tránh xung đột như duplicate , hay table đã có sẵn từ phiên bản cũ
 
 ## Kết nối Database trong Mysql với DBeaver
 -   Bước 1 1: Mở DBeaver -> New Connection --> Chọn MySQL
@@ -48,7 +48,7 @@ sudo docker exec -it tutor_system_db mysql -u root -p
 ``` 
 Pass: admin123
 
-### Setup docker
+### Build docker
 ```bash
 docker compose down -v && docker compose up -d --build
 ```
