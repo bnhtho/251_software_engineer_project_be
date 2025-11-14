@@ -1,15 +1,52 @@
 services:
   mysql:
     image: mysql
-    container_name: tutor_system
+    container_name: tutor_system_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin123
       MYSQL_DATABASE: tutor_system
       SPRING_PROFILES_ACTIVE: docker
       TZ: Asia/Ho_Chi_Minh
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
-      - "3307:3306"
+      - "3307:3306"  # Host port : Container port
     volumes:
-      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql
+      - ./docker:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+
+    networks:
+      - tutor_net
+
+  api:
+    build: .
+    container_name: tutor_system_api
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8081
+      SERVER_ADDRESS: 0.0.0.0   # Bắt container listen tất cả interface
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./docker:/docker:ro
+    networks:
+      - tutor_net
+volumes:
+  db_data:
+networks:
+  tutor_net:
+    driver: bridge

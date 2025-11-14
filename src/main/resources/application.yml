@@ -1,8 +1,18 @@
 # ======================
+<<<<<<< Updated upstream
 # CẤU HÌNH MẶC ĐỊNH / DEV (chạy local)
+=======
+# PROFILE DEV (chạy local)
+>>>>>>> Stashed changes
 # ======================
 server:
   port: 8081
+  address: 0.0.0.0           # bind tất cả interface để dễ test
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   error:
     include-message: always
     include-binding-errors: always
@@ -30,28 +40,38 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+      encoding: UTF-8
 
 app:
   jwt:
     secret: gixcprMftqxTdjUeWJ0dvTrAqoUPjcROc2U8YRiWbX0=
     expiration: 43200000
-  cors:
-    allowed-origins: ["http://localhost:5173"]
 
 ---
+
 # ======================
-# CẤU HÌNH KHI CHẠY PROFILE "docker"
-# (API + MySQL trong Docker network)
+# PROFILE DOCKER (chạy trong Docker network)
 # ======================
 spring:
   config:
     activate:
-      on-profile: docker      # Khi SPRING_PROFILES_ACTIVE=docker thì block này được apply
+      on-profile: docker
   datasource:
     url: jdbc:mysql://mysql:3306/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
     username: root
     password: admin123
 
-app:
-  cors:
-    allowed-origins: ["http://localhost:5173"]
+server:
+  port: 8081
+  address: 0.0.0.0           # bind tất cả interface trong container
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      encoding: UTF-8

@@ -5,7 +5,7 @@ CREATE TABLE `subject` (
   `name` VARCHAR(255)    NOT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_subject_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 INSERT INTO subject (name) VALUES

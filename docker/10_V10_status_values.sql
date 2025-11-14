@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `session_status` (
   `created_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_session_status_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed tối thiểu
 INSERT INTO `session_status` (`id`,`name`,`description`) VALUES

@@ -14,7 +14,7 @@ CREATE TABLE student_session (
 
     -- Prevent duplicate registrations
     CONSTRAINT uk_student_session UNIQUE (student_id, session_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Remove student_id from session table (if it exists)
 -- Note: This will break existing data, migration needed
