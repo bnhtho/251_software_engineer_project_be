@@ -35,6 +35,8 @@ app:
   jwt:
     secret: gixcprMftqxTdjUeWJ0dvTrAqoUPjcROc2U8YRiWbX0=
     expiration: 43200000
+  cors:
+    allowed-origins: ["http://localhost:5173"]
 
 ---
 # ======================
@@ -49,3 +51,7 @@ spring:
     url: jdbc:mysql://mysql:3306/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
     username: root
     password: admin123
+
+app:
+  cors:
+    allowed-origins: ["http://localhost:5173"]
