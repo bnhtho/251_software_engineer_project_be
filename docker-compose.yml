@@ -6,9 +6,10 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: admin123
       MYSQL_DATABASE: tutor_system
+      SPRING_PROFILES_ACTIVE: docker
       TZ: Asia/Ho_Chi_Minh
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
-      - "3307:3306" #Nếu cổng 3306 có ứng dụng chạy thì đổi
+      - "3307:3306"
     volumes:
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
