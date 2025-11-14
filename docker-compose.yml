@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: mysql
+    image: mysql:8.0.44
     container_name: tutor_system_db
     restart: always
     environment:
@@ -13,15 +13,12 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./docker:/docker-entrypoint-initdb.d:ro
+      - ./mysql-conf:/etc/mysql/conf.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
-      
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-
-
     networks:
       - tutor_net
 

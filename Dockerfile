@@ -1,9 +1,3 @@
-
-# Set environment for utf-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
 # ========= STAGE 1: BUILD với Maven Wrapper (mvnw) + Java 21 =========
 FROM eclipse-temurin AS build
 WORKDIR /app

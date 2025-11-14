@@ -36,7 +36,6 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
-      encoding: UTF-8
 
 app:
   jwt:
@@ -59,7 +58,6 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
-      encoding: UTF-8
 
 server:
   port: 8081
