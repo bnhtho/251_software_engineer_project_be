@@ -280,7 +280,8 @@ POST /auth/login
 
 Lưu ý: Password đã được mã hoá sẽ được lưu trong database dưới dạng mã Hash thông qua **BcCrypt** với cost là **12**.. 
 
-Reminded: Convert password dạng chuỗi sang Hash tự động và lưu vào cột **password** của bảng **hcmut_sso**  . 
+Reminder: Convert password dạng chuỗi sang Hash tự động và lưu vào cột **password** của bảng **hcmut_sso**  . 
+
 ---
 
 ## 📦 Bước 6: Cấu trúc Response chung
