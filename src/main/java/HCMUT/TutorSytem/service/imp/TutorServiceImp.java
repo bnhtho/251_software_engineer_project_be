@@ -1,14 +1,156 @@
 package HCMUT.TutorSytem.service.imp;
+import HCMUT.TutorSytem.dto.*;
+import HCMUT.TutorSytem.model.*;
+import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
+import HCMUT.TutorSytem.repo.*;
+import org.springframework.transaction.annotation.Transactional;
+    @Autowired
+    private TutorScheduleRepository tutorScheduleRepository;
 
-import HCMUT.TutorSytem.dto.PageDTO;
-import HCMUT.TutorSytem.dto.TutorDTO;
-import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
-import HCMUT.TutorSytem.mapper.TutorMapper;
-import HCMUT.TutorSytem.model.Major;
-import HCMUT.TutorSytem.model.Subject;
-import HCMUT.TutorSytem.model.TutorProfile;
-import HCMUT.TutorSytem.model.User;
-import HCMUT.TutorSytem.payload.request.TutorRequest;
+
+    @Override
+    public TutorDetailDTO getTutorDetail(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
+
+        TutorProfile tutorProfile = tutorProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
+
+        return mapToTutorDetailDTO(user, tutorProfile);
+    }
+
+    @Override
+    @Transactional
+    public TutorDetailDTO updateTutorProfile(Long userId, TutorProfileUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
+
+        TutorProfile tutorProfile = tutorProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
+
+        // Update User fields
+        if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) {
+            user.setFirstName(request.getFirstName().trim());
+        }
+        if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) {
+            user.setLastName(request.getLastName().trim());
+        }
+        if (request.getProfileImage() != null) {
+            user.setProfileImage(request.getProfileImage());
+        }
+        if (request.getAcademicStatus() != null && !request.getAcademicStatus().trim().isEmpty()) {
+            user.setAcademicStatus(request.getAcademicStatus().trim());
+        }
+        if (request.getDob() != null) {
+            user.setDob(request.getDob());
+        }
+        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
+            user.setPhone(request.getPhone().trim());
+        }
+        if (request.getOtherMethodContact() != null) {
+            user.setOtherMethodContact(request.getOtherMethodContact());
+        }
+        if (request.getMajorId() != null) {
+            Major major = majorRepository.findById(request.getMajorId())
+                    .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
+            user.setMajor(major);
+        }
+
+        // Update TutorProfile fields
+        if (request.getBio() != null) {
+            tutorProfile.setBio(request.getBio());
+        }
+        if (request.getExperienceYears() != null) {
+            tutorProfile.setExperienceYears(request.getExperienceYears().shortValue());
+        }
+        if (request.getIsAvailable() != null) {
+            tutorProfile.setIsAvailable(request.getIsAvailable());
+        }
+
+        // Update subjects if provided
+        if (request.getSubjectIds() != null && !request.getSubjectIds().isEmpty()) {
+            tutorProfile.getSubjects().clear();
+            for (Long subjectId : request.getSubjectIds()) {
+                Subject subject = subjectRepository.findById(subjectId)
+                        .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
+                tutorProfile.getSubjects().add(subject);
+            }
+        }
+
+        user = userRepository.save(user);
+        tutorProfile = tutorProfileRepository.save(tutorProfile);
+
+        return mapToTutorDetailDTO(user, tutorProfile);
+    }
+
+    private TutorDetailDTO mapToTutorDetailDTO(User user, TutorProfile tutorProfile) {
+        TutorDetailDTO dto = new TutorDetailDTO();
+
+        // User fields
+        dto.setId(user.getId());
+        dto.setHcmutId(user.getHcmutId());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setProfileImage(user.getProfileImage());
+        dto.setAcademicStatus(user.getAcademicStatus());
+        dto.setDob(user.getDob());
+        dto.setPhone(user.getPhone());
+        dto.setOtherMethodContact(user.getOtherMethodContact());
+        dto.setRole(user.getRole());
+        dto.setCreatedDate(user.getCreatedDate());
+        dto.setUpdateDate(user.getUpdateDate());
+        dto.setLastLogin(user.getLastLogin());
+
+        if (user.getMajor() != null) {
+            dto.setMajorId(user.getMajor().getId());
+            dto.setMajorName(user.getMajor().getName());
+            if (user.getMajor().getDepartment() != null) {
+                dto.setDepartment(user.getMajor().getDepartment().getName());
+            }
+        }
+
+        // TutorProfile fields
+        dto.setTutorProfileId(tutorProfile.getId());
+        dto.setBio(tutorProfile.getBio());
+        dto.setRating(tutorProfile.getRating());
+        dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : null);
+        dto.setTotalSessionsCompleted(tutorProfile.getTotalSessionsCompleted());
+        dto.setIsAvailable(tutorProfile.getIsAvailable());
+
+        // Subjects
+        if (tutorProfile.getSubjects() != null) {
+            List<SubjectDTO> subjectDTOs = tutorProfile.getSubjects().stream()
+                    .map(subject -> {
+                        SubjectDTO subjectDTO = new SubjectDTO();
+                        subjectDTO.setId(subject.getId());
+                        subjectDTO.setName(subject.getName());
+                        return subjectDTO;
+                    })
+                    .collect(Collectors.toList());
+            dto.setSubjects(subjectDTOs);
+        }
+
+        // Schedules
+        List<TutorSchedule> schedules = tutorScheduleRepository.findByTutorId(user.getId());
+        if (schedules != null && !schedules.isEmpty()) {
+            List<TutorScheduleDTO> scheduleDTOs = schedules.stream()
+                    .map(schedule -> {
+                        TutorScheduleDTO scheduleDTO = new TutorScheduleDTO();
+                        scheduleDTO.setId(schedule.getId());
+                        scheduleDTO.setDayOfWeek(schedule.getDayOfWeek() != null ? schedule.getDayOfWeek().intValue() : null);
+                        scheduleDTO.setStartTime(schedule.getStartTime());
+                        scheduleDTO.setEndTime(schedule.getEndTime());
+                        scheduleDTO.setStatus(schedule.getStatus());
+                        scheduleDTO.setCreatedDate(schedule.getCreatedDate());
+                        scheduleDTO.setUpdateDate(schedule.getUpdateDate());
+                        return scheduleDTO;
+                    })
+                    .collect(Collectors.toList());
+            dto.setSchedules(scheduleDTOs);
+        }
+
+        return dto;
+    }
 import HCMUT.TutorSytem.repo.MajorRepository;
 import HCMUT.TutorSytem.repo.SubjectRepository;
 import HCMUT.TutorSytem.repo.TutorProfileRepository;
