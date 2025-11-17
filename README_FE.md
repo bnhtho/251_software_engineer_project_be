@@ -190,13 +190,25 @@ Started TutorSytemApplication in X.XXX seconds (process running for X.XXX)
 Content-Type: application/json
 ```
 
-**Body (raw JSON):**
+### 🔐 Endpoint Xác thực
+
+#### Đăng nhập
+```
+POST /auth/login
+```
+**Body:**
 ```json
 {
-  "username": "admin",
-  "password": "admin123"
+  "email": "string",
+  "password": "string"
 }
 ```
+
+**Response:** Token trong `data`
+
+Lưu ý: Password đã được mã hoá sẽ được lưu trong database dưới dạng mã Hash thông qua **BcCrypt** với cost là **12**.. 
+
+Reminder: Convert password dạng chuỗi sang Hash tự động và lưu vào cột **password** của bảng **hcmut_sso**  . 
 
 **Response mong đợi:**
 ```json
@@ -263,22 +275,6 @@ GET /student-session-statuses
 ```
 **Response:** Danh sách `StudentSessionStatusDTO[]`
 
-### 🔐 Endpoint Xác thực
-
-#### Đăng nhập
-```
-POST /auth/login
-```
-**Body:**
-```json
-{
-  "username": "string",
-  "password": "string"
-}
-```
-**Response:** Token trong `data`
-
----
 
 ## 📦 Bước 6: Cấu trúc Response chung
 

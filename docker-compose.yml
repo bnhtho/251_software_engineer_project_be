@@ -1,6 +1,8 @@
 services:
   mysql:
-    image: mysql
+    build:
+      context: .
+      dockerfile: mysql.Dockerfile # Chỉ định Dockerfile mới
     container_name: tutor_system_db
     restart: always
     environment:
@@ -18,10 +20,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-
-
     networks:
       - tutor_net
 
@@ -30,23 +28,23 @@ services:
     container_name: tutor_system_api
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&useUnicode=true&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&useUnicode=UTF-8&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: admin123
       SPRING_PROFILES_ACTIVE: docker
       SERVER_PORT: 8081
-      SERVER_ADDRESS: 0.0.0.0   # Bắt container listen tất cả interface
+      SERVER_ADDRESS: 0.0.0.0
     ports:
       - "8081:8081"
     depends_on:
       mysql:
         condition: service_healthy
-    volumes:
-      - ./docker:/docker:ro
+    command: ["java", "-jar", "/app/app.jar"]  # <-- thay cho entrypoint.sh
     networks:
       - tutor_net
 volumes:
   db_data:
+
 networks:
   tutor_net:
     driver: bridge

@@ -10,3 +10,6 @@ public interface TutorProfileRepository extends JpaRepository<TutorProfile, Inte
     Optional<TutorProfile> findByUserId(Integer userId);
 }
 
+    Optional<TutorProfile> findByUserId(Long userId);
+
+}
