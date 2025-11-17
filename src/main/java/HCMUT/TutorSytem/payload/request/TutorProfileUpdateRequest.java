@@ -15,11 +15,11 @@ public class TutorProfileUpdateRequest {
     private LocalDate dob;
     private String phone;
     private String otherMethodContact;
-    private Long majorId;
+    private Integer majorId;
 
     // TutorProfile fields
     private String bio;
-    private List<Long> subjectIds; // List of subject IDs
+    private List<Integer> subjectIds; // List of subject IDs
     private Integer experienceYears;
     private Boolean isAvailable;
 }

@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.service.imp;
 
-import HCMUT.TutorSytem.dto.PageDTO;
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.SessionMapper;
@@ -15,9 +14,6 @@ import HCMUT.TutorSytem.repo.SubjectRepository;
 import HCMUT.TutorSytem.repo.UserRepository;
 import HCMUT.TutorSytem.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -43,25 +39,11 @@ public class SessionServiceImp implements SessionService {
     private SessionMapper sessionMapper;
 
     @Override
-    public PageDTO<SessionDTO> getAllSessions(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Session> sessionPage = sessionRepository.findAll(pageable);
-
-        List<SessionDTO> sessionDTOs = sessionPage.getContent().stream()
+    public List<SessionDTO> getAllSessions() {
+        List<Session> sessions = sessionRepository.findAll();
+        return sessions.stream()
                 .map(sessionMapper::toDTO)
                 .collect(Collectors.toList());
-
-        PageDTO<SessionDTO> pageDTO = new PageDTO<>();
-        pageDTO.setContent(sessionDTOs);
-        pageDTO.setPageNumber(sessionPage.getNumber());
-        pageDTO.setPageSize(sessionPage.getSize());
-        pageDTO.setTotalElements(sessionPage.getTotalElements());
-        pageDTO.setTotalPages(sessionPage.getTotalPages());
-        pageDTO.setFirst(sessionPage.isFirst());
-        pageDTO.setLast(sessionPage.isLast());
-        pageDTO.setEmpty(sessionPage.isEmpty());
-
-        return pageDTO;
     }
 
     @Override
@@ -102,7 +84,7 @@ public class SessionServiceImp implements SessionService {
     }
 
     @Override
-    public SessionDTO updateSession(Long id, SessionRequest request) {
+    public SessionDTO updateSession(Integer id, SessionRequest request) {
         Session session = sessionRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundExceptions("Session not found with id: " + id));
 
@@ -154,7 +136,7 @@ public class SessionServiceImp implements SessionService {
     }
 
     @Override
-    public void deleteSession(Long id) {
+    public void deleteSession(Integer id) {
         if (!sessionRepository.existsById(id)) {
             throw new DataNotFoundExceptions("Session not found with id: " + id);
         }
@@ -162,7 +144,7 @@ public class SessionServiceImp implements SessionService {
     }
 
     @Override
-    public Long getTutorIdFromSession(Long sessionId) {
+    public Integer getTutorIdFromSession(Integer sessionId) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Session not found with id: " + sessionId));
         return session.getTutor() != null ? session.getTutor().getId() : null;

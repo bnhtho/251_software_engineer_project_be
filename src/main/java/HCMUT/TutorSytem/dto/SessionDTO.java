@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class SessionDTO {
-    private Long id;
+    private Integer id;
     private String tutorName;
     private List<String> studentNames; // List of registered students
     private String subjectName;

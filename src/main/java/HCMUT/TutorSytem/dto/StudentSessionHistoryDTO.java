@@ -6,8 +6,8 @@ import java.time.Instant;
 
 @Data
 public class StudentSessionHistoryDTO {
-    private Long studentSessionId;
-    private Long sessionId;
+    private Integer studentSessionId;
+    private Integer sessionId;
     private String tutorName;
     private String subjectName;
     private String subjectCode;

@@ -1,13 +1,9 @@
 # ======================
-<<<<<<< Updated upstream
 # CẤU HÌNH MẶC ĐỊNH / DEV (chạy local)
-=======
-# PROFILE DEV (chạy local)
->>>>>>> Stashed changes
 # ======================
 server:
   port: 8081
-  address: 0.0.0.0           # bind tất cả interface để dễ test
+  address: 0.0.0.0
   servlet:
     encoding:
       charset: UTF-8
@@ -21,7 +17,7 @@ server:
 
 spring:
   profiles:
-    active: dev          # Khi chạy local: dùng profile dev
+    active: dev
   datasource:
     url: jdbc:mysql://localhost:3307/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
     username: root
@@ -40,15 +36,18 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
-      encoding: UTF-8
 
 app:
   jwt:
     secret: gixcprMftqxTdjUeWJ0dvTrAqoUPjcROc2U8YRiWbX0=
     expiration: 43200000
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://localhost:3000
+
 
 ---
-
 # ======================
 # PROFILE DOCKER (chạy trong Docker network)
 # ======================
@@ -60,18 +59,16 @@ spring:
     url: jdbc:mysql://mysql:3306/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
     username: root
     password: admin123
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
 
 server:
   port: 8081
-  address: 0.0.0.0           # bind tất cả interface trong container
+  address: 0.0.0.0
   servlet:
     encoding:
       charset: UTF-8
       enabled: true
       force: true
 
-spring:
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
-      encoding: UTF-8

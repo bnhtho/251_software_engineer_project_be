@@ -13,6 +13,6 @@ public class StudentProfileUpdateRequest {
     private LocalDate dob;
     private String phone;
     private String otherMethodContact;
-    private Long majorId;
+    private Integer majorId;
 }
 

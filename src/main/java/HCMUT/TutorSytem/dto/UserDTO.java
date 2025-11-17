@@ -6,10 +6,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
-public class StudentDTO {
+public class UserDTO {
     private Integer id;
-
-    // From User (Datacore)
     private String hcmutId;
     private String firstName;
     private String lastName;
@@ -22,6 +20,8 @@ public class StudentDTO {
     private Integer majorId;
     private String majorName;
     private String department; // From major.department.name
+    private Integer statusId;
+    private String statusName;
     private Instant createdDate;
     private Instant updateDate;
     private Instant lastLogin;

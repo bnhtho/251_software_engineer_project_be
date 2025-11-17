@@ -16,7 +16,7 @@ public class Library {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private Integer id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -40,7 +40,7 @@ public class Library {
     private Instant uploadedDate;
 
     @Column(name = "uploaded_by")
-    private Long uploadedBy;
+    private Integer uploadedBy;
 
     @OneToMany(mappedBy = "library", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReportMaterial> reportMaterials = new ArrayList<>();

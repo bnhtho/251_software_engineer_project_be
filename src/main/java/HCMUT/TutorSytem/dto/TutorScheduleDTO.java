@@ -7,7 +7,7 @@ import java.time.LocalTime;
 
 @Data
 public class TutorScheduleDTO {
-    private Long id;
+    private Integer id;
     private Integer dayOfWeek; // 0=Sunday, 1=Monday...6=Saturday
     private LocalTime startTime;
     private LocalTime endTime;

@@ -38,10 +38,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             try {
                 boolean valid = jwtHelper.isValid(token);
                 if (valid) {
-                    String userId = jwtHelper.getUserIdFromToken(token);
+                    String userIdStr = jwtHelper.getUserIdFromToken(token);
                     String role = jwtHelper.getRoleFromToken(token); // ví dụ: ADMIN / STUDENT
 
-                    if (userId != null && role != null) {
+                    if (userIdStr != null && role != null) {
+                        // Convert userId từ String sang Integer
+                        Integer userId = Integer.parseInt(userIdStr);
+
                         List<GrantedAuthority> authorities = new ArrayList<>();
                         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
                         authorities.add(authority);

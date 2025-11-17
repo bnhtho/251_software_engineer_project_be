@@ -1,14 +1,15 @@
 package HCMUT.TutorSytem.service;
 
-import HCMUT.TutorSytem.dto.PageDTO;
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.payload.request.SessionRequest;
 
+import java.util.List;
+
 public interface SessionService {
-    PageDTO<SessionDTO> getAllSessions(int page, int size);
+    List<SessionDTO> getAllSessions();
     SessionDTO createSession(SessionRequest request);
-    SessionDTO updateSession(Long id, SessionRequest request);
-    void deleteSession(Long id);
-    Long getTutorIdFromSession(Long sessionId); // Get tutor ID to check ownership
+    SessionDTO updateSession(Integer id, SessionRequest request);
+    void deleteSession(Integer id);
+    Integer getTutorIdFromSession(Integer sessionId); // Get tutor ID to check ownership
 }
 

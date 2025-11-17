@@ -26,11 +26,11 @@ public class StudentController {
      * Students can only view their own profile
      */
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<BaseResponse> getStudentProfile(@PathVariable Long userId) {
+    public ResponseEntity<BaseResponse> getStudentProfile(@PathVariable Integer userId) {
         // Check ownership: only the student can view their own profile
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
+            Integer currentUserId = getCurrentUserId(authentication);
             if (!currentUserId.equals(userId)) {
                 BaseResponse response = new BaseResponse();
                 response.setStatusCode(403);
@@ -49,19 +49,20 @@ public class StudentController {
     }
 
     /**
-     * Get student's learning history (session history)
+     * Get student session history by user ID
+     * Returns list of all sessions student has enrolled in
      * Students can only view their own history
      */
     @GetMapping("/history/{userId}")
-    public ResponseEntity<BaseResponse> getStudentSessionHistory(@PathVariable Long userId) {
+    public ResponseEntity<BaseResponse> getStudentSessionHistory(@PathVariable Integer userId) {
         // Check ownership: only the student can view their own history
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
+            Integer currentUserId = getCurrentUserId(authentication);
             if (!currentUserId.equals(userId)) {
                 BaseResponse response = new BaseResponse();
                 response.setStatusCode(403);
-                response.setMessage("Access denied: You can only view your own learning history");
+                response.setMessage("Access denied: You can only view your own session history");
                 response.setData(null);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
@@ -81,12 +82,12 @@ public class StudentController {
      */
     @PutMapping("/profile/{userId}")
     public ResponseEntity<BaseResponse> updateStudentProfile(
-            @PathVariable Long userId,
+            @PathVariable Integer userId,
             @RequestBody StudentProfileUpdateRequest request) {
         // Check ownership: only the student can update their own profile
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
+            Integer currentUserId = getCurrentUserId(authentication);
             if (!currentUserId.equals(userId)) {
                 BaseResponse response = new BaseResponse();
                 response.setStatusCode(403);
@@ -104,8 +105,8 @@ public class StudentController {
         return ResponseEntity.ok(response);
     }
 
-    private Long getCurrentUserId(Authentication authentication) {
-        return (Long) authentication.getPrincipal();
+    private Integer getCurrentUserId(Authentication authentication) {
+        return (Integer) authentication.getPrincipal();
     }
 }
 

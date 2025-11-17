@@ -2,6 +2,7 @@ package HCMUT.TutorSytem.controller;
 
 import HCMUT.TutorSytem.dto.StudentDTO;
 import HCMUT.TutorSytem.dto.TutorDetailDTO;
+import HCMUT.TutorSytem.dto.UserDTO;
 import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
@@ -9,6 +10,8 @@ import HCMUT.TutorSytem.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -19,11 +22,10 @@ public class AdminController {
 
     /**
      * Admin: Update student profile
-     * POST method as requested
      */
-    @PostMapping("/students/{userId}")
+    @PutMapping("/students/{userId}")
     public ResponseEntity<BaseResponse> updateStudentProfile(
-            @PathVariable Long userId,
+            @PathVariable Integer userId,
             @RequestBody StudentProfileUpdateRequest request) {
         StudentDTO studentDTO = adminService.updateStudentProfileByAdmin(userId, request);
         BaseResponse response = new BaseResponse();
@@ -34,14 +36,14 @@ public class AdminController {
     }
 
     /**
-     * Admin: Delete student profile
+     * Admin: Soft delete student profile (set status to INACTIVE)
      */
     @DeleteMapping("/students/{userId}")
-    public ResponseEntity<BaseResponse> deleteStudentProfile(@PathVariable Long userId) {
+    public ResponseEntity<BaseResponse> deleteStudentProfile(@PathVariable Integer userId) {
         adminService.deleteStudentProfile(userId);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
-        response.setMessage("Student profile deleted successfully by admin");
+        response.setMessage("Student profile deactivated successfully by admin");
         response.setData(null);
         return ResponseEntity.ok(response);
     }
@@ -51,7 +53,7 @@ public class AdminController {
      */
     @PutMapping("/tutors/{userId}")
     public ResponseEntity<BaseResponse> updateTutorProfile(
-            @PathVariable Long userId,
+            @PathVariable Integer userId,
             @RequestBody TutorProfileUpdateRequest request) {
         TutorDetailDTO tutorDetail = adminService.updateTutorProfileByAdmin(userId, request);
         BaseResponse response = new BaseResponse();
@@ -62,15 +64,28 @@ public class AdminController {
     }
 
     /**
-     * Admin: Delete tutor profile
+     * Admin: Soft delete tutor profile (set status to INACTIVE)
      */
     @DeleteMapping("/tutors/{userId}")
-    public ResponseEntity<BaseResponse> deleteTutorProfile(@PathVariable Long userId) {
+    public ResponseEntity<BaseResponse> deleteTutorProfile(@PathVariable Integer userId) {
         adminService.deleteTutorProfile(userId);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
-        response.setMessage("Tutor profile deleted successfully by admin");
+        response.setMessage("Tutor profile deactivated successfully by admin");
         response.setData(null);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Admin: Get All Users (without pagination)
+     */
+    @GetMapping("/users")
+    public ResponseEntity<BaseResponse> getAllUsers() {
+        List<UserDTO> users = adminService.getAllUsers();
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Users retrieved successfully");
+        response.setData(users);
         return ResponseEntity.ok(response);
     }
 }

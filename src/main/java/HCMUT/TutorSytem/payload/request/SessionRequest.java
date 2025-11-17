@@ -6,8 +6,8 @@ import java.time.Instant;
 
 @Data
 public class SessionRequest {
-    private Long tutorId;
-    private Long subjectId;
+    private Integer tutorId;
+    private Integer subjectId;
     private Instant startTime;
     private Instant endTime;
     private String format;

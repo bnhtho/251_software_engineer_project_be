@@ -1,0 +1,96 @@
+USE tutor_system;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- A. DROP FOREIGN KEY
+ALTER TABLE `datacore` DROP FOREIGN KEY `fk_datacore_major`;
+ALTER TABLE `datacore` DROP FOREIGN KEY `fk_datacore_role`;
+ALTER TABLE `feedback_student` DROP FOREIGN KEY `fk_feedback_session`;
+ALTER TABLE `feedback_student` DROP FOREIGN KEY `fk_feedback_student_user`;
+ALTER TABLE `library` DROP FOREIGN KEY `fk_library_subject`;
+ALTER TABLE `major` DROP FOREIGN KEY `fk_major_department`;
+ALTER TABLE `notification` DROP FOREIGN KEY `fk_notification_session`;
+ALTER TABLE `notification` DROP FOREIGN KEY `fk_notification_user`;
+ALTER TABLE `report_material` DROP FOREIGN KEY `fk_report_material_library`;
+ALTER TABLE `report_material` DROP FOREIGN KEY `fk_report_material_report`;
+ALTER TABLE `reportof_tutor` DROP FOREIGN KEY `fk_reportof_tutor_session`;
+ALTER TABLE `session` DROP FOREIGN KEY `fk_session_subject`;
+ALTER TABLE `session` DROP FOREIGN KEY `fk_session_tutor`;
+ALTER TABLE `student_schedule` DROP FOREIGN KEY `fk_student_schedule_student`;
+ALTER TABLE `student_session` DROP FOREIGN KEY `fk_student_session_session`;
+ALTER TABLE `student_session` DROP FOREIGN KEY `fk_student_session_student`;
+ALTER TABLE `tutor_profile` DROP FOREIGN KEY `fk_tutor_profile_user`;
+ALTER TABLE `tutor_profile_subject` DROP FOREIGN KEY `fk_tps_subject`;
+ALTER TABLE `tutor_profile_subject` DROP FOREIGN KEY `fk_tps_tutor`;
+ALTER TABLE `tutor_schedule` DROP FOREIGN KEY `fk_tutor_schedule_tutor`;
+ALTER TABLE `user` DROP FOREIGN KEY `fk_user_major`;
+ALTER TABLE `user` DROP FOREIGN KEY `fk_user_status`;
+
+-- B. ĐỔI KIỂU CÁC CỘT BIGINT -> INT (bao gồm cả bảng cha & con, và các cột độc lập)
+ALTER TABLE `datacore` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `datacore` MODIFY COLUMN `major_id` int unsigned NULL;
+ALTER TABLE `datacore` MODIFY COLUMN `role_id` int unsigned NULL;
+ALTER TABLE `department` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `feedback_student` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `feedback_student` MODIFY COLUMN `session_id` int unsigned NOT NULL;
+ALTER TABLE `feedback_student` MODIFY COLUMN `student_id` int unsigned NOT NULL;
+ALTER TABLE `hcmut_sso` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `library` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `library` MODIFY COLUMN `subject_id` int unsigned NULL;
+ALTER TABLE `library` MODIFY COLUMN `uploaded_by` int unsigned NULL;
+ALTER TABLE `major` MODIFY COLUMN `department_id` int unsigned NOT NULL;
+ALTER TABLE `major` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `notification` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `notification` MODIFY COLUMN `related_session_id` int unsigned NULL;
+ALTER TABLE `notification` MODIFY COLUMN `user_id` int unsigned NOT NULL;
+ALTER TABLE `report_material` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `report_material` MODIFY COLUMN `library_id` int unsigned NULL;
+ALTER TABLE `report_material` MODIFY COLUMN `report_id` int unsigned NOT NULL;
+ALTER TABLE `reportof_tutor` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `reportof_tutor` MODIFY COLUMN `session_id` int unsigned NOT NULL;
+ALTER TABLE `role` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `session` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `session` MODIFY COLUMN `subject_id` int unsigned NOT NULL;
+ALTER TABLE `session` MODIFY COLUMN `tutor_id` int unsigned NOT NULL;
+ALTER TABLE `student_schedule` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `student_schedule` MODIFY COLUMN `student_id` int unsigned NOT NULL;
+ALTER TABLE `student_session` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `student_session` MODIFY COLUMN `session_id` int unsigned NOT NULL;
+ALTER TABLE `student_session` MODIFY COLUMN `student_id` int unsigned NOT NULL;
+ALTER TABLE `subject` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `tutor_profile` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `tutor_profile` MODIFY COLUMN `user_id` int unsigned NOT NULL;
+ALTER TABLE `tutor_profile_subject` MODIFY COLUMN `subject_id` int unsigned NOT NULL;
+ALTER TABLE `tutor_profile_subject` MODIFY COLUMN `tutor_profile_id` int unsigned NOT NULL;
+ALTER TABLE `tutor_schedule` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `tutor_schedule` MODIFY COLUMN `tutor_id` int unsigned NOT NULL;
+ALTER TABLE `user` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+ALTER TABLE `user` MODIFY COLUMN `major_id` int unsigned NULL;
+ALTER TABLE `user` MODIFY COLUMN `status_id` int unsigned NOT NULL DEFAULT '1';
+ALTER TABLE `user_status` MODIFY COLUMN `id` int unsigned NOT NULL AUTO_INCREMENT;
+
+-- C. ADD FOREIGN KEY LẠI (giữ nguyên ON DELETE / ON UPDATE)
+ALTER TABLE `datacore` ADD CONSTRAINT `fk_datacore_major` FOREIGN KEY (`major_id`) REFERENCES `major` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `datacore` ADD CONSTRAINT `fk_datacore_role` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `feedback_student` ADD CONSTRAINT `fk_feedback_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `feedback_student` ADD CONSTRAINT `fk_feedback_student_user` FOREIGN KEY (`student_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `library` ADD CONSTRAINT `fk_library_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `major` ADD CONSTRAINT `fk_major_department` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON UPDATE CASCADE;
+ALTER TABLE `notification` ADD CONSTRAINT `fk_notification_session` FOREIGN KEY (`related_session_id`) REFERENCES `session` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `notification` ADD CONSTRAINT `fk_notification_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `report_material` ADD CONSTRAINT `fk_report_material_library` FOREIGN KEY (`library_id`) REFERENCES `library` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `report_material` ADD CONSTRAINT `fk_report_material_report` FOREIGN KEY (`report_id`) REFERENCES `reportof_tutor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `reportof_tutor` ADD CONSTRAINT `fk_reportof_tutor_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `session` ADD CONSTRAINT `fk_session_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`id`) ON UPDATE CASCADE;
+ALTER TABLE `session` ADD CONSTRAINT `fk_session_tutor` FOREIGN KEY (`tutor_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
+ALTER TABLE `student_schedule` ADD CONSTRAINT `fk_student_schedule_student` FOREIGN KEY (`student_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `student_session` ADD CONSTRAINT `fk_student_session_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`) ON DELETE CASCADE;
+ALTER TABLE `student_session` ADD CONSTRAINT `fk_student_session_student` FOREIGN KEY (`student_id`) REFERENCES `user` (`id`) ON DELETE CASCADE;
+ALTER TABLE `tutor_profile` ADD CONSTRAINT `fk_tutor_profile_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `tutor_profile_subject` ADD CONSTRAINT `fk_tps_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`id`) ON UPDATE CASCADE;
+ALTER TABLE `tutor_profile_subject` ADD CONSTRAINT `fk_tps_tutor` FOREIGN KEY (`tutor_profile_id`) REFERENCES `tutor_profile` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `tutor_schedule` ADD CONSTRAINT `fk_tutor_schedule_tutor` FOREIGN KEY (`tutor_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `user` ADD CONSTRAINT `fk_user_major` FOREIGN KEY (`major_id`) REFERENCES `major` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `user` ADD CONSTRAINT `fk_user_status` FOREIGN KEY (`status_id`) REFERENCES `user_status` (`id`) ON UPDATE CASCADE;
+
+SET FOREIGN_KEY_CHECKS = 1;

@@ -13,9 +13,6 @@ import HCMUT.TutorSytem.repo.SubjectRepository;
 import HCMUT.TutorSytem.repo.TutorProfileRepository;
 import HCMUT.TutorSytem.repo.UserRepository;
 import HCMUT.TutorSytem.service.TutorService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -43,29 +40,16 @@ public class TutorServiceImp implements TutorService {
     @Autowired
     private TutorScheduleRepository tutorScheduleRepository;
 
-    @Override
-    public PageDTO<TutorDTO> getAllTutors(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<TutorProfile> tutorPage = tutorProfileRepository.findAll(pageable);
+    @Autowired
+    private StatusRepository statusRepository;
 
-        List<TutorDTO> tutorDTOs = tutorPage.getContent().stream()
+    @Override
+    public List<TutorDTO> getAllTutors() {
+        List<TutorProfile> tutorProfiles = tutorProfileRepository.findAll();
+        return tutorProfiles.stream()
                 .map(tutorMapper::toDTO)
                 .collect(Collectors.toList());
-
-        PageDTO<TutorDTO> pageDTO = new PageDTO<>();
-        pageDTO.setContent(tutorDTOs);
-        pageDTO.setPageNumber(tutorPage.getNumber());
-        pageDTO.setPageSize(tutorPage.getSize());
-        pageDTO.setTotalElements(tutorPage.getTotalElements());
-        pageDTO.setTotalPages(tutorPage.getTotalPages());
-        pageDTO.setFirst(tutorPage.isFirst());
-        pageDTO.setLast(tutorPage.isLast());
-        pageDTO.setEmpty(tutorPage.isEmpty());
-
-        return pageDTO;
     }
-
-
 
     @Override
     public TutorDTO createTutor(TutorRequest request) {
@@ -96,7 +80,7 @@ public class TutorServiceImp implements TutorService {
 
         // Handle subjects - link by subject IDs (ManyToMany)
         if (request.getSubjects() != null && !request.getSubjects().isEmpty()) {
-            for (Long subjectId : request.getSubjects()) {
+            for (Integer subjectId : request.getSubjects()) {
                 Subject subject = subjectRepository.findById(subjectId)
                         .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
                 tutorProfile.getSubjects().add(subject);
@@ -106,7 +90,7 @@ public class TutorServiceImp implements TutorService {
         tutorProfile.setExperienceYears(request.getExperienceYears() != null ? request.getExperienceYears().shortValue() : null);
         tutorProfile.setBio(request.getDescription());
         tutorProfile.setRating(BigDecimal.ZERO); // Auto set to 0, calculated from reviews
-        tutorProfile.setTotalSessionsCompleted(0L); // Auto set to 0
+        tutorProfile.setTotalSessionsCompleted(0); // Auto set to 0
         tutorProfile.setIsAvailable(true); // Auto set to true
 
         tutorProfile = tutorProfileRepository.save(tutorProfile);
@@ -114,7 +98,7 @@ public class TutorServiceImp implements TutorService {
     }
 
     @Override
-    public TutorDTO updateTutor(Long id, TutorRequest request) {
+    public TutorDTO updateTutor(Integer id, TutorRequest request) {
         TutorProfile tutorProfile = tutorProfileRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + id));
 
@@ -136,7 +120,7 @@ public class TutorServiceImp implements TutorService {
             tutorProfile.getSubjects().clear();
 
             // Add subjects by IDs
-            for (Long subjectId : request.getSubjects()) {
+            for (Integer subjectId : request.getSubjects()) {
                 Subject subject = subjectRepository.findById(subjectId)
                         .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
                 tutorProfile.getSubjects().add(subject);
@@ -166,22 +150,33 @@ public class TutorServiceImp implements TutorService {
     }
 
     @Override
-    public void deleteTutor(Long id) {
-        if (!tutorProfileRepository.existsById(id)) {
-            throw new DataNotFoundExceptions("Tutor not found with id: " + id);
+    @Transactional
+    public void deleteTutor(Integer id) {
+        TutorProfile tutorProfile = tutorProfileRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + id));
+
+        User user = tutorProfile.getUser();
+        if (user == null) {
+            throw new DataNotFoundExceptions("User not found for tutor profile id: " + id);
         }
-        tutorProfileRepository.deleteById(id);
+
+        // Soft delete: set status to INACTIVE
+        Status inactiveStatus = statusRepository.findByName("INACTIVE")
+                .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
+
+        user.setStatus(inactiveStatus);
+        userRepository.save(user);
     }
 
     @Override
-    public Long getUserIdFromTutorProfile(Long tutorProfileId) {
+    public Integer getUserIdFromTutorProfile(Integer tutorProfileId) {
         TutorProfile tutorProfile = tutorProfileRepository.findById(tutorProfileId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found with id: " + tutorProfileId));
         return tutorProfile.getUser() != null ? tutorProfile.getUser().getId() : null;
     }
 
     @Override
-    public TutorDetailDTO getTutorDetail(Long userId) {
+    public TutorDetailDTO getTutorDetail(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
 
@@ -193,56 +188,19 @@ public class TutorServiceImp implements TutorService {
 
     @Override
     @Transactional
-    public TutorDetailDTO updateTutorProfile(Long userId, TutorProfileUpdateRequest request) {
+    public TutorDetailDTO updateTutorProfile(Integer userId, TutorProfileUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
 
         TutorProfile tutorProfile = tutorProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
 
-        // Update User fields
-        if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) {
-            user.setFirstName(request.getFirstName().trim());
-        }
-        if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) {
-            user.setLastName(request.getLastName().trim());
-        }
-        if (request.getProfileImage() != null) {
-            user.setProfileImage(request.getProfileImage());
-        }
-        if (request.getAcademicStatus() != null && !request.getAcademicStatus().trim().isEmpty()) {
-            user.setAcademicStatus(request.getAcademicStatus().trim());
-        }
-        if (request.getDob() != null) {
-            user.setDob(request.getDob());
-        }
-        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
-            user.setPhone(request.getPhone().trim());
-        }
-        if (request.getOtherMethodContact() != null) {
-            user.setOtherMethodContact(request.getOtherMethodContact());
-        }
-        if (request.getMajorId() != null) {
-            Major major = majorRepository.findById(request.getMajorId())
-                    .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
-            user.setMajor(major);
-        }
-
-        // Update TutorProfile fields
-        if (request.getBio() != null) {
-            tutorProfile.setBio(request.getBio());
-        }
-        if (request.getExperienceYears() != null) {
-            tutorProfile.setExperienceYears(request.getExperienceYears().shortValue());
-        }
-        if (request.getIsAvailable() != null) {
-            tutorProfile.setIsAvailable(request.getIsAvailable());
-        }
+        // ...existing code...
 
         // Update subjects if provided
         if (request.getSubjectIds() != null && !request.getSubjectIds().isEmpty()) {
             tutorProfile.getSubjects().clear();
-            for (Long subjectId : request.getSubjectIds()) {
+            for (Integer subjectId : request.getSubjectIds()) {
                 Subject subject = subjectRepository.findById(subjectId)
                         .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
                 tutorProfile.getSubjects().add(subject);

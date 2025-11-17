@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.controller;
 
-import HCMUT.TutorSytem.dto.PageDTO;
 import HCMUT.TutorSytem.dto.TutorDTO;
 import HCMUT.TutorSytem.dto.TutorDetailDTO;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
@@ -14,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/tutors")
 public class TutorController {
@@ -22,18 +23,16 @@ public class TutorController {
     private TutorService tutorService;
 
     /**
-     * Get all tutors with pagination
+     * Get all tutors (without pagination)
      * Public endpoint - anyone can view tutor list
      */
     @GetMapping
-    public ResponseEntity<BaseResponse> getAllTutors(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        PageDTO<TutorDTO> tutorPage = tutorService.getAllTutors(page, size);
+    public ResponseEntity<BaseResponse> getAllTutors() {
+        List<TutorDTO> tutors = tutorService.getAllTutors();
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
         response.setMessage("Tutors retrieved successfully");
-        response.setData(tutorPage);
+        response.setData(tutors);
         return ResponseEntity.ok(response);
     }
 
@@ -43,11 +42,11 @@ public class TutorController {
      * Tutors can only view their own detailed profile
      */
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<BaseResponse> getTutorDetail(@PathVariable Long userId) {
+    public ResponseEntity<BaseResponse> getTutorDetail(@PathVariable Integer userId) {
         // Check ownership: only the tutor can view their own detailed profile
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
+            Integer currentUserId = getCurrentUserId(authentication);
             if (!currentUserId.equals(userId)) {
                 BaseResponse response = new BaseResponse();
                 response.setStatusCode(403);
@@ -71,12 +70,12 @@ public class TutorController {
      */
     @PutMapping("/profile/{userId}")
     public ResponseEntity<BaseResponse> updateTutorProfile(
-            @PathVariable Long userId,
+            @PathVariable Integer userId,
             @RequestBody TutorProfileUpdateRequest request) {
         // Check ownership: only the tutor can update their own profile
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
+            Integer currentUserId = getCurrentUserId(authentication);
             if (!currentUserId.equals(userId)) {
                 BaseResponse response = new BaseResponse();
                 response.setStatusCode(403);
@@ -113,12 +112,12 @@ public class TutorController {
      * Tutors can only update their own profile
      */
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse> updateTutor(@PathVariable Long id, @RequestBody TutorRequest tutorRequest) {
+    public ResponseEntity<BaseResponse> updateTutor(@PathVariable Integer id, @RequestBody TutorRequest tutorRequest) {
         // Check ownership: only the tutor owner can update their profile
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
-            Long profileUserId = tutorService.getUserIdFromTutorProfile(id);
+            Integer currentUserId = getCurrentUserId(authentication);
+            Integer profileUserId = tutorService.getUserIdFromTutorProfile(id);
 
             if (!currentUserId.equals(profileUserId)) {
                 BaseResponse response = new BaseResponse();
@@ -138,16 +137,16 @@ public class TutorController {
     }
 
     /**
-     * Delete tutor profile by tutor profile ID
+     * Soft delete tutor profile by tutor profile ID (set status to INACTIVE)
      * Tutors can only delete their own profile
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponse> deleteTutor(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse> deleteTutor(@PathVariable Integer id) {
         // Check ownership: only the tutor owner can delete their profile
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
-            Long profileUserId = tutorService.getUserIdFromTutorProfile(id);
+            Integer currentUserId = getCurrentUserId(authentication);
+            Integer profileUserId = tutorService.getUserIdFromTutorProfile(id);
 
             if (!currentUserId.equals(profileUserId)) {
                 BaseResponse response = new BaseResponse();
@@ -161,7 +160,7 @@ public class TutorController {
         tutorService.deleteTutor(id);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
-        response.setMessage("Tutor deleted successfully");
+        response.setMessage("Tutor profile deactivated successfully");
         response.setData(null);
         return ResponseEntity.ok(response);
     }
@@ -169,8 +168,8 @@ public class TutorController {
     /**
      * Helper method to get current user ID from authentication
      */
-    private Long getCurrentUserId(Authentication authentication) {
-        return (Long) authentication.getPrincipal();
+    private Integer getCurrentUserId(Authentication authentication) {
+        return (Integer) authentication.getPrincipal();
     }
 }
 

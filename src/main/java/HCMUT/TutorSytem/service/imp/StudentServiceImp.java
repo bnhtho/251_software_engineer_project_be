@@ -31,7 +31,7 @@ public class StudentServiceImp implements StudentService {
     private MajorRepository majorRepository;
 
     @Override
-    public StudentDTO getStudentProfile(Long userId) {
+    public StudentDTO getStudentProfile(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + userId));
 
@@ -39,7 +39,7 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
-    public List<StudentSessionHistoryDTO> getStudentSessionHistory(Long userId) {
+    public List<StudentSessionHistoryDTO> getStudentSessionHistory(Integer userId) {
         // Verify user exists
         if (!userRepository.existsById(userId)) {
             throw new DataNotFoundExceptions("Student not found with id: " + userId);
@@ -54,7 +54,7 @@ public class StudentServiceImp implements StudentService {
 
     @Override
     @Transactional
-    public StudentDTO updateStudentProfile(Long userId, StudentProfileUpdateRequest request) {
+    public StudentDTO updateStudentProfile(Integer userId, StudentProfileUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + userId));
 

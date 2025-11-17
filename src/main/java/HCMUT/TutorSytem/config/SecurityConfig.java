@@ -46,7 +46,7 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
 
                     //Login endpoint
-                    request.requestMatchers(HttpMethod.POST, "/auth/**  ").permitAll(); // Anyone can attempt to
+                    request.requestMatchers(HttpMethod.POST, "/auth/**").permitAll(); // Anyone can attempt to login
                     // Default: require authentication for other requests
                     request.anyRequest().authenticated();
                 })

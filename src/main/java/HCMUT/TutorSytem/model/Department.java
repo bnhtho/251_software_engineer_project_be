@@ -14,8 +14,8 @@ import java.util.List;
 public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)          // BIGINT UNSIGNED AUTO_INCREMENT
-    private Long id;
+    @Column(name = "id", nullable = false)          // INT UNSIGNED AUTO_INCREMENT
+    private Integer id;
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;

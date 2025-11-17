@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 public class TutorDetailDTO {
-    private Long id;
+    private Integer id;
 
     // From User (Datacore)
     private String hcmutId;
@@ -26,15 +26,15 @@ public class TutorDetailDTO {
     private Instant lastLogin;
 
     // From TutorProfile
-    private Long tutorProfileId;
-    private Long majorId;
+    private Integer tutorProfileId;
+    private Integer majorId;
     private String majorName;
     private String department; // From major.department.name
     private String bio;
     private List<SubjectDTO> subjects; // List of subjects the tutor teaches
     private BigDecimal rating;
     private Integer experienceYears;
-    private Long totalSessionsCompleted;
+    private Integer totalSessionsCompleted;
     private Boolean isAvailable;
 
     // Teaching schedule

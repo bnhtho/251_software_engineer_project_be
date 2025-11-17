@@ -17,7 +17,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     @Transactional
-    public Long getInfoFromHcmutSystem(Datacore data) {
+    public Integer getInfoFromHcmutSystem(Datacore data) {
         if (data == null) throw new DataNotFoundExceptions("Datacore data not found");
 
         User user = userRepository.findByHcmutId(data.getHcmutId())

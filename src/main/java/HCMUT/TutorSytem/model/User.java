@@ -21,7 +21,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private Integer id;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_date", nullable = false)

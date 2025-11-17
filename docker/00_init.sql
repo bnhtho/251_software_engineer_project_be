@@ -261,9 +261,9 @@ VALUES
 
 -- 3) HCMUT_SSO (đăng nhập tập trung)
 INSERT INTO hcmut_sso (id, email, password, hcmut_id) VALUES
-(1, 'loannt@hcmut.edu.vn',   'admin123',   'NV001'),
-(2, '17123456@hcmut.edu.vn', 'tutor123',   '17123456'),
-(3, '20123456@hcmut.edu.vn', 'student123', '20123456');
+(1, 'loannt@hcmut.edu.vn',   '$2a$12$rYvpx3Yiqutf8pIW8AtqeO2jP4Hqtpfl8HnhaYDGNs.CIckpyWl8G',   'NV001'),
+(2, '17123456@hcmut.edu.vn', '$2a$12$rYvpx3Yiqutf8pIW8AtqeO2jP4Hqtpfl8HnhaYDGNs.CIckpyWl8G',   '17123456'),
+(3, '20123456@hcmut.edu.vn', '$2a$12$rYvpx3Yiqutf8pIW8AtqeO2jP4Hqtpfl8HnhaYDGNs.CIckpyWl8G', '20123456');
 
 -- 4) USER (tài khoản hệ thống ứng dụng; dùng chuỗi role + hcmut_id để liên hệ)
 INSERT INTO `user`

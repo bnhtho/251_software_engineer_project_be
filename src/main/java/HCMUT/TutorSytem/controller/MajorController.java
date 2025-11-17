@@ -34,7 +34,7 @@ public class MajorController {
     }
 
     @GetMapping("/by-department/{departmentId}")
-    public ResponseEntity<BaseResponse> getMajorsByDepartment(@PathVariable Long departmentId) {
+    public ResponseEntity<BaseResponse> getMajorsByDepartment(@PathVariable Integer departmentId) {
         List<Major> majors = majorRepository.findByDepartmentId(departmentId);
 
         List<MajorDTO> majorDTOs = majors.stream()

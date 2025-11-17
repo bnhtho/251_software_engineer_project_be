@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.controller;
 
-import HCMUT.TutorSytem.dto.PageDTO;
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.payload.request.SessionRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
@@ -12,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/sessions")
 public class SessionController {
@@ -19,18 +20,22 @@ public class SessionController {
     @Autowired
     private SessionService sessionService;
 
+    /**
+     * Get all sessions (without pagination)
+     */
     @GetMapping
-    public ResponseEntity<BaseResponse> getAllSessions(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        PageDTO<SessionDTO> sessionPage = sessionService.getAllSessions(page, size);
+    public ResponseEntity<BaseResponse> getAllSessions() {
+        List<SessionDTO> sessions = sessionService.getAllSessions();
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
         response.setMessage("Sessions retrieved successfully");
-        response.setData(sessionPage);
+        response.setData(sessions);
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Create a new session
+     */
     @PostMapping
     public ResponseEntity<BaseResponse> createSession(@RequestBody SessionRequest sessionRequest) {
         SessionDTO session = sessionService.createSession(sessionRequest);
@@ -41,13 +46,17 @@ public class SessionController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Update an existing session
+     * Only the tutor who created the session can update it
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse> updateSession(@PathVariable Long id, @RequestBody SessionRequest sessionRequest) {
+    public ResponseEntity<BaseResponse> updateSession(@PathVariable Integer id, @RequestBody SessionRequest sessionRequest) {
         // Check ownership: only the tutor who created the session can update it
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
-            Long sessionTutorId = sessionService.getTutorIdFromSession(id);
+            Integer currentUserId = getCurrentUserId(authentication);
+            Integer sessionTutorId = sessionService.getTutorIdFromSession(id);
 
             if (!currentUserId.equals(sessionTutorId)) {
                 BaseResponse response = new BaseResponse();
@@ -66,13 +75,17 @@ public class SessionController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Delete a session
+     * Only the tutor who created the session can delete it
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponse> deleteSession(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse> deleteSession(@PathVariable Integer id) {
         // Check ownership: only the tutor who created the session can delete it
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Long currentUserId = getCurrentUserId(authentication);
-            Long sessionTutorId = sessionService.getTutorIdFromSession(id);
+            Integer currentUserId = getCurrentUserId(authentication);
+            Integer sessionTutorId = sessionService.getTutorIdFromSession(id);
 
             if (!currentUserId.equals(sessionTutorId)) {
                 BaseResponse response = new BaseResponse();
@@ -91,11 +104,8 @@ public class SessionController {
         return ResponseEntity.ok(response);
     }
 
-    private Long getCurrentUserId(Authentication authentication) {
-        // TODO: Extract user ID from authentication principal
-        // This depends on how you implement authentication
-        // Example: return ((UserDetails) authentication.getPrincipal()).getId();
-        return 1L; // Placeholder - replace with actual implementation
+    private Integer getCurrentUserId(Authentication authentication) {
+        return (Integer) authentication.getPrincipal();
     }
 }
 

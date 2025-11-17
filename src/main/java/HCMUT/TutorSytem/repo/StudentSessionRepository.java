@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface StudentSessionRepository extends JpaRepository<StudentSession, Long> {
-    List<StudentSession> findByStudentId(Long studentId);
-    List<StudentSession> findBySessionId(Long sessionId);
-    Optional<StudentSession> findByStudentIdAndSessionId(Long studentId, Long sessionId);
+public interface StudentSessionRepository extends JpaRepository<StudentSession, Integer> {
+    List<StudentSession> findByStudentId(Integer studentId);
+    List<StudentSession> findBySessionId(Integer sessionId);
+    Optional<StudentSession> findByStudentIdAndSessionId(Integer studentId, Integer sessionId);
 
     // Use studentSessionStatus.id instead of status string
     List<StudentSession> findByStudentSessionStatusId(Byte statusId);

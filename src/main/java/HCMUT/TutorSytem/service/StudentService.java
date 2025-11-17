@@ -7,8 +7,8 @@ import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
 import java.util.List;
 
 public interface StudentService {
-    StudentDTO getStudentProfile(Long userId);
-    List<StudentSessionHistoryDTO> getStudentSessionHistory(Long userId);
-    StudentDTO updateStudentProfile(Long userId, StudentProfileUpdateRequest request);
+    StudentDTO getStudentProfile(Integer userId);
+    List<StudentSessionHistoryDTO> getStudentSessionHistory(Integer userId);
+    StudentDTO updateStudentProfile(Integer userId, StudentProfileUpdateRequest request);
 }
 

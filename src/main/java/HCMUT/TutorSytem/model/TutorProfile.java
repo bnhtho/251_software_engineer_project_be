@@ -22,7 +22,7 @@ public class TutorProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -48,11 +48,11 @@ public class TutorProfile {
     private BigDecimal rating;
 
     @Column(name = "priority", columnDefinition = "int UNSIGNED")
-    private Long priority;
+    private Integer priority;
 
     @ColumnDefault("'0'")
     @Column(name = "total_sessions_completed", columnDefinition = "int UNSIGNED not null")
-    private Long totalSessionsCompleted;
+    private Integer totalSessionsCompleted;
 
     @ColumnDefault("1")
     @Column(name = "is_available", nullable = false)

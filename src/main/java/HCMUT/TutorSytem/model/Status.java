@@ -19,7 +19,7 @@ public class Status {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;  // tương ứng INT UNSIGNED AUTO_INCREMENT
+    private Integer id;  // tương ứng INT UNSIGNED AUTO_INCREMENT
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;  // ví dụ: ACTIVE, INACTIVE
@@ -33,12 +33,12 @@ public class Status {
     public Status(int id){
         switch (id){
             case 1:
-                this.id = 1L;
+                this.id = 1;
                 this.name = "ACTIVE";
                 this.description = "Trạng thái hoạt động";
                 break;
             case 2:
-                this.id = 2L;
+                this.id = 2;
                 this.name = "INACTIVE";
                 this.description = "Trạng thái ngừng hoạt động";
                 break;
