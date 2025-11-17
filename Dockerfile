@@ -1,32 +1,31 @@
-# -------------- Stage 0  ------------
-# ========= STAGE 1: BUILD với Maven Wrapper (mvnw) + Java 21 =========
-FROM eclipse-temurin AS build
+# ========= STAGE 1: BUILD với Maven Wrapper (mvnw) =========
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-# Copy Maven Wrapper (mvnw, mvnw.cmd, .mvn) – bắt buộc để dùng wrapper
-COPY mvnw mvnw.cmd ./
+# Bước 1: Copy file cần thiết cho Maven
+COPY mvnw mvnw.cmd pom.xml ./
 COPY .mvn .mvn
 
-# Copy pom.xml và source
-COPY pom.xml .
+# Bước 2: Tải dependencies để tối ưu cache
+RUN chmod +x ./mvnw && \
+    ./mvnw dependency:go-offline
+
+# Bước 3: Copy source code
 COPY src ./src
 
-# Cấp quyền + Build bằng Maven Wrapper (không cần cài Maven toàn cục)
-RUN chmod +x ./mvnw && \
-    ./mvnw clean package -DskipTests -Dmaven.repo.local=.m2
+# Bước 4: Build
+RUN ./mvnw clean package -DskipTests
 
-# ========= STAGE 2: Runtime với JRE 21 (nhẹ hơn JDK) =========
-FROM eclipse-temurin
+# ========= STAGE 2: RUNTIME =========
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-# Copy JAR từ stage build
 COPY --from=build /app/target/*.jar app.jar
 
-
 EXPOSE 8080
-# Set quyền file config
+
 RUN mkdir -p /etc/mysql/conf.d
 COPY mysql-conf/charset.cnf /etc/mysql/conf.d/charset.cnf
 RUN chmod 644 /etc/mysql/conf.d/charset.cnf
 
-# End
+CMD ["java", "-jar", "app.jar"]

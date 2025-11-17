@@ -1,12 +1,53 @@
 package HCMUT.TutorSytem.service.imp;
+
 import HCMUT.TutorSytem.dto.*;
 import HCMUT.TutorSytem.model.*;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
-import HCMUT.TutorSytem.repo.*;
+import HCMUT.TutorSytem.repo.MajorRepository;
+import HCMUT.TutorSytem.repo.SubjectRepository;
+import HCMUT.TutorSytem.repo.TutorProfileRepository;
+import HCMUT.TutorSytem.repo.TutorScheduleRepository; // Thêm vì nó được sử dụng trong mapToTutorDetailDTO
+import HCMUT.TutorSytem.repo.UserRepository;
+import HCMUT.TutorSytem.service.TutorService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+// Import missing symbols
+import HCMUT.TutorSytem.mapper.TutorMapper;
+import HCMUT.TutorSytem.payload.request.TutorRequest;
+import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
+@Service
+public class TutorServiceImp implements TutorService {
+
+    // --- TẤT CẢ FIELDS VÀ @AUTOWIRED PHẢI NẰM BÊN TRONG CLASS ---
+    
     @Autowired
     private TutorScheduleRepository tutorScheduleRepository;
 
+    @Autowired
+    private TutorProfileRepository tutorProfileRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TutorMapper tutorMapper;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
+
+    @Autowired
+    private MajorRepository majorRepository;
+
+    // ---------------------------------------------------------------- //
 
     @Override
     public TutorDetailDTO getTutorDetail(Long userId) {
@@ -151,38 +192,6 @@ import org.springframework.transaction.annotation.Transactional;
 
         return dto;
     }
-import HCMUT.TutorSytem.repo.MajorRepository;
-import HCMUT.TutorSytem.repo.SubjectRepository;
-import HCMUT.TutorSytem.repo.TutorProfileRepository;
-import HCMUT.TutorSytem.repo.UserRepository;
-import HCMUT.TutorSytem.service.TutorService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Service
-public class TutorServiceImp implements TutorService {
-
-    @Autowired
-    private TutorProfileRepository tutorProfileRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TutorMapper tutorMapper;
-
-    @Autowired
-    private SubjectRepository subjectRepository;
-
-    @Autowired
-    private MajorRepository majorRepository;
 
     @Override
     public PageDTO<TutorDTO> getAllTutors(int page, int size) {
@@ -319,4 +328,3 @@ public class TutorServiceImp implements TutorService {
         return tutorProfile.getUser() != null ? tutorProfile.getUser().getId() : null;
     }
 }
-
