@@ -1,0 +1,257 @@
+Luồng xử lý chi tiết cho các chức năng Hệ thống Tutor HCMUT
+Thống kê
+Thống kê theo buổi học (Session Statistics)
+Tác nhân chính: Điều phối viên chương trình Tutor (hoặc quản trị viên hệ thống).
+Điều kiện bắt đầu: Hệ thống đã có các buổi tutor được lên lịch và lưu trữ thông tin (bao gồm trạng thái hoàn tất, hủy, sắp diễn ra). Điều phối viên đã đăng nhập và có quyền truy cập chức năng thống kê.
+Luồng chính:
+1.	Điều phối viên truy cập trang Thống kê và chọn mục Thống kê theo buổi học.
+2.	Hệ thống truy vấn cơ sở dữ liệu để lấy danh sách tất cả các buổi tutor trong phạm vi (ví dụ: học kỳ hiện tại hoặc toàn bộ chương trình).
+3.	Hệ thống tính toán tổng số buổi tutor đã được tạo, số buổi đã hoàn tất, số buổi bị hủy, và số buổi sắp diễn ra. (Thông tin về buổi bị hủy được ghi nhận do hệ thống hỗ trợ hủy/đổi lịch các buổi học.)
+4.	Hệ thống hiển thị các thống kê này trên giao diện, có thể dưới dạng bảng số liệu và biểu đồ. Ví dụ: “Tổng số buổi: X; Đã hoàn tất: Y; Đã hủy: Z; Sắp diễn ra: W”.
+5.	Điều phối viên xem xét các số liệu tổng quan này.
+Điều kiện kết thúc: Điều phối viên thu được thông tin tổng quát về tình hình tổ chức buổi tutor (số lượng buổi hoàn thành, hủy, v.v.). Thông tin này có thể được sử dụng để lập báo cáo tổng quan phục vụ quản lý (phòng Đào tạo có thể dùng những báo cáo này để tối ưu phân bổ nguồn lực và xem xét để cung cấp các lợi ích khác cho Tutor).
+Trường hợp ngoại lệ:
+•	Không có dữ liệu: Nếu chưa có buổi tutor nào trong hệ thống, hệ thống hiển thị thông báo “Chưa có dữ liệu” hoặc tất cả các thống kê bằng 0.
+•	Lỗi truy xuất dữ liệu: Nếu xảy ra lỗi kết nối cơ sở dữ liệu hoặc lỗi hệ thống khi truy vấn, hệ thống hiển thị thông báo lỗi và hướng dẫn thử lại sau.
+•	Quyền truy cập: Nếu người dùng không có quyền xem thống kê, hệ thống sẽ từ chối truy cập, hiện thống báo và điều hướng người dùng về trang đăng nhập để đăng nhập lai
+Thống kê theo tutor (Tutor Statistics)
+Tác nhân chính: Điều phối viên chương trình Tutor hoặc quản trị viên (cũng có thể chính Tutor xem thống kê của bản thân).
+Điều kiện bắt đầu: Hệ thống có dữ liệu về các tutor: danh sách học viên mỗi tutor hỗ trợ, số buổi do tutor đó tổ chức, và các đánh giá/điểm phản hồi từ học viên. Người dùng đã đăng nhập với quyền phù hợp.
+Luồng chính:
+1.	Người dùng truy cập Thống kê và chọn mục Thống kê theo Tutor.
+2.	Hệ thống hiển thị danh sách các tutor hoặc một giao diện cho phép chọn một tutor cụ thể (theo tên hoặc mã định danh).
+3.	Người dùng chọn một tutor (hoặc xem lần lượt danh sách).
+4.	Hệ thống truy xuất dữ liệu cho tutor đã chọn, bao gồm:
+o	Số lượng học viên được hỗ trợ: đếm số học viên mà tutor này đang hoặc đã hướng dẫn.
+o	Số buổi đã tổ chức: đếm tổng số buổi học do tutor này phụ trách (bao gồm buổi đã diễn ra và có thể cả sắp tới).
+o	Điểm đánh giá trung bình: tính trung bình các đánh giá/điểm số phản hồi mà học viên đã cho tutor này sau mỗi buổi học. (Hệ thống đã thu thập phản hồi chất lượng buổi học từ sinh viên sau mỗi buổi nên có dữ liệu để tính toán điểm trung bình này.)
+5.	Hệ thống hiển thị các thống kê trên cho tutor được chọn, ví dụ: “Tutor A – Số học viên: 10; Số buổi đã dạy: 25; Đánh giá trung bình: 4.8/5”. Thông tin có thể hiển thị dạng bảng (nếu liệt kê nhiều tutor) hoặc trang thông tin chi tiết cho từng tutor.
+6.	Người dùng (điều phối hoặc tutor) xem các chỉ số này để đánh giá hiệu quả hoạt động của tutor.
+Điều kiện kết thúc: Thông tin thống kê về tutor được trình bày cho người dùng. Điều phối viên có cái nhìn về hiệu suất của từng tutor, hoặc tutor cá nhân nhìn thấy thành tích và phản hồi của mình. Có thể download file thống kê dưới dạng .pdf và .exl
+Trường hợp ngoại lệ:
+•	Tutor không có dữ liệu: Nếu tutor chưa hỗ trợ học viên nào hoặc chưa tổ chức buổi học nào, hệ thống hiển thị “0” cho các chỉ số tương ứng hoặc thông báo “Chưa có dữ liệu”. Nếu chưa có phản hồi từ sinh viên, điểm đánh giá trung bình có thể hiển thị “Chưa có”.
+•	Chọn tutor không hợp lệ: Nếu người dùng nhập tên/mã tutor không tồn tại, hệ thống báo lỗi “Tutor không tồn tại” và yêu cầu chọn lại.
+•	Lỗi hệ thống: Lỗi truy xuất hoặc tính toán dữ liệu (tương tự trường hợp thống kê buổi học) sẽ dẫn đến thông báo lỗi cho người dùng.
+•	Quyền hạn: Tutor thường chỉ xem được thống kê của chính mình; nếu tutor cố xem thống kê của tutor khác, hệ thống sẽ chặn và báo không có quyền truy cập.
+Thống kê theo học viên (Student Statistics)
+Tác nhân chính: Tutor phụ trách hoặc điều phối viên (cũng có thể chính học viên xem thống kê của bản thân).
+Điều kiện bắt đầu: Hệ thống lưu trữ dữ liệu về từng học viên: các buổi học viên đã đăng ký/tham gia, điểm danh buổi đã tham gia hay vắng, cùng các ghi chú/đánh giá tiến độ từ tutor. Người dùng đã đăng nhập với vai trò tutor tương ứng hoặc quyền xem thống kê học viên.
+Luồng chính:
+1.	Người dùng truy cập Thống kê và chọn Thống kê theo học viên.
+2.	Hệ thống cung cấp giao diện tìm kiếm hoặc danh sách học viên. Tutor có thể thấy danh sách học viên mà mình phụ trách; điều phối viên có thể tìm bất kỳ học viên nào.
+3.	Người dùng chọn một học viên cụ thể cần xem thống kê.
+4.	Hệ thống truy xuất dữ liệu của học viên đó, bao gồm:
+o	Số buổi đã tham gia: đếm số buổi học viên đã thực sự tham dự (có điểm danh hoặc đánh dấu hoàn thành).
+o	Tỷ lệ tham gia: tính toán = (số buổi đã tham gia / tổng số buổi được mời hoặc đăng ký) * 100%. Ví dụ, nếu học viên được mời 10 buổi, tham gia 8 buổi thì tỷ lệ là 80%.
+o	Tiến độ học tập: thông tin về quá trình tiến bộ của học viên, được tổng hợp từ nhận xét và đánh giá của tutor sau các buổi học. Ví dụ: mức độ hiểu bài qua các buổi, kỹ năng được cải thiện, những vấn đề còn tồn đọng. (Tutor thường ghi nhận tiến bộ của học viên sau mỗi buổi học và lưu lại trong hệ thống, các thông tin này được hệ thống tổng hợp thành bức tranh tiến độ chung.)
+5.	Hệ thống hiển thị các thông tin trên một trang thống kê cho học viên đã chọn. Ví dụ: “Học viên B – Số buổi đã tham gia: 8/10; Tỷ lệ tham gia: 80%; Tiến độ: Đã cải thiện đáng kể về kỹ năng giải bài tập, cần bổ sung kiến thức chương 3.”
+6.	Người dùng (tutor hoặc điều phối) xem xét thống kê để đánh giá mức độ tham gia và tiến bộ của học viên. Điều này giúp tutor điều chỉnh kế hoạch hỗ trợ hoặc giúp nhà trường nắm bắt tình hình học tập của sinh viên.
+Điều kiện kết thúc: Thông tin về mức độ tham gia và tiến độ của học viên được cung cấp đầy đủ cho người dùng có thẩm quyền. Tutor có thể kết luận về hiệu quả kèm cặp, học viên (nếu họ tự xem) có thể thấy được sự tiến bộ của mình, và điều phối viên có dữ liệu để báo cáo cho các đơn vị liên quan.
+Trường hợp ngoại lệ:
+•	Học viên chưa tham gia buổi nào: Hệ thống hiển thị số buổi = 0 và tỷ lệ tham gia 0%. Phần tiến độ có thể ghi chú “Chưa có dữ liệu vì học viên chưa tham gia buổi tutor nào”.
+•	Thiếu dữ liệu tiến độ: Nếu tutor chưa nhập đánh giá/ghi chú tiến độ cho học viên, hệ thống có thể chỉ hiển thị các chỉ số định lượng (số buổi, tỷ lệ) và thông báo “Chưa có đánh giá từ Tutor về tiến độ học tập”.
+•	Tìm kiếm không hợp lệ: Nếu mã số hoặc tên học viên không tồn tại hoặc không thuộc phạm vi quản lý của tutor đang đăng nhập, hệ thống báo lỗi và yêu cầu kiểm tra lại.
+•	Quyền hạn: Học viên chỉ được xem thống kê của chính mình (ví dụ trên dashboard cá nhân). Tutor chỉ xem được của học viên mình phụ trách. Điều phối viên hoặc quản trị viên mới có quyền xem thống kê của bất kỳ học viên nào trong hệ thống.
+Quản lý hồ sơ cá nhân
+Tác nhân chính: Người dùng hệ thống (sinh viên hoặc tutor) muốn xem/chỉnh sửa hồ sơ cá nhân của chính họ.
+Điều kiện bắt đầu: Người dùng đã đăng nhập thông qua HCMUT_SSO. Thông tin hồ sơ cơ bản của người dùng đã được đồng bộ từ HCMUT_DATACORE sang hệ thống Tutor (bao gồm họ tên, MSSV/Mã cán bộ, khoa/đơn vị, email học vụ, v.v.). Hệ thống cho phép người dùng chỉnh sửa một số thông tin cá nhân mở rộng.
+Luồng chính (xem và cập nhật hồ sơ):
+1.	Người dùng chọn chức năng Hồ sơ cá nhân (thường từ menu tài khoản hoặc dashboard).
+2.	Hệ thống hiển thị trang hồ sơ cá nhân, bao gồm các thông tin hiện có của người dùng: thông tin cá nhân cơ bản (họ tên, MSSV/Mã cán bộ, email trường, khoa/ngành), thông tin học thuật/chuyên môn (ví dụ: năm học, lĩnh vực chuyên môn đối với tutor), và trạng thái hoạt động (đang học/đang giảng dạy, kích hoạt hay tạm ngưng tài khoản). Các thông tin này được lấy từ cơ sở dữ liệu nội bộ, trong đó thông tin cơ bản được đồng bộ tự động từ DATACORE nên luôn chính xác và nhất quán.
+3.	Người dùng nhấn nút Chỉnh sửa hồ sơ (Edit Profile). Hệ thống chuyển sang chế độ cho phép chỉnh sửa trên các trường được phép thay đổi.
+o	Những trường có nguồn từ DATACORE (như họ tên, MSSV, khoa…) thường không cho phép người dùng sửa (được hiển thị dạng chỉ đọc) để đảm bảo đồng bộ với dữ liệu trung tâm.
+o	Các trường người dùng có thể tự cập nhật có thể gồm: Email liên lạc phụ (nếu muốn cung cấp email cá nhân thay vì email học vụ), mô tả ngắn về bản thân (giới thiệu, kinh nghiệm, lĩnh vực quan tâm), ảnh đại diện (avatar), và các thông tin bổ sung khác (ví dụ: số điện thoại liên lạc, nếu hệ thống cho phép).
+4.	Người dùng thực hiện thay đổi thông tin trên các trường cho phép. Ví dụ: cập nhật ảnh đại diện mới (tải lên từ máy tính), nhập mô tả bản thân hoặc cập nhật email liên hệ.
+5.	Sau khi chỉnh sửa, người dùng nhấn Lưu thay đổi.
+6.	Hệ thống kiểm tra tính hợp lệ của dữ liệu vừa nhập:
+o	Kiểm tra định dạng email (nếu người dùng thay đổi email).
+o	Kiểm tra kích thước và định dạng file ảnh đại diện (nếu có upload ảnh).
+o	Đảm bảo các trường bắt buộc không bị bỏ trống (nếu có).
+7.	Nếu tất cả hợp lệ, hệ thống cập nhật các thông tin mới vào cơ sở dữ liệu người dùng. Đối với ảnh đại diện, hệ thống lưu trữ file và cập nhật đường dẫn tương ứng.
+8.	Hệ thống hiển thị thông báo “Hồ sơ của bạn đã được cập nhật thành công.” và tải lại trang hồ sơ cá nhân với thông tin mới. Người dùng thấy các thay đổi mình vừa thực hiện được phản ánh ngay lập tức.
+Điều kiện kết thúc: Thông tin hồ sơ cá nhân của người dùng được cập nhật trong hệ thống. Các thay đổi được lưu vĩnh viễn và sẽ hiển thị khi người dùng (hoặc các bên liên quan được phép xem hồ sơ) truy cập hồ sơ. Hồ sơ cơ bản vẫn đảm bảo đồng bộ với dữ liệu trung tâm của trường (DATACORE) đối với các mục không cho chỉnh sửa.
+Trường hợp ngoại lệ:
+•	Dữ liệu không hợp lệ: Nếu người dùng nhập thông tin sai định dạng (vd: email không đúng định dạng, file ảnh không được hỗ trợ hoặc quá dung lượng cho phép), hệ thống sẽ hiển thị thông báo lỗi cụ thể dưới trường tương ứng (vd: “Email không hợp lệ” hoặc “Ảnh vượt quá dung lượng cho phép”) và yêu cầu người dùng điều chỉnh.
+•	Lưu thất bại: Nếu xảy ra lỗi máy chủ hoặc cơ sở dữ liệu trong quá trình lưu, hệ thống thông báo “Cập nhật không thành công, vui lòng thử lại sau.” Các thay đổi sẽ không được ghi nhận cho đến khi lưu thành công.
+•	Xung đột đồng bộ: Trong trường hợp hi hữu thông tin từ DATACORE thay đổi đồng thời với lúc người dùng chỉnh sửa (vd: email học vụ được nhà trường cập nhật), hệ thống có thể ưu tiên dữ liệu từ DATACORE cho các trường đó và thông báo cho người dùng biết có thay đổi từ hệ thống trung tâm.
+•	Quyền hạn: Sinh viên chỉ có thể chỉnh sửa hồ sơ của chính mình, tutor chỉ chỉnh sửa hồ sơ của họ. Người dùng không thể chỉnh sửa hồ sơ người khác (nút “Chỉnh sửa” sẽ không xuất hiện nếu xem hồ sơ của người khác, trừ admin có quyền).
+Use case name
+Thông báo & nhắc lịch buổi học
+Actor
+Tutor, Sinh viên
+Description
+Khi tutor tạo mới, hủy hoặc dời lịch một buổi học, hệ thống sẽ tự động tạo thông báo gửi cho tutor và sinh viên (email + in-app). Ngoài ra, trước thời điểm diễn ra buổi học, hệ thống sẽ tự động nhắc lịch. Đối với trường hợp dời lịch, sinh viên cần xác nhận thời gian mới; hệ thống kiểm tra lịch sinh viên, nếu không trùng thì cập nhật schedule, nếu trùng thì báo lỗi cho sinh viên.
+Precondition
+•	Tutor đã đăng nhập hệ thống và có quyền tạo / chỉnh sửa buổi học.
+•	Hệ thống đã lưu thông tin người dùng (tutor, sinh viên) kèm email hợp lệ.
+•	Lịch (schedule) của sinh viên được quản lý trong hệ thống (để kiểm tra trùng lịch).
+•	Dịch vụ gửi email / thông báo in-app đang hoạt động.
+Post condition
+•	Tutor và sinh viên nhận được thông báo tương ứng khi buổi học được tạo mới, hủy hoặc dời lịch.
+•	Lịch học của sinh viên và tutor được cập nhật đúng với trạng thái mới của buổi học.
+•	Các buổi học còn hiệu lực được đưa vào danh sách để hệ thống tự động nhắc lịch trước giờ học.
+
+Normal flow
+1.	Tutor tạo mới một buổi học (chọn môn, thời gian, hình thức, danh sách sinh viên tham gia).
+2.	Hệ thống lưu buổi học với trạng thái “Đã lên lịch”.
+3.	Hệ thống lấy thông tin tutor và danh sách sinh viên (tên, email, mã số, …) từ dữ liệu người dùng.
+4.	Hệ thống tạo thông báo “buổi học mới” kèm đầy đủ thông tin buổi học.
+5.	Hệ thống gửi thông báo:
+o	Email đến email của tutor và từng sinh viên.
+o	Thông báo in-app trên dashboard của tutor và sinh viên.
+6.	Buổi học mới được đưa vào danh sách các buổi học còn hiệu lực để scheduler tự động nhắc lịch.
+7.	Trước thời điểm buổi học (ví dụ 24h và 1h), scheduler chạy, tìm các buổi học sắp diễn ra và gửi thông báo nhắc lịch cho tutor và sinh viên (email + in-app).
+Alternative flow
+AF1 – Tutor hủy buổi học
+1.	Sau khi tạo, tutor chọn buổi học và thao tác “Hủy buổi học”.
+2.	Hệ thống cập nhật trạng thái buổi học sang “Đã hủy” và loại buổi này khỏi danh sách cần nhắc lịch.
+3.	Hệ thống tạo thông báo hủy buổi học (thời gian, môn, lý do nếu có) và gửi email + in-app cho tutor và tất cả sinh viên.
+AF2 – Tutor dời lịch buổi học (reschedule, có xác nhận của sinh viên)
+1.	Tutor chọn một buổi học còn hiệu lực và thay đổi thời gian từ T_old sang T_new.
+2.	Hệ thống kiểm tra dữ liệu thời gian mới hợp lệ và cập nhật ngay thời gian buổi học sang T_new (buổi học vẫn ở trạng thái “Đã lên lịch”, không có trạng thái tạm).
+3.	Hệ thống tạo thông báo dời lịch, nêu rõ T_old và T_new, gửi email + in-app cho từng sinh viên, kèm hai lựa chọn:
+o	“Xác nhận tham gia giờ mới”
+o	“Không tham gia buổi học này nữa”
+4.	Khi sinh viên chọn “Xác nhận tham gia giờ mới”:
+4.1. Hệ thống kiểm tra schedule của sinh viên tại T_new:
+o	Nếu không trùng với buổi học / sự kiện nào khác:
+	Hệ thống cập nhật schedule của sinh viên cho buổi học tại thời gian T_new và đánh dấu sinh viên “đã xác nhận”.
+	Gửi thông báo xác nhận thành công cho sinh viên (và, nếu cần, thông báo cho tutor biết sinh viên đó vẫn tham gia).
+o	Nếu bị trùng lịch với một buổi/sự kiện khác:
+	Hệ thống hiển thị thông báo cho sinh viên: “Giờ học mới trùng với một lịch khác của bạn, vui lòng xem xét lại.”
+	Ở bước này sinh viên có thể quay lại và chọn “Không tham gia buổi học này nữa” (AF3).
+5.	Trước giờ bắt đầu buổi học T_new 12 giờ, hệ thống kiểm tra danh sách sinh viên chưa xác nhận:
+o	Với mỗi sinh viên chưa xác nhận sau khi dời lịch:
+	Hệ thống tự động xóa sinh viên đó khỏi danh sách tham gia buổi học.
+	Gửi thông báo cho sinh viên: “Bạn đã bị hủy khỏi buổi học … do không xác nhận giờ mới trước 12 giờ.”
+	Gửi thông báo cho tutor: “Sinh viên X đã bị hệ thống tự động hủy tham gia buổi học … do không xác nhận giờ mới.”
+AF3 – Sinh viên chủ động hủy tham gia buổi học
+1.	Trước khi buổi học bắt đầu (ở thời gian ban đầu hoặc sau khi dời lịch), sinh viên mở chi tiết buổi học và chọn chức năng “Hủy tham gia buổi học”.
+2.	Hệ thống xóa sinh viên khỏi danh sách tham gia buổi học và cập nhật lại schedule của sinh viên.
+3.	Hệ thống gửi thông báo cho tutor (email + in-app): “Sinh viên X đã hủy tham gia buổi học …”.
+4.	Tùy yêu cầu, hệ thống có thể gửi thêm thông báo xác nhận cho chính sinh viên.
+Exception flow
+•	E1 – Lỗi gửi email / thông báo
+Hệ thống ghi log lỗi, vẫn lưu/cập nhật buổi học bình thường và vẫn hiển thị thông báo in-app nếu có thể.
+•	E2 – Thiếu thông tin email hoặc dữ liệu sinh viên/tutor
+Hệ thống không gửi được email tới người đó, ghi log lỗi dữ liệu; các thao tác tạo/hủy/dời và nhắc lịch cho các người dùng còn lại vẫn diễn ra.
+•	E3 – Scheduler lỗi, không chạy được nhắc lịch
+Hệ thống ghi log lỗi scheduler; thông tin buổi học vẫn đúng nhưng người dùng có thể không nhận được nhắc lịch cho đến khi scheduler hoạt động lại.
+
+Feedback và đánh giá
+Phản hồi từ sinh viên sau mỗi buổi học
+Tác nhân chính: Sinh viên (người tham gia buổi học với tutor).
+Điều kiện bắt đầu: Buổi tutor đã diễn ra và kết thúc. Sinh viên đã tham gia buổi học đó (được đánh dấu hiện diện). Hệ thống mở chức năng cho phép gửi phản hồi sau buổi học (thông thường chỉ khả dụng sau giờ kết thúc buổi học, và có thể trong một khoảng thời gian nhất định sau buổi học, ví dụ 1 tuần).
+Luồng chính:
+1.	Sau khi buổi học kết thúc, sinh viên nhận được thông báo (trên hệ thống hoặc email) mời đánh giá buổi học. Thông báo có thể là: “Hãy gửi phản hồi về buổi học với tutor X ngày Y” cùng liên kết tới form feedback.
+2.	Sinh viên truy cập vào biểu mẫu Phản hồi/Đánh giá tutor cho buổi học vừa qua.
+3.	Biểu mẫu phản hồi bao gồm các mục để sinh viên đánh giá:
+o	Nội dung buổi học: Sinh viên có thể đánh giá mức độ hữu ích, chất lượng nội dung được tutor truyền đạt.
+o	Thái độ của tutor: Đánh giá về thái độ, sự hỗ trợ và tương tác của tutor (thân thiện, nhiệt tình, v.v.).
+o	Hiệu quả chung: Sinh viên cho biết buổi học có giúp cải thiện hiểu biết/kỹ năng hay không.
+o	Đánh giá chung: Có thể dưới dạng thang điểm (ví dụ 1-5 sao hoặc điểm 1-10) cho toàn buổi học.
+o	Ý kiến đóng góp: Một ô cho sinh viên nhập nhận xét tự do về những điểm tốt và cần cải thiện.
+4.	Sinh viên điền các mục đánh giá: chọn các mức điểm hoặc sao cho các tiêu chí, và viết nhận xét (nếu có).
+5.	Sinh viên nhấn Gửi phản hồi.
+6.	Hệ thống kiểm tra nhanh các trường thông tin: các tiêu chí bắt buộc đã được đánh giá, nhận xét (nếu bắt buộc số từ tối thiểu thì kiểm tra) v.v.
+7.	Hệ thống lưu trữ phản hồi của sinh viên vào cơ sở dữ liệu, gắn với buổi học và tutor tương ứng. Phản hồi này bao gồm cả điểm số và nội dung nhận xét. (Những phản hồi này sẽ được tổng hợp trong hồ sơ của tutor, góp phần tính điểm đánh giá trung bình cho tutor và cũng có thể được điều phối viên xem để đảm bảo chất lượng chương trình.)
+8.	Hệ thống có thể hiện thông báo cảm ơn sinh viên đã phản hồi, và cho biết phản hồi đã được ghi nhận thành công.
+Điều kiện kết thúc: Phản hồi của sinh viên sau buổi học được lưu lại trong hệ thống. Tutor có thể xem phản hồi để biết ý kiến học viên, và ban quản lý có dữ liệu để đánh giá chất lượng tutor.
+Trường hợp ngoại lệ:
+•	Không tham gia không phản hồi: Nếu sinh viên đã không tham gia buổi học (vắng mặt), thường họ sẽ không được mời phản hồi (hoặc nếu cố truy cập form sẽ bị chặn). Hệ thống chỉ cho phép phản hồi từ những ai có tham gia.
+•	Phản hồi trùng lặp: Mỗi sinh viên chỉ được phản hồi một lần cho mỗi buổi học. Nếu sinh viên cố gửi lần thứ hai (hoặc chỉnh sửa phản hồi đã gửi), hệ thống sẽ ngăn lại hoặc cập nhật phản hồi cũ thay vì tạo mới.
+•	Quá hạn phản hồi: Nếu sinh viên truy cập form sau thời gian cho phép (vd quá 1 tuần sau buổi học), hệ thống có thể hiển thị thông báo “Đã quá hạn gửi phản hồi cho buổi học này” và không cho gửi. Điều này khuyến khích phản hồi kịp thời.
+•	Lỗi hệ thống: Nếu có lỗi khi lưu phản hồi (vd mất kết nối, lỗi server), hệ thống thông báo “Gửi phản hồi thất bại, vui lòng thử lại” và giữ nội dung đã nhập (nếu có) để sinh viên không phải nhập lại từ đầu.
+•	Bảo mật & ẩn danh: Thông thường phản hồi sinh viên có thể ẩn danh đối với tutor (tutor xem điểm và nội dung góp ý nhưng không biết cụ thể ai gửi trong nhóm nếu là nhóm lớn). Nếu hệ thống đảm bảo ẩn danh, danh tính sinh viên sẽ không hiển thị kèm phản hồi đối với tutor. Trường hợp cá nhân 1-1 thì tutor đương nhiên biết học viên nào phản hồi; hệ thống vẫn khuyến khích sự thẳng thắn.
+Đánh giá từ tutor sau mỗi buổi học
+Tác nhân chính: Tutor (người hướng dẫn buổi học).
+Điều kiện bắt đầu: Buổi tutor đã kết thúc. Tutor muốn ghi lại nhận xét và đánh giá về học viên sau buổi đó. Hệ thống cung cấp chức năng để tutor nhập feedback nội bộ về tiến bộ của học viên.
+Luồng chính:
+1.	Sau khi hoàn thành buổi học, tutor truy cập vào trang chi tiết buổi học đó (ví dụ từ lịch sử buổi dạy hoặc danh sách buổi đã diễn ra).
+2.	Tại trang chi tiết buổi học, tutor chọn chức năng Đánh giá học viên hoặc Ghi chú sau buổi học.
+3.	Hệ thống mở form để tutor nhập nhận xét và đánh giá về học viên:
+o	Mức độ hiểu bài: Tutor đánh giá liệu học viên nắm được bài đến đâu, có chỗ nào chưa hiểu.
+o	Thái độ/hợp tác của học viên: Ví dụ học viên có tích cực hỏi bài, có làm bài tập đầy đủ, đúng giờ không.
+o	Tiến bộ so với buổi trước: Tutor nhận xét học viên có tiến bộ hay thụt lùi ở kỹ năng/kiến thức nào, đạt được mục tiêu đề ra chưa.
+o	Đề xuất/hướng dẫn thêm: Tutor có thể ghi chú những việc học viên nên làm tiếp (đọc thêm tài liệu, luyện tập thêm…).
+o	Ghi chú cá nhân: Bất kỳ nhận xét nào khác tutor muốn lưu lại (có thể ghi cho bản thân hoặc cho ban quản lý, thường những ghi chú này có thể học viên sẽ không thấy trực tiếp).
+4.	Tutor điền các trường thông tin phù hợp. Có thể một số mục dưới dạng chọn mức độ (ví dụ: tiến bộ tốt/trung bình/chậm) hoặc nhập tự do.
+5.	Tutor nhấn Lưu đánh giá.
+6.	Hệ thống lưu trữ các đánh giá/ghi chú này vào hồ sơ của buổi học và gắn với từng học viên liên quan. Những thông tin này sẽ hiển thị trong hồ sơ học tập của học viên, giúp tạo nên bức tranh về tiến độ học tập của họ theo thời gian. Đồng thời, đây là thông tin nội bộ để tutor theo dõi sau này và để điều phối viên/giảng viên cố vấn xem xét khi cần (ví dụ cố vấn học tập có thể khai thác dữ liệu này để nắm tình hình của sinh viên).
+7.	Tutor nhận được xác nhận từ hệ thống rằng đánh giá đã được lưu thành công.
+Điều kiện kết thúc: Sau bước này, hệ thống đã cập nhật tiến độ của học viên dựa trên đánh giá của tutor. Thông tin này có thể được tổng hợp trong thống kê học viên (như đã đề cập ở phần thống kê theo học viên) và phục vụ các báo cáo cho khoa/phòng ban.
+Trường hợp ngoại lệ:
+•	Nhiều học viên trong một buổi: Nếu buổi tutor dạng nhóm có nhiều học viên, tutor có thể cần nhập đánh giá riêng cho từng học viên. Hệ thống sẽ cung cấp danh sách học viên và form đánh giá tương ứng. Trường hợp quên chưa đánh giá một người nào đó, hệ thống có thể nhắc nhở tutor hoàn thành đánh giá cho mọi học viên.
+•	Tutor quên/chậm nhập đánh giá: Nếu sau một thời gian (ví dụ vài ngày) tutor chưa nhập đánh giá, hệ thống có thể gửi email hoặc thông báo nhắc tutor bổ sung nhận xét cho buổi học, đảm bảo dữ liệu không bị thiếu. Đây là bước ngoài luồng chính để đảm bảo đủ thông tin cho chương trình.
+•	Chỉnh sửa đánh giá: Nếu tutor nhập sai hoặc muốn bổ sung sau khi đã lưu, hệ thống có thể cho phép chỉnh sửa trong một khoảng thời gian (hoặc cho phép điều phối viên chỉnh sửa). Nếu không cho phép, tutor cần liên hệ quản trị để hiệu chỉnh.
+•	Quyền truy cập của học viên: Tùy chính sách hệ thống, học viên có thể không trực tiếp thấy những ghi chú cá nhân từ tutor (nhằm mục đích nội bộ). Học viên có thể chỉ thấy một phần đánh giá mang tính tổng quát hoặc kết quả cuối cùng. Nếu hệ thống cho phép, học viên có thể xem nhận xét tổng quan về tiến bộ của mình, nhưng không phải các ghi chú riêng tư của tutor.
+•	Lỗi hệ thống: Tương tự, lỗi lưu trữ hoặc kết nối sẽ được báo cho tutor và yêu cầu thực hiện lại khi hệ thống ổn định.
+
+Use Case: Upload Tài liệu (PDF/Link) lên Thư viện Chung
+Cả quản trị viên (Admin) và gia sư (Tutor) đều có thể tải lên tài liệu (dưới dạng link hoặc file PDF) vào thư viện tài liệu chung của hệ thống Tutor Support. Tuy nhiên, luồng thực hiện sẽ khác nhau tùy theo vai trò, do có cơ chế kiểm duyệt đối với Tutor. Dưới đây là mô tả chi tiết cho từng luồng:
+Luồng Upload Tài liệu bởi Admin
+Tác nhân: Admin (người thực hiện chính), Hệ thống (xử lý upload).
+Điều kiện bắt đầu: Admin đã đăng nhập vào hệ thống và đang ở giao diện/quyền truy cập chức năng upload tài liệu.
+Các bước chính:
+1.	Admin chọn chức năng “Upload tài liệu”: Tại giao diện quản lý thư viện, Admin nhấp vào nút upload và chọn loại tài liệu (đường link hoặc file PDF).
+2.	Nhập thông tin tài liệu: Admin điền các thông tin cần thiết (ví dụ: tiêu đề, mô tả, từ khóa) và nếu là file thì đính kèm file PDF, nếu là tài liệu online thì nhập URL liên kết.
+3.	Xác nhận upload: Admin bấm xác nhận để tải lên. Hệ thống kiểm tra định dạng file hoặc tính hợp lệ của URL.
+4.	Hệ thống lưu trữ tài liệu: Tài liệu được lưu vào cơ sở dữ liệu thư viện chung của hệ thống.
+5.	Tài liệu được công khai ngay: Hệ thống đánh dấu tài liệu là “đã duyệt” (do admin tự tải lên không cần phê duyệt) và hiển thị trong thư viện để tất cả người dùng có quyền (sinh viên, tutor, v.v.) có thể truy cập.
+Điều kiện kết thúc: Tài liệu mới được lưu thành công trong thư viện chung và hiển thị công khai cho người dùng đủ quyền truy cập.
+Trường hợp ngoại lệ phổ biến:
+•	File không hợp lệ: Nếu Admin cố gắng tải lên file không đúng định dạng (không phải PDF) hoặc file quá lớn vượt giới hạn, hệ thống sẽ báo lỗi và dừng quy trình upload.
+•	Lỗi mạng hoặc hệ thống: Nếu xảy ra lỗi trong quá trình upload (mạng mất kết nối, lỗi máy chủ), hệ thống thông báo cho Admin và tài liệu chưa được lưu; Admin có thể thử lại sau.
+•	Thiếu thông tin: Nếu Admin chưa nhập đủ thông tin bắt buộc (ví dụ thiếu tiêu đề), hệ thống sẽ nhắc nhở bổ sung trước khi cho phép upload.
+Luồng Upload Tài liệu bởi Tutor
+Tác nhân: Tutor (người thực hiện chính), Hệ thống; Admin (tham gia ở bước phê duyệt sau cùng).
+Điều kiện bắt đầu: Tutor đã đăng nhập và ở giao diện upload tài liệu trong hệ thống (có quyền upload nhưng không có quyền duyệt).
+Các bước chính:
+1.	Tutor chọn chức năng “Upload tài liệu”: Tại giao diện thư viện chung, Tutor nhấn nút upload và chọn loại tài liệu muốn chia sẻ (file PDF hoặc link).
+2.	Nhập thông tin tài liệu: Tutor nhập các thông tin cần thiết (tiêu đề, mô tả, từ khóa) và đính kèm file PDF hoặc URL tài liệu.
+3.	Xác nhận gửi lên: Tutor bấm xác nhận upload. Hệ thống kiểm tra nhanh định dạng file/URL. Nếu hợp lệ, hệ thống tạm lưu tài liệu vào cơ sở dữ liệu ở trạng thái “chờ duyệt”.
+4.	Chờ phê duyệt: Ngay sau khi gửi, tài liệu chưa xuất hiện công khai trong thư viện. Hệ thống có thể thông báo cho Admin rằng có tài liệu mới do Tutor gửi đang chờ phê duyệt. Tutor sẽ thấy trạng thái tài liệu là “đang chờ duyệt” và không có quyền chỉnh sửa hay xoá sau khi gửi.
+5.	Admin phê duyệt tài liệu (ngoại tác): Admin đăng nhập và vào mục quản lý phê duyệt tài liệu. Tại đây Admin thấy danh sách các tài liệu Tutor đã upload đang chờ. Admin xem xét chi tiết tài liệu (nội dung file hoặc link, thông tin mô tả).
+o	Nếu đồng ý: Admin chọn “Phê duyệt”. Hệ thống đổi trạng thái tài liệu thành “đã duyệt” và hiển thị tài liệu công khai trong thư viện chung, để mọi người dùng có thể truy cập giống như tài liệu do Admin upload. Tutor có thể được thông báo rằng tài liệu đã được phê duyệt.
+o	Nếu từ chối: Admin chọn “Từ chối” (không bắt buộc nhập lý do). Hệ thống đánh dấu tài liệu là “bị từ chối” và sẽ không hiển thị trong thư viện chung. Tutor có thể nhận thông báo rằng tài liệu bị từ chối (không nêu lý do, do Admin không cần cung cấp lý do từ chối).
+Điều kiện kết thúc:
+•	Trường hợp phê duyệt: Tài liệu do Tutor upload được Admin phê duyệt và xuất hiện trong thư viện chung (coi như hoàn tất upload thành công).
+•	Trường hợp từ chối: Tài liệu không được đưa vào thư viện (upload không thành công do bị từ chối); hệ thống kết thúc quy trình upload đối với tài liệu này. Tutor dừng ở bước chờ và nhận kết quả duyệt.
+Trường hợp ngoại lệ phổ biến:
+•	File/Link không hợp lệ: Nếu Tutor cố gắng upload file sai định dạng (không phải PDF) hoặc link không hợp lệ, hệ thống sẽ báo lỗi và không chấp nhận yêu cầu upload. Tutor phải điều chỉnh (chọn file/link đúng) rồi thực hiện lại.
+•	Không có quyền: Nếu một người dùng không phải Tutor/Admin (ví dụ sinh viên thường) cố truy cập chức năng upload, hệ thống sẽ chặn và thông báo không có quyền thực hiện chức năng này. (Thư viện chung chỉ cho phép Tutor và Admin upload tài liệu).
+•	Lỗi khi phê duyệt: Nếu Admin gặp lỗi kỹ thuật khi phê duyệt (ví dụ mất mạng lúc nhấn phê duyệt), tài liệu có thể vẫn ở trạng thái chờ. Admin sau đó cần phê duyệt lại khi hệ thống hoạt động bình thường.
+•	Tutor muốn chỉnh sửa sau khi gửi: Hệ thống không cho phép Tutor tự chỉnh sửa hay xóa tài liệu sau khi đã gửi. Nếu phát hiện sai sót, Tutor có thể liên hệ Admin để chỉnh sửa hoặc phải gửi lại một tài liệu mới. (Mọi thay đổi trên tài liệu gốc đều cần sự phê duyệt của Admin).
+Lưu ý khác biệt chính giữa luồng Admin và Tutor: Tài liệu do Admin tải lên sẽ được công bố ngay lập tức không qua bước kiểm duyệt, trong khi tài liệu do Tutor tải lên phải chờ Admin phê duyệt mới được công khai. Ngoài ra, Tutor chỉ có quyền upload một lần ban đầu, không thể tự chỉnh sửa/xóa sau khi đã nộp lên, còn Admin có toàn quyền quản lý (upload và duyệt/xóa tài liệu trong thư viện).
+
+Luồng tuần tự tổng quát cho hệ thống Tutor HCMUT
+Hệ thống Tutor HCMUT có ba nhóm người dùng chính: Sinh viên, Tutor (gia sư) và Quản trị viên (Admin). Mọi người dùng đều phải đăng nhập thông qua dịch vụ đăng nhập một lần HCMUT_SSO để xác thực danh tính. Sau khi đăng nhập thành công, thông tin hồ sơ và vai trò người dùng được đồng bộ từ hệ thống HCMUT_DATACORE (cơ sở dữ liệu người dùng của trường). Ngoài ra, hệ thống Tutor HCMUT còn tích hợp với HCMUT_LIBRARY để cho phép truy cập tài liệu học tập trực tuyến khi cần. Dưới đây là luồng chính (theo trình tự thời gian) cho từng vai trò người dùng, từ bước đăng nhập cho đến khi hoàn thành các chức năng chính và đạt được kết quả cuối cùng.
+Luồng chính cho Sinh viên
+1.	Đăng nhập qua HCMUT_SSO: Sinh viên truy cập hệ thống Tutor HCMUT và chọn đăng nhập. Hệ thống chuyển hướng đến cổng HCMUT_SSO để sinh viên nhập tài khoản trường (tên đăng nhập, mật khẩu). Nếu xác thực thành công, hệ thống tạo phiên làm việc cho sinh viên. Thông tin cơ bản của sinh viên (họ tên, MSSV, email, vai trò “Student”…) được hệ thống lấy từ HCMUT_DATACORE về để khởi tạo hồ sơ trong ứng dụng. (Lưu ý: hệ thống không lưu mật khẩu nội bộ, mọi xác thực đều qua SSO nhằm đảm bảo an toàn).
+2.	Đăng ký tham gia chương trình Tutor (lần đầu): Nếu đây là lần đầu sử dụng, sinh viên sẽ thực hiện đăng ký tham gia chương trình tutor. Hệ thống hiển thị một biểu mẫu để sinh viên điền các thông tin bổ sung như nhu cầu hỗ trợ học tập, môn học cần tutor, thời gian rảnh, và các ưu tiên cá nhân. Một số trường thông tin có thể được điền sẵn từ DATACORE (vd. chuyên ngành, năm học) để sinh viên xác nhận. Sau khi sinh viên hoàn tất biểu mẫu, hệ thống kiểm tra tính hợp lệ của dữ liệu và lưu thông tin đăng ký này vào cơ sở dữ liệu của hệ thống. Điều kiện: Tài khoản sinh viên phải tồn tại trong DataCore và đã xác thực ở bước 1. Kết quả: Hồ sơ sinh viên được cập nhật trạng thái “đã tham gia chương trình Tutor”.
+3.	Quản lý hồ sơ cá nhân: Sau khi đăng nhập, sinh viên có thể truy cập trang hồ sơ của mình. Tại đây hiển thị các thông tin cá nhân cơ bản đồng bộ từ HCMUT_DATACORE (ví dụ: tên, MSSV, khoa/ngành) và các thông tin liên quan đến chương trình Tutor (như môn muốn được hỗ trợ, mục tiêu học tập). Sinh viên có thể chỉnh sửa một số trường nhất định phục vụ cho chương trình (ví dụ cập nhật nguyện vọng học, thời gian rảnh mới). Mọi thay đổi được lưu vào cơ sở dữ liệu của hệ thống Tutor (các thông tin nền tảng từ DataCore thì chỉ đọc). Việc quản lý hồ sơ đảm bảo thông tin luôn chính xác và cập nhật cho các bước tư vấn sau.
+4.	Tìm kiếm và ghép cặp với Tutor: Sinh viên bắt đầu tìm tutor phù hợp nhu cầu. Có hai cách: (a) Tìm thủ công: Sinh viên duyệt danh sách tutor theo môn học, kỹ năng, đánh giá..., sau đó chọn một tutor cụ thể. (b) Ghép cặp tự động: Sinh viên cung cấp tiêu chí (môn học, lịch rảnh,...) và hệ thống tự động đề xuất một tutor phù hợp dựa trên dữ liệu có sẵn và quy tắc ghép cặp thông minh. Chẳng hạn, hệ thống xét môn học cần hỗ trợ và đối chiếu với chuyên môn cùng lịch trống của các tutor để tìm ra tutor tối ưu. Khi sinh viên đồng ý với tutor được đề xuất (hoặc xác nhận lựa chọn tutor thủ công), hệ thống sẽ thiết lập mối ghép cặp giữa sinh viên và tutor đó trong cơ sở dữ liệu. Kết quả: Xác định được cặp sinh viên – tutor phù hợp để tiến hành các buổi học.
+5.	Đặt lịch buổi học: Sau khi có tutor, sinh viên tiến hành đăng ký buổi học đầu tiên với tutor đó. Hệ thống hiển thị lịch trống (các khung giờ có thể đặt) do tutor đã công bố trước đó. Sinh viên chọn một khung giờ phù hợp và gửi yêu cầu đặt lịch. Ngay lập tức, hệ thống tạo một bản ghi buổi học mới trong cơ sở dữ liệu, bao gồm thông tin: sinh viên, tutor, thời gian, địa điểm (hoặc đường link lớp học online) và trạng thái “đang chờ xác nhận”. Hệ thống cũng gửi thông báo cho tutor về yêu cầu buổi học mới (qua email hoặc thông báo trong ứng dụng). Nếu tutor đã công khai slot rảnh, thường buổi học sẽ tự động được xác nhận; tutor có thể chủ động từ chối nếu có trục trặc. Trường hợp cần phê duyệt: Nếu quy trình chương trình yêu cầu, một quản trị viên hoặc điều phối viên cũng nhận được yêu cầu này để duyệt buổi học. Hệ thống kiểm tra các ràng buộc như không trùng lịch, không vi phạm số buổi tối đa,... nhằm ngăn double-booking và các lỗi lịch. Khi mọi thứ hợp lệ (và được duyệt nếu cần), trạng thái buổi học chuyển thành “đã xác nhận”. Kết quả: Lịch buổi học được thiết lập và xác nhận cho cả hai bên.
+6.	Tham gia buổi học: Đến thời điểm đã hẹn, sinh viên tham gia buổi học với tutor. Buổi học có thể diễn ra trực tiếp (gặp mặt) hoặc trực tuyến qua một công cụ học tập (ví dụ: hệ thống sẽ cung cấp đường dẫn đến phòng học ảo nếu tích hợp). Khi buổi học bắt đầu, cả tutor và sinh viên xác nhận trên hệ thống (ví dụ nhấn “Bắt đầu” hoặc hệ thống tự đánh dấu khi họ truy cập lớp học online). Hệ thống ghi nhận điểm danh rằng sinh viên và tutor đã tham gia buổi học. Nếu sinh viên không tham gia hoặc tutor vắng mặt, hệ thống cũng sẽ ghi chú trạng thái tương ứng (có thể để phục vụ thống kê sau này). Sau buổi học, hệ thống có thể tự động gửi nhắc nhở sinh viên về việc đánh giá và gửi phản hồi.
+7.	Truy cập tài liệu hỗ trợ (nếu cần): Trong quá trình học hoặc trước/sau buổi học, sinh viên có thể cần xem thêm tài liệu tham khảo do tutor gợi ý. Ngay trên hệ thống Tutor HCMUT, sinh viên được phép truy xuất tài liệu số từ thư viện HCMUT_LIBRARY. Ví dụ: tutor giới thiệu một sách hoặc đề thi mẫu trên thư viện, sinh viên sẽ được cấp đường link hoặc xem trực tiếp tài liệu đó qua tích hợp API thư viện. Hệ thống đảm bảo việc lấy dữ liệu thư viện diễn ra trơn tru trong giới hạn cho phép (có cơ chế timeout và dự phòng nếu dịch vụ thư viện gặp sự cố). Kết quả: Sinh viên có đầy đủ tài nguyên học tập cần thiết trong suốt quá trình được tutor hỗ trợ.
+8.	Gửi phản hồi sau buổi học: Hoàn tất mỗi buổi học, sinh viên được mời đánh giá và gửi phản hồi về chất lượng buổi học và hiệu quả hướng dẫn của tutor. Sinh viên sẽ chấm điểm (ví dụ thang 5 sao) và viết nhận xét ngắn gọn. Hệ thống thu thập đánh giá này, kiểm tra hợp lệ (đảm bảo sinh viên đã tham gia buổi học mới được feedback) rồi lưu vào cơ sở dữ liệu. Phản hồi của sinh viên có thể được ẩn danh khi hiển thị cho tutor, nhưng quản trị viên có thể xem đầy đủ để theo dõi chất lượng. Kết quả: Ý kiến phản hồi được ghi nhận, giúp cải thiện dịch vụ (tutor có thể xem điểm đánh giá trung bình của mình, admin có dữ liệu để đánh giá chương trình).
+9.	Thống kê và kết thúc: Sinh viên có thể truy cập trang tổng quan cá nhân để xem thống kê tiến độ học tập của mình: số buổi đã tham gia, điểm phản hồi của các buổi, cải thiện điểm số (nếu có đo lường), v.v. Hệ thống tổng hợp những thông tin này từ dữ liệu đã lưu (ví dụ tổng hợp các buổi học đã điểm danh, các feedback) và hiển thị dưới dạng biểu đồ hoặc danh sách. Kết thúc luồng, sinh viên có thể tiếp tục đặt thêm buổi học khác hoặc kết thúc phiên làm việc. Kết quả cuối cùng: Sinh viên nhận được sự hỗ trợ học tập hiệu quả qua các buổi tutor, thông tin phản hồi được ghi nhận, và hồ sơ học tập cá nhân của sinh viên được cập nhật đầy đủ sau mỗi tương tác.
+Luồng chính cho Tutor (Gia sư)
+1.	Đăng nhập qua HCMUT_SSO: Tương tự sinh viên, tutor truy cập hệ thống và sử dụng tài khoản HCMUT_SSO để đăng nhập một lần. Hệ thống xác thực tutor qua SSO và lấy thông tin hồ sơ từ HCMUT_DATACORE, bao gồm vai trò “Tutor” hoặc các vai trò liên quan (có thể một tutor đồng thời là sinh viên hoặc là nhân sự được chỉ định). Sau đăng nhập, tutor được chuyển đến bảng điều khiển dành riêng cho gia sư, nơi các chức năng hỗ trợ giảng dạy được hiển thị.
+2.	Hoàn thiện hồ sơ Tutor: Nếu là lần đầu làm tutor, người dùng có thể cần cập nhật hồ sơ tutor của mình. Thông tin gồm có: lĩnh vực chuyên môn hoặc môn học có thể hướng dẫn, kinh nghiệm hoặc chứng chỉ (nếu có), lịch làm việc (khoa/bộ môn của tutor nếu là giảng viên), v.v. Một số thông tin cơ bản được lấy từ DataCore (ví dụ khoa/đơn vị công tác đối với tutor là giảng viên hoặc MSSV đối với tutor là sinh viên năm trên). Tutor có thể bổ sung mô tả ngắn về bản thân, phương pháp giảng dạy, v.v. Hồ sơ này giúp sinh viên có cơ sở lựa chọn tutor phù hợp. Hệ thống lưu các cập nhật hồ sơ vào cơ sở dữ liệu. Lưu ý: Nếu tutor là sinh viên đăng ký làm gia sư, có thể quản trị viên đã phải phê duyệt và gán quyền “Tutor” cho sinh viên đó thông qua hệ thống (phân quyền dựa trên DataCore) trước khi họ có thể truy cập các chức năng tutor.
+3.	Quản lý thời gian rảnh (availability): Tutor truy cập chức năng quản lý lịch rảnh để thiết lập các khung giờ mà mình có thể dạy kèm. Tutor chọn các buổi (vd. Thứ 2, 14:00-16:00 hàng tuần) và cấu hình sức chứa (số sinh viên tối đa cho mỗi buổi, nếu cho phép nhiều sinh viên một lúc). Hệ thống kiểm tra tính hợp lệ (không cho phép chọn giờ trong quá khứ hoặc trùng lặp) rồi lưu lịch rảnh này vào cơ sở dữ liệustudocu.vn. Những khung giờ sẵn sàng này sẽ được hiển thị cho sinh viên khi đặt lịch. Tutor có thể cập nhật lịch rảnh thường xuyên, và hệ thống sẽ đồng bộ thay đổi ngay lập tức để tránh sinh viên đặt vào slot không còn trống.
+4.	Tiếp nhận yêu cầu buổi học: Khi một sinh viên chọn tutor (theo luồng phía sinh viên) và đặt lịch buổi học, tutor sẽ nhận được thông báo về yêu cầu đó. Thông tin bao gồm tên sinh viên, thời gian đề nghị và môn học/yêu cầu cụ thể. Tutor truy cập vào lịch biểu của mình trên hệ thống để xem các yêu cầu mới. Nếu tutor thấy phù hợp, buổi học sẽ được xác nhận tự động (vì slot đó vốn do tutor cung cấp). Trong trường hợp có vấn đề (ví dụ: trùng lịch do tutor quên cập nhật hoặc lý do bất khả kháng), tutor có thể chủ động từ chối hoặc đề nghị thời gian khác. Hệ thống hỗ trợ tutor gửi phản hồi, ví dụ gợi ý sinh viên một khung giờ khác. (Lưu ý: Nếu tutor từ chối, trạng thái buổi học chuyển thành “bị từ chối” và sinh viên được thông báo để đặt lịch lại). Nhờ cơ chế này, lịch dạy của tutor luôn được kiểm soát chặt chẽ, không bị double-book bởi nhiều sinh viên cùng lúc.
+5.	Chuẩn bị cho buổi dạy: Trước khi buổi học diễn ra, tutor có thể xem chi tiết hồ sơ và nhu cầu của sinh viên được lưu trong hệ thống (ví dụ: sinh viên đang gặp khó khăn phần nào của môn học). Tutor tận dụng chức năng tích hợp HCMUT_LIBRARY để tìm kiếm tài liệu, giáo trình, bài tập mẫu liên quan đến nội dung sẽ dạy. Ví dụ, tutor tìm một chương sách trên thư viện điện tử của trường và gửi đường dẫn tài liệu đó cho sinh viên thông qua hệ thống. Nhờ tích hợp này, tutor có ngay tài nguyên chính thống để hỗ trợ sinh viên. Nếu cần, tutor cũng có thể tải lên tài liệu riêng (slide bài giảng, đề cương) vào hệ thống trước buổi học để sinh viên có thể truy cập.
+6.	Giảng dạy buổi học: Đến thời gian đã hẹn, tutor tiến hành dạy kèm cho sinh viên. Nếu học trực tiếp, hai bên gặp nhau tại địa điểm đã thỏa thuận (ví dụ thư viện trường hoặc phòng học); nếu trực tuyến, tutor sử dụng công cụ hội thoại/video tích hợp và sinh viên tham gia thông qua liên kết trên hệ thống. Trong suốt buổi học, tutor giải đáp thắc mắc và hướng dẫn sinh viên theo kế hoạch. Hệ thống có thể không can thiệp trực tiếp nội dung buổi học, nhưng có thể ghi nhận thời gian bắt đầu/kết thúc và trạng thái buổi học. Sau khi hoàn thành, tutor đánh dấu buổi học là đã hoàn thành trên hệ thống (nếu hệ thống không tự động cập nhật khi thời gian kết thúc).
+7.	Ghi chú và tải lên tài liệu sau buổi học: Sau mỗi buổi học, tutor có chức năng ghi chú nội dung buổi học và chia sẻ tài liệu liên quan. Tutor nhập các ghi chú chính: những nội dung đã dạy, điểm mạnh/yếu của sinh viên, đề xuất cho buổi học tiếp theo, v.v. Đồng thời, tutor có thể đính kèm file tài liệu như bài tập về nhà, slide buổi học, hoặc tài liệu tham khảo bổ sung cho sinh viên. Hệ thống lưu trữ các ghi chú này gắn liền với buổi học trong cơ sở dữ liệu. Sinh viên sẽ thấy được ghi chú và tải về tài liệu tutor cung cấp. Tính năng này giúp duy trì liên tục việc học: sinh viên có tài liệu để ôn tập, còn tutor có hồ sơ để chuẩn bị cho các buổi kế tiếp.
+8.	Cập nhật tiến độ của sinh viên: Bên cạnh ghi chú mỗi buổi, tutor có thể cập nhật tiến độ học tập của sinh viên sau một số buổi nhất định. Ví dụ: sau 4 buổi, tutor ghi nhận sinh viên đã cải thiện kỹ năng giải bài tập lập trình C++, nhưng còn yếu về cấu trúc dữ liệu. Tutor nhập những đánh giá này vào hệ thống, kèm theo điểm số hoặc cấp độ nếu có. Thông tin tiến độ này được lưu vào hồ sơ mentee (hồ sơ của sinh viên trong chương trình). Chỉ sinh viên, tutor và các quản trị viên liên quan mới xem được chi tiết tiến độ để đảm bảo tính riêng tư. Kết quả: Bức tranh về quá trình tiến bộ của sinh viên được ghi nhận, giúp điều chỉnh phương pháp dạy và hỗ trợ việc báo cáo hiệu quả chương trình.
+9.	Nhận phản hồi từ sinh viên: Sau khi sinh viên gửi feedback (bước 8 ở luồng sinh viên), tutor có thể xem đánh giá của sinh viên cho buổi học. Hệ thống thông báo cho tutor biết đã có feedback mới, hiển thị điểm số chung và nhận xét (có thể ẩn danh hoặc không tùy chính sách). Tutor dùng thông tin này để cải thiện chất lượng giảng dạy. Nếu có phản hồi tiêu cực hoặc vấn đề, tutor có thể liên hệ sinh viên hoặc báo cáo lên điều phối viên để có biện pháp hỗ trợ. Tất cả các phản hồi đều được lưu cho mục đích thống kê dài hạn.
+10.	Kết thúc và chuẩn bị buổi tiếp theo: Tutor xem lại lịch biểu để nắm các buổi sắp tới với sinh viên hiện tại hoặc sinh viên khác. Nếu sinh viên muốn đổi lịch hoặc hủy buổi học đã lên, tutor sẽ nhận thông báo và có thể phối hợp tìm lịch mới hoặc xác nhận hủy. Hệ thống hỗ trợ gửi thông báo tự động cho các bên trong trường hợp có thay đổi lịch. Kết thúc luồng, tutor có cái nhìn đầy đủ về lịch dạy, phản hồi và tiến độ của từng học viên mình phụ trách. Kết quả cuối cùng: Tutor hoàn thành việc hướng dẫn, đóng góp vào cải thiện kiến thức cho sinh viên, đồng thời tích lũy được đánh giá uy tín trong hệ thống (thông qua phản hồi tốt) và quản lý hiệu quả thời gian dạy của mình.
+Luồng chính cho Quản trị viên (Admin)
+1.	Đăng nhập qua HCMUT_SSO: Quản trị viên truy cập trang quản trị của hệ thống Tutor HCMUT và đăng nhập thông qua HCMUT_SSO như các vai trò khác. Sau khi xác thực, hệ thống kiểm tra vai trò Admin của người dùng dựa trên thông tin từ HCMUT_DATACORE (hoặc từ cơ chế phân quyền nội bộ nếu có). Chỉ những người dùng có quyền quản trị (ví dụ: Điều phối viên chương trình Tutor, phòng Đào tạo hoặc bộ phận CTSV được cấp quyền) mới truy cập được các chức năng quản trị. Khi đăng nhập thành công, admin được chuyển đến giao diện bảng điều khiển thống kê và quản lý.
+2.	Quản lý người dùng và phân quyền: Admin có quyền xem và quản lý danh sách người dùng tham gia hệ thống (cả sinh viên và tutor). Khi một sinh viên đăng ký làm tutor mới, admin sẽ nhận được thông báo yêu cầu xét duyệt. Admin kiểm tra thông tin (thành tích học tập, kỹ năng) và quyết định phê duyệt hoặc từ chối yêu cầu đó. Nếu phê duyệt, admin sẽ cập nhật vai trò của người dùng đó thành “Tutor” trong hệ thống (thao tác này có thể đồng bộ ngược lại về DATACORE hoặc lưu trong bảng phân quyền cục bộ của ứng dụng). Tương tự, admin có thể gán các vai trò đặc biệt khác (VD: Program Coordinator – điều phối viên chương trình, hoặc thêm quyền “Staff” cho một giảng viên giám sát) tùy nhu cầu. Mọi thay đổi về quyền đều được ghi log để đảm bảo truy vết. Kết quả: Danh sách người dùng và vai trò được quản lý chặt chẽ, đảm bảo đúng người, đúng quyền trong hệ thống.
+3.	Duyệt và giám sát buổi học: Admin có cái nhìn tổng quan về tất cả các buổi tutor diễn ra trong hệ thống. Tùy chính sách, admin có thể tham gia vào quy trình duyệt buổi học. Ví dụ: Một số chương trình yêu cầu admin duyệt buổi học đầu tiên giữa một cặp sinh viên-tutor để đảm bảo ghép cặp phù hợp. Khi có yêu cầu duyệt, admin xem chi tiết buổi học (thông tin sinh viên, tutor, thời gian, môn học) rồi xác nhận hoặc từ chối. Hệ thống sau đó cập nhật trạng thái buổi học và gửi thông báo cho sinh viên, tutor tương ứng. Ngoài ra, trong vai trò giám sát, admin theo dõi các buổi học được đặt: số buổi sắp diễn ra, buổi nào bị hủy, lý do hủy. Hệ thống hỗ trợ gửi nhắc nhở về các buổi học sắp tới cho tutor/sinh viên, nhưng admin cũng có thể can thiệp thủ công (ví dụ: liên hệ trực tiếp nếu thấy một tutor có nhiều buổi gần kề để đảm bảo họ không quên). Kết quả: Các buổi học diễn ra trơn tru, đúng quy định, và được ghi nhận đầy đủ để phục vụ đánh giá sau này.
+4.	Quản lý nội dung và tài nguyên tích hợp: Admin đảm bảo rằng hệ thống kết nối tốt với các dịch vụ bên ngoài. Ví dụ: nếu dịch vụ HCMUT_LIBRARY yêu cầu cập nhật API key hoặc gặp sự cố, admin sẽ phối hợp với quản trị thư viện để khôi phục, nhờ đó sinh viên và tutor luôn truy cập được tài liệu khi cần. Tương tự, admin làm việc với đội IT của trường nếu có vấn đề về SSO hoặc DataCore (như tài khoản hợp lệ nhưng không đăng nhập được hoặc dữ liệu người dùng bị thiếu). Bên trong hệ thống Tutor, admin có thể quản lý các danh mục môn học, tài liệu chung: thêm môn học mới, chỉnh sửa mô tả chương trình, hoặc đăng tải thông báo hướng dẫn cho tất cả người dùng. Những nội dung này hỗ trợ cho việc sử dụng hệ thống nhưng không trực tiếp do sinh viên/tutor tạo ra.
+5.	Tiếp nhận và xử lý phản hồi: Admin có quyền truy cập tất cả các feedback mà sinh viên gửi về tutor và về hệ thống. Định kỳ, admin duyệt qua các phản hồi để phát hiện vấn đề: ví dụ, nếu nhiều sinh viên phàn nàn về một tutor cụ thể, admin sẽ chủ động liên hệ tutor đó để góp ý hoặc tổ chức tập huấn nâng cao kỹ năng. Nếu có phản hồi về lỗi hệ thống hoặc đề xuất tính năng mới, admin tập hợp và phối hợp với đội phát triển để cải thiện. Hệ thống có thể cung cấp màn hình thống kê điểm đánh giá trung bình của tutor, tỷ lệ hài lòng, v.v., giúp admin dễ dàng nhận ra xu hướng chất lượng. Việc xử lý kịp thời phản hồi đảm bảo chương trình Tutor duy trì chất lượng và uy tín.
+6.	Xem thống kê và báo cáo: Một trong những chức năng quan trọng của admin là truy cập dashboard/báo cáo thống kê tổng thể của hệ thống. Tại đây, admin có thể xem số lượng sinh viên tham gia chương trình, số tutor hoạt động, tổng số buổi học đã diễn ra, tỉ lệ buổi học hoàn thành, tỉ lệ hủy, mức độ hài lòng trung bình,... theo các tiêu chí thời gian hoặc phân nhóm (theo khoa, bộ môn). Hệ thống tự động tổng hợp dữ liệu từ database (các bản ghi buổi học, phản hồi, tiến độ) để tạo báo cáo trực quan. Admin có thể chọn khoảng thời gian (vd. thống kê theo học kỳ) và xuất báo cáo để trình bày với nhà trường. Kết quả: Nhà trường và ban điều hành chương trình có được cái nhìn định lượng về hiệu quả của hệ thống Tutor – ví dụ cải thiện điểm số của sinh viên, mức độ sử dụng dịch vụ – từ đó đưa ra quyết định điều chỉnh phù hợp.
+7.	Bảo trì và kết thúc phiên làm việc: Cuối cùng, admin có nhiệm vụ đảm bảo hệ thống vận hành ổn định. Họ kiểm tra các log hệ thống, theo dõi các cảnh báo (như lỗi tích hợp SSO, DataCore, Library nếu có). Nếu phát hiện lỗi hoặc sự cố, admin phối hợp với bộ phận kỹ thuật để khắc phục nhanh nhất có thể nhằm đáp ứng các cam kết dịch vụ (ví dụ uptime ≥ 99% trong giờ hành chính). Khi hoàn tất các công việc trong ngày, admin có thể đăng xuất khỏi hệ thống (phiên SSO sẽ hết hạn sau một khoảng thời gian nếu không hoạt động để đảm bảo bảo mật). Kết quả cuối cùng: Hệ thống Tutor HCMUT được vận hành thông suốt, người dùng được hỗ trợ kịp thời, và dữ liệu được thu thập đầy đủ cho mục tiêu cải thiện trải nghiệm học tập cho sinh viên cũng như hiệu quả của chương trình tutor.

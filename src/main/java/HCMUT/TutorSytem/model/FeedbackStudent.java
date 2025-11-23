@@ -7,6 +7,7 @@ import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -47,7 +48,7 @@ public class FeedbackStudent {
     private Boolean wouldRecommend = false;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_date", nullable = false)
+    @CreationTimestamp
     private Instant createdDate;
 
 }

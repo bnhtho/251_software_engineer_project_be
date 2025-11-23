@@ -1,5 +1,6 @@
 package HCMUT.TutorSytem.controller;
 
+import HCMUT.TutorSytem.dto.StudentSessionDTO;
 import HCMUT.TutorSytem.dto.TutorDTO;
 import HCMUT.TutorSytem.dto.TutorDetailDTO;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
@@ -165,11 +166,81 @@ public class TutorController {
         return ResponseEntity.ok(response);
     }
 
+
     /**
-     * Helper method to get current user ID from authentication
+     * Lấy danh sách yêu cầu đăng ký đang chờ duyệt
+     * Tutor chỉ xem được yêu cầu của các session mình tạo
      */
+    @GetMapping("/pending-registrations")
+    public ResponseEntity<BaseResponse> getPendingStudentSessions() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer tutorId = getCurrentUserId(authentication);
+
+        List<StudentSessionDTO> pendingSessions = tutorService.getPendingStudentSessions(tutorId);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Pending student sessions retrieved successfully");
+        response.setData(pendingSessions);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Duyệt một yêu cầu đăng ký
+     * Tham khảo pattern từ AdminController.updateSessionStatus
+     *
+     * @param studentSessionId ID của yêu cầu đăng ký (StudentSession)
+     */
+    @PutMapping("/student-sessions/{studentSessionId}/approve")
+    public ResponseEntity<BaseResponse> approveStudentSession(@PathVariable Integer studentSessionId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer tutorId = getCurrentUserId(authentication);
+
+        StudentSessionDTO studentSession = tutorService.approveStudentSession(tutorId, studentSessionId);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Đã duyệt đăng ký cho sinh viên");
+        response.setData(studentSession);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Từ chối một yêu cầu đăng ký
+     *
+     * @param studentSessionId ID của yêu cầu đăng ký (StudentSession)
+     */
+    @PutMapping("/student-sessions/{studentSessionId}/reject")
+    public ResponseEntity<BaseResponse> rejectStudentSession(@PathVariable Integer studentSessionId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer tutorId = getCurrentUserId(authentication);
+
+        StudentSessionDTO studentSession = tutorService.rejectStudentSession(tutorId, studentSessionId);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Đã từ chối yêu cầu đăng ký");
+        response.setData(studentSession);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Duyệt nhiều yêu cầu đăng ký cùng lúc
+     * Dùng @RequestBody với List<Integer> thay vì tạo DTO riêng vì chỉ cần danh sách ID
+     *
+     * @param studentSessionIds Danh sách ID của các yêu cầu đăng ký
+     */
+    @PutMapping("/student-sessions/batch-approve")
+    public ResponseEntity<BaseResponse> batchApproveStudentSessions(@RequestBody List<Integer> studentSessionIds) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer tutorId = getCurrentUserId(authentication);
+
+        List<StudentSessionDTO> results = tutorService.batchApproveStudentSessions(tutorId, studentSessionIds);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Đã xử lý các yêu cầu đăng ký");
+        response.setData(results);
+        return ResponseEntity.ok(response);
+    }
+
     private Integer getCurrentUserId(Authentication authentication) {
         return (Integer) authentication.getPrincipal();
     }
 }
-

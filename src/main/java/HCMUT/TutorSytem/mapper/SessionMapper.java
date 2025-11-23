@@ -2,16 +2,14 @@ package HCMUT.TutorSytem.mapper;
 
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.model.Session;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
 public class SessionMapper {
 
-    public SessionDTO toDTO(Session session) {
+    public static SessionDTO toDTO(Session session) {
         if (session == null) {
             return null;
         }
@@ -44,19 +42,19 @@ public class SessionMapper {
         dto.setEndTime(session.getEndTime());
         dto.setFormat(session.getFormat());
         dto.setLocation(session.getLocation());
-        dto.setStatus(session.getSessionStatus() != null ? session.getSessionStatus().getName() : null);
-        dto.setCreatedDate(session.getCreatedDate());
+        dto.setMaxQuantity(session.getMaxQuantity());
+        dto.setCurrentQuantity(session.getCurrentQuantity());
         dto.setUpdatedDate(session.getUpdatedDate());
 
         return dto;
     }
 
-    public List<SessionDTO> toDTOList(List<Session> sessions) {
+    public static List<SessionDTO> toDTOList(List<Session> sessions) {
         if (sessions == null) {
             return Collections.emptyList();
         }
         return sessions.stream()
-                .map(this::toDTO)
+                .map(SessionMapper::toDTO)
                 .collect(Collectors.toList());
     }
 }

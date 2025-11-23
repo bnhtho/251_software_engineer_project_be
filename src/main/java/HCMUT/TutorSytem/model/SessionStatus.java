@@ -36,9 +36,10 @@ public class SessionStatus {
     private List<Session> sessions;
 
     // Constants for easy reference
-    public static final byte SCHEDULED = 1;
-    public static final byte IN_PROGRESS = 2;
-    public static final byte COMPLETED = 3;
-    public static final byte CANCELLED = 4;
+    public static final byte PENDING = 1;
+    public static final byte SCHEDULED = 2;
+    public static final byte IN_PROGRESS = 3;
+    public static final byte COMPLETED = 4;
+    public static final byte CANCELLED = 5;
 }
 

@@ -1,5 +1,6 @@
 package HCMUT.TutorSytem.service;
 
+import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.dto.StudentDTO;
 import HCMUT.TutorSytem.dto.TutorDetailDTO;
 import HCMUT.TutorSytem.dto.UserDTO;
@@ -19,5 +20,8 @@ public interface AdminService {
 
     // User management
     List<UserDTO> getAllUsers();
+
+    // Session management
+    SessionDTO updateSessionStatus(Integer sessionId, Integer adminId, String setStatus);
 }
 

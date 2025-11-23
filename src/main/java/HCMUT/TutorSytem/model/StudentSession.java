@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
@@ -29,11 +31,14 @@ public class StudentSession {
     @JoinColumn(name = "status_id", nullable = false)
     private StudentSessionStatus studentSessionStatus;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "registered_date", nullable = false)
+    @CreationTimestamp
     private Instant registeredDate;
 
+    @Column(name = "confirmed_date")
+    private Instant confirmedDate;
+
     @Column(name = "updated_date")
+    @UpdateTimestamp
     private Instant updatedDate;
 }
-

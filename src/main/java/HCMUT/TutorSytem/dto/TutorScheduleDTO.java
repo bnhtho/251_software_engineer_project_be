@@ -1,5 +1,6 @@
 package HCMUT.TutorSytem.dto;
 
+import HCMUT.TutorSytem.Enum.DayOfWeek;
 import lombok.Data;
 
 import java.time.Instant;
@@ -8,11 +9,11 @@ import java.time.LocalTime;
 @Data
 public class TutorScheduleDTO {
     private Integer id;
-    private Integer dayOfWeek; // 0=Sunday, 1=Monday...6=Saturday
+    private DayOfWeek dayOfWeek;
     private LocalTime startTime;
     private LocalTime endTime;
-    private String status;
     private Instant createdDate;
     private Instant updateDate;
 }
+
 

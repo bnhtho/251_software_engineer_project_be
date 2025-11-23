@@ -15,8 +15,8 @@ public class SessionDTO {
     private Instant endTime;
     private String format;
     private String location;
-    private String status; // sessionStatus.name
-    private Instant createdDate;
+    private Integer maxQuantity; // Số lượng tối đa sinh viên
+    private Integer currentQuantity; // Số lượng sinh viên đã được approved
     private Instant updatedDate;
 }
 

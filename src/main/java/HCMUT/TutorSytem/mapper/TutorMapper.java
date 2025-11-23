@@ -3,16 +3,14 @@ package HCMUT.TutorSytem.mapper;
 import HCMUT.TutorSytem.dto.TutorDTO;
 import HCMUT.TutorSytem.model.TutorProfile;
 import HCMUT.TutorSytem.model.User;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
 public class TutorMapper {
 
-    public TutorDTO toDTO(TutorProfile tutorProfile) {
+    public static TutorDTO toDTO(TutorProfile tutorProfile) {
         if (tutorProfile == null) {
             return null;
         }
@@ -72,12 +70,12 @@ public class TutorMapper {
         return dto;
     }
 
-    public List<TutorDTO> toDTOList(List<TutorProfile> tutorProfiles) {
+    public static List<TutorDTO> toDTOList(List<TutorProfile> tutorProfiles) {
         if (tutorProfiles == null) {
             return Collections.emptyList();
         }
         return tutorProfiles.stream()
-                .map(this::toDTO)
+                .map(TutorMapper::toDTO)
                 .collect(Collectors.toList());
     }
 }

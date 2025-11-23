@@ -1,7 +1,9 @@
 package HCMUT.TutorSytem.controller;
 
+import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.dto.StudentDTO;
 import HCMUT.TutorSytem.dto.StudentSessionHistoryDTO;
+import HCMUT.TutorSytem.dto.StudentSessionDTO;
 import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
 import HCMUT.TutorSytem.service.StudentService;
@@ -104,9 +106,40 @@ public class StudentController {
         response.setData(studentDTO);
         return ResponseEntity.ok(response);
     }
+    /**
+     * Lấy danh sách session khả dụng để đăng ký
+     * Public endpoint - tất cả student có thể xem
+     */
+    @GetMapping("/available-sessions")
+    public ResponseEntity<BaseResponse> getAvailableSessions () {
+        List<SessionDTO> sessions = studentService.getAvailableSessions();
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Available sessions retrieved successfully");
+        response.setData(sessions);
+        return ResponseEntity.ok(response);
+    }
 
+    /**
+     * Đăng ký session
+     * Student chỉ có thể đăng ký cho chính mình (userId lấy từ token)
+     *
+     * @param sessionId ID của session muốn đăng ký (dùng @RequestParam thay vì tạo DTO vì chỉ có 1 tham số)
+     */
+    @PostMapping("/register-session")
+    public ResponseEntity<BaseResponse> registerSession (@RequestParam Integer sessionId){
+        // Lấy studentId từ authentication (token)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer studentId = getCurrentUserId(authentication);
+
+        StudentSessionDTO studentSession = studentService.registerSession(studentId, sessionId);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Yêu cầu đăng ký đã gửi, đang chờ tutor duyệt");
+        response.setData(studentSession);
+        return ResponseEntity.ok(response);
+    }
     private Integer getCurrentUserId(Authentication authentication) {
         return (Integer) authentication.getPrincipal();
     }
 }
-

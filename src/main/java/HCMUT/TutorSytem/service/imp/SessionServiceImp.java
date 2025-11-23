@@ -1,22 +1,18 @@
 package HCMUT.TutorSytem.service.imp;
 
+import HCMUT.TutorSytem.Enum.DayOfWeek;
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.SessionMapper;
-import HCMUT.TutorSytem.model.Session;
-import HCMUT.TutorSytem.model.SessionStatus;
-import HCMUT.TutorSytem.model.Subject;
-import HCMUT.TutorSytem.model.User;
+import HCMUT.TutorSytem.model.*;
 import HCMUT.TutorSytem.payload.request.SessionRequest;
-import HCMUT.TutorSytem.repo.SessionRepository;
-import HCMUT.TutorSytem.repo.SessionStatusRepository;
-import HCMUT.TutorSytem.repo.SubjectRepository;
-import HCMUT.TutorSytem.repo.UserRepository;
+import HCMUT.TutorSytem.repo.*;
 import HCMUT.TutorSytem.service.SessionService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,24 +31,42 @@ public class SessionServiceImp implements SessionService {
     @Autowired
     private SessionStatusRepository sessionStatusRepository;
 
+
     @Autowired
-    private SessionMapper sessionMapper;
+    private TutorScheduleRepository tutorScheduleRepository;
 
     @Override
     public List<SessionDTO> getAllSessions() {
         List<Session> sessions = sessionRepository.findAll();
         return sessions.stream()
-                .map(sessionMapper::toDTO)
+                .map(SessionMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public SessionDTO createSession(SessionRequest request) {
+        // Validation 1: Kiểm tra startTime và endTime
+        if (request.getStartTime() == null || request.getEndTime() == null) {
+            throw new IllegalArgumentException("Start time and end time are required");
+        }
+
+        // Validation 2: Kiểm tra startTime < endTime
+        if (!request.getStartTime().isBefore(request.getEndTime())) {
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+
+        // Validation 3: Kiểm tra date phải trong tương lai
+        Instant now = Instant.now();
+        if (request.getStartTime().isBefore(now)) {
+            throw new IllegalArgumentException("Session start time must be in the future");
+        }
+
         Session session = new Session();
 
-        // Set tutor
+        User tutor = null;
         if (request.getTutorId() != null) {
-            User tutor = userRepository.findById(request.getTutorId())
+            tutor = userRepository.findById(request.getTutorId())
                     .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + request.getTutorId()));
             session.setTutor(tutor);
         }
@@ -71,16 +85,19 @@ public class SessionServiceImp implements SessionService {
         session.setFormat(request.getFormat());
         session.setLocation(request.getLocation());
 
-        // Set status - default to SCHEDULED (id=1) if not provided
-        Byte statusId = request.getStatusId() != null ? request.getStatusId() : SessionStatus.SCHEDULED;
-        SessionStatus sessionStatus = sessionStatusRepository.findById(statusId)
-                .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + statusId));
-        session.setSessionStatus(sessionStatus);
+        // Set maxQuantity (bắt buộc, nếu không có thì dùng default 50)
+        session.setMaxQuantity(request.getMaxQuantity() != null ? request.getMaxQuantity() : 50);
 
-        session.setCreatedDate(Instant.now());
+        // Set currentQuantity = 0 khi mới tạo
+        session.setCurrentQuantity(0);
+
+        // Set sessionStatus mặc định là PENDING(id = 1)
+        SessionStatus scheduledStatus = sessionStatusRepository.findById(SessionStatus.PENDING)
+                .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + SessionStatus.PENDING));
+        session.setSessionStatus(scheduledStatus);
 
         session = sessionRepository.save(session);
-        return sessionMapper.toDTO(session);
+        return SessionMapper.toDTO(session);
     }
 
     @Override
@@ -123,24 +140,30 @@ public class SessionServiceImp implements SessionService {
         }
 
         // Only update status if provided
-        if (request.getStatusId() != null) {
-            SessionStatus sessionStatus = sessionStatusRepository.findById(request.getStatusId())
-                    .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + request.getStatusId()));
+        if (request.getSessionStatusId() != null) {
+            SessionStatus sessionStatus = sessionStatusRepository.findById(request.getSessionStatusId())
+                    .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + request.getSessionStatusId()));
             session.setSessionStatus(sessionStatus);
+
+            // Update maxQuantity if provided
+            if (request.getMaxQuantity() != null) {
+                session.setMaxQuantity(request.getMaxQuantity());
+            }
+
         }
-
-        session.setUpdatedDate(Instant.now());
-
-        session = sessionRepository.save(session);
-        return sessionMapper.toDTO(session);
+        return SessionMapper.toDTO(session);
     }
-
     @Override
     public void deleteSession(Integer id) {
         if (!sessionRepository.existsById(id)) {
             throw new DataNotFoundExceptions("Session not found with id: " + id);
         }
-        sessionRepository.deleteById(id);
+        Session session = sessionRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundExceptions("Session not found with id: " + id));
+        SessionStatus cancelledStatus = sessionStatusRepository.findById(SessionStatus.CANCELLED)
+                .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus not found with id: " + SessionStatus.CANCELLED));
+        session.setSessionStatus(cancelledStatus);
+        sessionRepository.save(session);
     }
 
     @Override

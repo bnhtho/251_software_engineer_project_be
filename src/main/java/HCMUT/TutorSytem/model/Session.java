@@ -1,10 +1,13 @@
 package HCMUT.TutorSytem.model;
 
+import HCMUT.TutorSytem.Enum.DayOfWeek;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -37,11 +40,23 @@ public class Session {
     @Column(name = "end_time", nullable = false)
     private Instant endTime;
 
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "day_of_week", nullable = false)
+    private DayOfWeek dayOfWeek;
+
     @Column(name = "format", length = 50)
     private String format;
 
     @Column(name = "location")
     private String location;
+
+    @Column(name = "max_quantity", nullable = false)
+    @ColumnDefault("50")
+    private Integer maxQuantity;
+
+    @Column(name = "current_quantity", nullable = false)
+    @ColumnDefault("0")
+    private Integer currentQuantity;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "status_id", nullable = false)
@@ -49,9 +64,11 @@ public class Session {
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_date", nullable = false)
+    @CreationTimestamp
     private Instant createdDate;
 
     @Column(name = "updated_date")
+    @UpdateTimestamp
     private Instant updatedDate;
 
     @OneToMany(mappedBy = "session")

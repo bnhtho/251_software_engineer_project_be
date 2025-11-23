@@ -1,20 +1,24 @@
 package HCMUT.TutorSytem.service.imp;
 
+import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.dto.StudentDTO;
+import HCMUT.TutorSytem.dto.StudentSessionDTO;
 import HCMUT.TutorSytem.dto.StudentSessionHistoryDTO;
-import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.model.Major;
-import HCMUT.TutorSytem.model.StudentSession;
-import HCMUT.TutorSytem.model.User;
+import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
+import HCMUT.TutorSytem.mapper.SessionMapper;
+import HCMUT.TutorSytem.mapper.StudentMapper;
+import HCMUT.TutorSytem.mapper.StudentSessionMapper;
+import HCMUT.TutorSytem.model.*;
 import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
-import HCMUT.TutorSytem.repo.MajorRepository;
-import HCMUT.TutorSytem.repo.StudentSessionRepository;
-import HCMUT.TutorSytem.repo.UserRepository;
+import HCMUT.TutorSytem.repo.*;
 import HCMUT.TutorSytem.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,30 +34,33 @@ public class StudentServiceImp implements StudentService {
     @Autowired
     private MajorRepository majorRepository;
 
+    @Autowired
+    private SessionRepository sessionRepository;
+
+    @Autowired
+    private StudentSessionStatusRepository studentSessionStatusRepository;
+
+
+    @Autowired
+    private StudentScheduleRepository studentScheduleRepository;
+
     @Override
     public StudentDTO getStudentProfile(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + userId));
-
-        return mapToStudentDTO(user);
+        return StudentMapper.toStudentDTO(user);
     }
 
     @Override
     public List<StudentSessionHistoryDTO> getStudentSessionHistory(Integer userId) {
-        // Verify user exists
-        if (!userRepository.existsById(userId)) {
-            throw new DataNotFoundExceptions("Student not found with id: " + userId);
-        }
-
         List<StudentSession> studentSessions = studentSessionRepository.findByStudentId(userId);
 
         return studentSessions.stream()
-                .map(this::mapToStudentSessionHistoryDTO)
+                .map(StudentSessionMapper::toStudentSessionHistoryDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional
     public StudentDTO updateStudentProfile(Integer userId, StudentProfileUpdateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + userId));
@@ -62,24 +69,15 @@ public class StudentServiceImp implements StudentService {
         if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) {
             user.setFirstName(request.getFirstName().trim());
         }
+
         if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) {
             user.setLastName(request.getLastName().trim());
         }
-        if (request.getProfileImage() != null) {
-            user.setProfileImage(request.getProfileImage());
-        }
-        if (request.getAcademicStatus() != null && !request.getAcademicStatus().trim().isEmpty()) {
-            user.setAcademicStatus(request.getAcademicStatus().trim());
-        }
-        if (request.getDob() != null) {
-            user.setDob(request.getDob());
-        }
-        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
-            user.setPhone(request.getPhone().trim());
-        }
+
         if (request.getOtherMethodContact() != null) {
             user.setOtherMethodContact(request.getOtherMethodContact());
         }
+
         if (request.getMajorId() != null) {
             Major major = majorRepository.findById(request.getMajorId())
                     .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
@@ -87,69 +85,83 @@ public class StudentServiceImp implements StudentService {
         }
 
         user = userRepository.save(user);
-        return mapToStudentDTO(user);
+        return StudentMapper.toStudentDTO(user);
     }
 
-    private StudentDTO mapToStudentDTO(User user) {
-        StudentDTO dto = new StudentDTO();
-        dto.setId(user.getId());
-        dto.setHcmutId(user.getHcmutId());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setProfileImage(user.getProfileImage());
-        dto.setAcademicStatus(user.getAcademicStatus());
-        dto.setDob(user.getDob());
-        dto.setPhone(user.getPhone());
-        dto.setOtherMethodContact(user.getOtherMethodContact());
-        dto.setRole(user.getRole());
-        dto.setCreatedDate(user.getCreatedDate());
-        dto.setUpdateDate(user.getUpdateDate());
-        dto.setLastLogin(user.getLastLogin());
-
-        if (user.getMajor() != null) {
-            dto.setMajorId(user.getMajor().getId());
-            dto.setMajorName(user.getMajor().getName());
-            if (user.getMajor().getDepartment() != null) {
-                dto.setDepartment(user.getMajor().getDepartment().getName());
-            }
-        }
-
-        return dto;
+    @Override
+    public List<SessionDTO> getAvailableSessions() {
+        List<Session> availableSessions = sessionRepository.findAvailableSessions(Instant.now());
+        return availableSessions.stream()
+                .map(SessionMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    private StudentSessionHistoryDTO mapToStudentSessionHistoryDTO(StudentSession studentSession) {
-        StudentSessionHistoryDTO dto = new StudentSessionHistoryDTO();
-        dto.setStudentSessionId(studentSession.getId());
-        dto.setRegisteredDate(studentSession.getRegisteredDate());
-        dto.setUpdatedDate(studentSession.getUpdatedDate());
+    @Override
+    @Transactional
+    public StudentSessionDTO registerSession(Integer studentId, Integer sessionId) {
+        // 1. Tìm student
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + studentId));
 
-        if (studentSession.getStudentSessionStatus() != null) {
-            dto.setRegistrationStatus(studentSession.getStudentSessionStatus().getName());
+        // 2. Tìm session
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new DataNotFoundExceptions("Session not found with id: " + sessionId));
+
+        // 3. Kiểm tra session có available không (status = SCHEDULED, chưa bắt đầu, chưa đầy)
+        if (session.getSessionStatus() == null || session.getSessionStatus().getId() != SessionStatus.SCHEDULED) {
+            throw new IllegalStateException("Session is not available for registration");
         }
 
-        if (studentSession.getSession() != null) {
-            dto.setSessionId(studentSession.getSession().getId());
-            dto.setStartTime(studentSession.getSession().getStartTime());
-            dto.setEndTime(studentSession.getSession().getEndTime());
-            dto.setFormat(studentSession.getSession().getFormat());
-            dto.setLocation(studentSession.getSession().getLocation());
+        Instant now = Instant.now();
+        if (session.getStartTime().isBefore(now)) {
+            throw new IllegalStateException("Session has already started or passed");
+        }
 
-            if (studentSession.getSession().getSessionStatus() != null) {
-                dto.setSessionStatus(studentSession.getSession().getSessionStatus().getName());
-            }
+        // Lưu ý: Không kiểm tra currentQuantity ở đây vì chỉ kiểm tra khi tutor approve
+        // Cho phép nhiều student đăng ký (PENDING) hơn maxQuantity, tutor sẽ chọn ai được approve
 
-            if (studentSession.getSession().getTutor() != null) {
-                User tutor = studentSession.getSession().getTutor();
-                dto.setTutorName((tutor.getFirstName() != null ? tutor.getFirstName() : "") + " " +
-                        (tutor.getLastName() != null ? tutor.getLastName() : ""));
-            }
+        // 4. Kiểm tra student đã đăng ký session này chưa
+        if (studentSessionRepository.findByStudentIdAndSessionId(studentId, sessionId).isPresent()) {
+            throw new IllegalStateException("Student has already registered for this session");
+        }
 
-            if (studentSession.getSession().getSubject() != null) {
-                dto.setSubjectName(studentSession.getSession().getSubject().getName());
+        // 5. Kiểm tra xung đột lịch trong StudentSchedule
+        if (session.getDayOfWeek() != null) {
+            boolean hasConflict = studentScheduleRepository.existsConflictingSchedule(
+                    studentId,
+                    session.getDayOfWeek(),
+                    session.getStartTime(),
+                    session.getEndTime()
+            );
+
+            if (hasConflict) {
+                throw new IllegalStateException("Schedule conflict: Student already has a session at this time");
             }
         }
 
-        return dto;
+        // 6. Tạo StudentSession với status = PENDING
+        StudentSession studentSession = new StudentSession();
+        studentSession.setStudent(student);
+        studentSession.setSession(session);
+
+        StudentSessionStatus pendingStatus = studentSessionStatusRepository.findById(StudentSessionStatus.PENDING)
+                .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus PENDING not found"));
+        studentSession.setStudentSessionStatus(pendingStatus);
+
+        // registeredDate sẽ tự động set bởi @CreationTimestamp
+        studentSession = studentSessionRepository.save(studentSession);
+
+        // 7. Thêm vào StudentSchedule để ngăn đăng ký session khác trùng giờ
+        if (session.getDayOfWeek() != null) {
+            StudentSchedule studentSchedule = new StudentSchedule();
+            studentSchedule.setStudent(student);
+            studentSchedule.setDayOfWeek(session.getDayOfWeek());
+            studentSchedule.setStartTime(session.getStartTime().atZone(ZoneId.systemDefault()).toLocalTime());
+            studentSchedule.setEndTime(session.getEndTime().atZone(ZoneId.systemDefault()).toLocalTime());
+            studentScheduleRepository.save(studentSchedule);
+        }
+
+        // 8. Return DTO
+        return StudentSessionMapper.toDTO(studentSession);
     }
 }
-

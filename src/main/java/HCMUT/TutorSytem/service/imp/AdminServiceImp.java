@@ -1,14 +1,20 @@
 package HCMUT.TutorSytem.service.imp;
 
+import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.dto.StudentDTO;
 import HCMUT.TutorSytem.dto.TutorDetailDTO;
 import HCMUT.TutorSytem.dto.UserDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
+import HCMUT.TutorSytem.mapper.SessionMapper;
 import HCMUT.TutorSytem.mapper.UserMapper;
+import HCMUT.TutorSytem.model.Session;
+import HCMUT.TutorSytem.model.SessionStatus;
 import HCMUT.TutorSytem.model.Status;
 import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
+import HCMUT.TutorSytem.repo.SessionRepository;
+import HCMUT.TutorSytem.repo.SessionStatusRepository;
 import HCMUT.TutorSytem.repo.StatusRepository;
 import HCMUT.TutorSytem.repo.TutorProfileRepository;
 import HCMUT.TutorSytem.repo.UserRepository;
@@ -38,10 +44,14 @@ public class AdminServiceImp implements AdminService {
     private TutorService tutorService;
 
     @Autowired
-    private UserMapper userMapper;
+    private StatusRepository statusRepository;
 
     @Autowired
-    private StatusRepository statusRepository;
+    private SessionRepository sessionRepository;
+
+    @Autowired
+    private SessionStatusRepository sessionStatusRepository;
+
 
     @Override
     @Transactional
@@ -93,8 +103,52 @@ public class AdminServiceImp implements AdminService {
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
-                .map(userMapper::toDTO)
+                .map(UserMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public SessionDTO updateSessionStatus(Integer sessionId, Integer adminId, String setStatus) {
+        // Kiểm tra quyền admin
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new DataNotFoundExceptions("Admin not found with id: " + adminId));
+
+        if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
+            throw new IllegalArgumentException("User does not have admin privileges");
+        }
+
+        // Tìm session theo sessionId
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new DataNotFoundExceptions("Session not found with id: " + sessionId));
+
+        // Kiểm tra session đang ở trạng thái PENDING
+        if (session.getSessionStatus().getId() != SessionStatus.PENDING) {
+            throw new IllegalStateException("Session is not in PENDING status. Current status: " + session.getSessionStatus().getName());
+        }
+
+        // Xác định status mới dựa vào setStatus parameter
+        SessionStatus newStatus;
+        if ("SCHEDULED".equalsIgnoreCase(setStatus)) {
+            // Admin approve -> đổi sang SCHEDULED
+            newStatus = sessionStatusRepository.findById(SessionStatus.SCHEDULED)
+                    .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus SCHEDULED not found"));
+        } else if ("CANCELLED".equalsIgnoreCase(setStatus)) {
+            // Admin reject -> đổi sang CANCELLED
+            newStatus = sessionStatusRepository.findById(SessionStatus.CANCELLED)
+                    .orElseThrow(() -> new DataNotFoundExceptions("SessionStatus CANCELLED not found"));
+        } else {
+            throw new IllegalArgumentException("Invalid setStatus parameter. Must be 'SCHEDULED' or 'CANCELLED'");
+        }
+
+        // Đổi status
+        session.setSessionStatus(newStatus);
+
+        // Lưu session (updatedDate sẽ tự động update nhờ @UpdateTimestamp)
+        session = sessionRepository.save(session);
+
+        // Map sang SessionDTO và trả về
+        return SessionMapper.toDTO(session);
     }
 }
 

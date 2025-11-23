@@ -17,10 +17,11 @@ CREATE TABLE IF NOT EXISTS `session_status` (
 
 -- Seed tối thiểu
 INSERT INTO `session_status` (`id`,`name`,`description`) VALUES
-(1,'SCHEDULED','Đã lên lịch'),
-(2,'IN_PROGRESS','Đang diễn ra'),
-(3,'COMPLETED','Hoàn thành'),
-(4,'CANCELLED','Đã hủy')
+(1,'PENDING','Chờ xác nhận'),
+(2,'SCHEDULED','Đã lên lịch'),
+(3,'IN_PROGRESS','Đang diễn ra'),
+(4,'COMPLETED','Hoàn thành'),
+(5,'CANCELLED','Đã hủy')
 ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
 
 -- 3) TẠO BẢNG STUDENT_SESSION_STATUS

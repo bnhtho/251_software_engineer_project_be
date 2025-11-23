@@ -1,20 +1,23 @@
 package HCMUT.TutorSytem.mapper;
 
-import HCMUT.TutorSytem.dto.UserDTO;
+import HCMUT.TutorSytem.dto.StudentDTO;
 import HCMUT.TutorSytem.model.User;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserMapper {
+public class StudentMapper {
 
-    public static UserDTO toDTO(User user) {
+    /**
+     * Chuyển đổi User entity sang StudentDTO
+     */
+    public static StudentDTO toStudentDTO(User user) {
         if (user == null) {
             return null;
         }
 
-        UserDTO dto = new UserDTO();
+        StudentDTO dto = new StudentDTO();
         dto.setId(user.getId());
         dto.setHcmutId(user.getHcmutId());
         dto.setFirstName(user.getFirstName());
@@ -29,33 +32,29 @@ public class UserMapper {
         dto.setUpdateDate(user.getUpdateDate());
         dto.setLastLogin(user.getLastLogin());
 
-        // Major information
+        // Thông tin Major
         if (user.getMajor() != null) {
             dto.setMajorId(user.getMajor().getId());
             dto.setMajorName(user.getMajor().getName());
 
-            // Department from major
+            // Thông tin Department từ Major
             if (user.getMajor().getDepartment() != null) {
                 dto.setDepartment(user.getMajor().getDepartment().getName());
             }
         }
 
-        // Status information
-        if (user.getStatus() != null) {
-            dto.setStatusId(user.getStatus().getId());
-            dto.setStatusName(user.getStatus().getName());
-        }
-
         return dto;
     }
 
-    public static List<UserDTO> toDTOList(List<User> users) {
+    /**
+     * Chuyển đổi danh sách User sang danh sách StudentDTO
+     */
+    public static List<StudentDTO> toStudentDTOList(List<User> users) {
         if (users == null) {
             return Collections.emptyList();
         }
         return users.stream()
-                .map(UserMapper::toDTO)
+                .map(StudentMapper::toStudentDTO)
                 .collect(Collectors.toList());
     }
 }
-
