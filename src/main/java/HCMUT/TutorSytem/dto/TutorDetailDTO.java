@@ -1,6 +1,6 @@
 package HCMUT.TutorSytem.dto;
 
-import HCMUT.TutorSytem.model.TutorStatus;
+import HCMUT.TutorSytem.Enum.TutorStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;

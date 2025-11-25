@@ -55,6 +55,7 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
 
+<<<<<<< HEAD
                     // Tutor profile registration
                     request.requestMatchers(HttpMethod.POST, "/api/tutor-profiles").hasRole("STUDENT");
                     request.requestMatchers(HttpMethod.PATCH, "/api/admin/tutor_profiles/**").hasRole("admin");
@@ -63,6 +64,10 @@ public class SecurityConfig {
                     //Login endpoint
                     request.requestMatchers(HttpMethod.POST, "/auth/**").permitAll(); // Anyone can attempt to login
                     // Default: require authentication for other requests
+=======
+                    // 9. Default - AUTHENTICATED
+                    // Tất cả requests khác yêu cầu authentication
+>>>>>>> parent of 5571d59 (Fix conflict)
                     request.anyRequest().authenticated();
                 })
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
