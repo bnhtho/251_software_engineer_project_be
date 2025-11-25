@@ -208,7 +208,7 @@ curl -X DELETE http://localhost:8080/admin/students/123 \
   -H "Authorization: Bearer ADMIN_JWT_TOKEN"
 
 # Admin list pending tutor profiles (page 0)
-curl -X GET "http://localhost:8080/api/admin/tutor_profiles/pending?page=0" \
+curl -X GET "http://localhost:8081/api/admin/tutor_profiles/pending?page=0" \
   -H "Authorization: Bearer ADMIN_JWT_TOKEN"
 
 # Admin approve pending tutor for user 42
