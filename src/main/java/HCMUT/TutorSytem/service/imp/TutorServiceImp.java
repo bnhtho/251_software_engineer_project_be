@@ -104,8 +104,10 @@ public class TutorServiceImp implements TutorService {
         tutorProfile.setExperienceYears(request.getExperienceYears() != null ? request.getExperienceYears().shortValue() : null);
         tutorProfile.setBio(request.getDescription());
         tutorProfile.setRating(BigDecimal.ZERO); // Auto set to 0, calculated from reviews
+        tutorProfile.setPriority(0);
         tutorProfile.setTotalSessionsCompleted(0); // Auto set to 0
         tutorProfile.setIsAvailable(true); // Auto set to true
+        tutorProfile.setStatus(TutorStatus.PENDING);
 
         tutorProfile = tutorProfileRepository.save(tutorProfile);
         return TutorMapper.toDTO(tutorProfile);
@@ -260,6 +262,7 @@ public class TutorServiceImp implements TutorService {
         dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : null);
         dto.setTotalSessionsCompleted(tutorProfile.getTotalSessionsCompleted());
         dto.setIsAvailable(tutorProfile.getIsAvailable());
+        dto.setStatus(tutorProfile.getStatus());
 
         // Subjects
         if (tutorProfile.getSubjects() != null) {
@@ -477,4 +480,3 @@ public class TutorServiceImp implements TutorService {
         return results;
     }
 }
-

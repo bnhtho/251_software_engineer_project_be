@@ -58,4 +58,8 @@ public class TutorProfile {
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private TutorStatus status = TutorStatus.PENDING;
+
 }

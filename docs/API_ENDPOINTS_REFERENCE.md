@@ -2,7 +2,7 @@
 
 ## Base URL
 ```
-http://localhost:8080
+http://localhost:8081
 ```
 
 ## All Endpoints
@@ -14,6 +14,7 @@ http://localhost:8080
 | GET | `/students/profile/{userId}` | Get student profile | Yes | Student (self) |
 | GET | `/students/history/{userId}` | Get learning history | Yes | Student (self) |
 | POST | `/students/profile/{userId}` | Update student profile | Yes | Student (self) |
+| POST | `/api/tutor-profiles` | Register as tutor (creates pending profile) | Yes | Student |
 
 ### 👨‍🏫 Tutor Endpoints
 
@@ -34,6 +35,9 @@ http://localhost:8080
 | DELETE | `/admin/students/{userId}` | Delete student profile | Yes | Admin |
 | POST | `/admin/tutors/{userId}` | Update tutor profile | Yes | Admin |
 | DELETE | `/admin/tutors/{userId}` | Delete tutor profile | Yes | Admin |
+| GET | `/api/admin/tutor_profiles/pending?page={page}` | List pending tutor registrations (10 per page) | Yes | Admin |
+| PATCH | `/api/admin/tutor_profiles/{userId}/approve` | Approve pending tutor for user | Yes | Admin |
+| PATCH | `/api/admin/tutor_profiles/{userId}/reject` | Reject pending tutor for user | Yes | Admin |
 
 ### 📚 Other Existing Endpoints
 
@@ -60,6 +64,16 @@ GET /students/history/123
 # Update my profile
 POST /students/profile/123
 Body: { "firstName": "New Name", ... }
+
+# Register as a tutor
+POST /api/tutor-profiles
+Body: {
+  "title": "Senior Student",
+  "majorId": 5,
+  "description": "Có 2 năm kinh nghiệm dạy lập trình.",
+  "subjects": [11, 20, 22],
+  "experienceYears": 2
+}
 ```
 
 ### Tutor Operations
@@ -87,6 +101,13 @@ Body: { "bio": "Admin updated", ... }
 
 # Delete any tutor
 DELETE /admin/tutors/456
+
+# View pending tutor registrations (page 0, 10 per page)
+GET /api/admin/tutor_profiles/pending?page=0
+
+# Approve/reject pending tutor (by userId)
+PATCH /api/admin/tutor_profiles/42/approve
+PATCH /api/admin/tutor_profiles/42/reject
 ```
 
 ## Response Format
@@ -140,6 +161,11 @@ The token contains user information including:
 - ❌ Cannot view other tutors' private data
 - ❌ Cannot access admin functions
 
+### Tutor Profile Status
+- `PENDING`: Student has registered but awaits approval/review.
+- `APPROVED`: Tutor profile is active and visible to others.
+- `REJECTED`: Registration was denied; student must update info and resubmit.
+
 ### Admin
 - ✅ Can view all profiles
 - ✅ Can update any profile
@@ -155,6 +181,18 @@ The token contains user information including:
 curl -X GET http://localhost:8080/students/profile/123 \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
+# Tutor registration (student role)
+curl -X POST http://localhost:8080/api/tutor-profiles \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "title": "Senior Student",
+        "majorId": 5,
+        "description": "Mình có 2 năm kinh nghiệm dạy lập trình cho sinh viên năm 1, 2. Chuyên về Java, Python và cơ sở dữ liệu.",
+        "subjects": [11, 20, 22],
+        "experienceYears": 2
+      }'
+
 # Update tutor profile
 curl -X POST http://localhost:8080/tutors/profile/456 \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -167,6 +205,18 @@ curl -X POST http://localhost:8080/tutors/profile/456 \
 
 # Admin delete student
 curl -X DELETE http://localhost:8080/admin/students/123 \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
+
+# Admin list pending tutor profiles (page 0)
+curl -X GET "http://localhost:8080/api/admin/tutor_profiles/pending?page=0" \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
+
+# Admin approve pending tutor for user 42
+curl -X PATCH http://localhost:8080/api/admin/tutor_profiles/42/approve \
+  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
+
+# Admin reject pending tutor for user 42
+curl -X PATCH http://localhost:8080/api/admin/tutor_profiles/42/reject \
   -H "Authorization: Bearer ADMIN_JWT_TOKEN"
 ```
 
@@ -192,4 +242,3 @@ curl -X DELETE http://localhost:8080/admin/students/123 \
 - `dayOfWeek`: 0-6
 - `majorId`: Must exist in database
 - `subjectIds`: All must exist in database
-

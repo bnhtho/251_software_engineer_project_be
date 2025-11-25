@@ -38,4 +38,14 @@ public class CentralException {
 
         return ResponseEntity.ok(BaseResponse);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> handleBadRequestException(Exception e) {
+        BaseResponse BaseResponse = new BaseResponse();
+        BaseResponse.setStatusCode(400);
+        BaseResponse.setMessage(e.getMessage());
+        BaseResponse.setData(null);
+
+        return ResponseEntity.ok(BaseResponse);
+    }
 }

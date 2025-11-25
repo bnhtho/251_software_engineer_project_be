@@ -66,6 +66,7 @@ public class TutorMapper {
         dto.setStudentCount(tutorProfile.getTotalSessionsCompleted() != null ? tutorProfile.getTotalSessionsCompleted().intValue() : 0);
         dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : 0);
         dto.setIsAvailable(tutorProfile.getIsAvailable());
+        dto.setStatus(tutorProfile.getStatus());
 
         return dto;
     }
@@ -79,4 +80,3 @@ public class TutorMapper {
                 .collect(Collectors.toList());
     }
 }
-

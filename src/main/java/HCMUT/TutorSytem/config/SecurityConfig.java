@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,6 +17,7 @@ import HCMUT.TutorSytem.filter.AuthorizationFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Bean
@@ -52,6 +54,11 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.GET, "/majors").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
+
+                    // Tutor profile registration
+                    request.requestMatchers(HttpMethod.POST, "/api/tutor-profiles").hasRole("STUDENT");
+                    request.requestMatchers(HttpMethod.PATCH, "/api/admin/tutor_profiles/**").hasRole("admin");
+                    request.requestMatchers(HttpMethod.GET, "/api/admin/tutor_profiles/**").hasRole("admin");
 
                     //Login endpoint
                     request.requestMatchers(HttpMethod.POST, "/auth/**").permitAll(); // Anyone can attempt to login
