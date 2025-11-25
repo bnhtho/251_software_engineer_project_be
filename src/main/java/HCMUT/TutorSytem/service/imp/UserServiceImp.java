@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 public class UserServiceImp implements UserService {
     @Autowired
@@ -22,7 +24,7 @@ public class UserServiceImp implements UserService {
 
         User user = userRepository.findByHcmutId(data.getHcmutId())
                 .orElseGet(User::new);
-
+        user.setLastLogin(Instant.now());
         if (user.getId() == null) {
             user.setHcmutId(data.getHcmutId());
             if (user.getStatus() == null) user.setStatus(new Status(1)); // active

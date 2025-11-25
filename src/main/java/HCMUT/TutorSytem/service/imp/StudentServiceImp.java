@@ -14,13 +14,15 @@ import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
 import HCMUT.TutorSytem.repo.*;
 import HCMUT.TutorSytem.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 public class StudentServiceImp implements StudentService {
@@ -40,9 +42,8 @@ public class StudentServiceImp implements StudentService {
     @Autowired
     private StudentSessionStatusRepository studentSessionStatusRepository;
 
-
     @Autowired
-    private StudentScheduleRepository studentScheduleRepository;
+    private ScheduleRepository scheduleRepository;
 
     @Override
     public StudentDTO getStudentProfile(Integer userId) {
@@ -52,12 +53,10 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
-    public List<StudentSessionHistoryDTO> getStudentSessionHistory(Integer userId) {
-        List<StudentSession> studentSessions = studentSessionRepository.findByStudentId(userId);
+    public Page<StudentSessionHistoryDTO> getStudentSessionHistory(Integer userId, Pageable pageable) {
+        Page<StudentSession> studentSessionsPage = studentSessionRepository.findByStudentId(userId, pageable);
 
-        return studentSessions.stream()
-                .map(StudentSessionMapper::toStudentSessionHistoryDTO)
-                .collect(Collectors.toList());
+        return studentSessionsPage.map(StudentSessionMapper::toStudentSessionHistoryDTO);
     }
 
     @Override
@@ -102,11 +101,9 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
-    public List<SessionDTO> getAvailableSessions() {
-        List<Session> availableSessions = sessionRepository.findAvailableSessions(Instant.now());
-        return availableSessions.stream()
-                .map(SessionMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<SessionDTO> getAvailableSessions(Pageable pageable) {
+        Page<Session> availableSessionsPage = sessionRepository.findAvailableSessions(Instant.now(), pageable);
+        return availableSessionsPage.map(SessionMapper::toDTO);
     }
 
     @Override
@@ -138,9 +135,14 @@ public class StudentServiceImp implements StudentService {
             throw new IllegalStateException("Student has already registered for this session");
         }
 
-        // 5. Kiểm tra xung đột lịch trong StudentSchedule
+        if(Objects.equals(student.getId(), session.getTutor().getId())) {
+            throw new IllegalStateException("Tutor cannot register for their own session");
+        }
+
+        // 5. Kiểm tra xung đột lịch trong Schedule
+        // Sử dụng Instant từ session để kiểm tra conflict
         if (session.getDayOfWeek() != null) {
-            boolean hasConflict = studentScheduleRepository.existsConflictingSchedule(
+            boolean hasConflict = scheduleRepository.existsConflictingSchedule(
                     studentId,
                     session.getDayOfWeek(),
                     session.getStartTime(),
@@ -164,17 +166,54 @@ public class StudentServiceImp implements StudentService {
         // registeredDate sẽ tự động set bởi @CreationTimestamp
         studentSession = studentSessionRepository.save(studentSession);
 
-        // 7. Thêm vào StudentSchedule để ngăn đăng ký session khác trùng giờ
+        // 7. Thêm vào Schedule để ngăn đăng ký session khác trùng giờ
+        // Lưu sessionId thay vì startTime/endTime
         if (session.getDayOfWeek() != null) {
-            StudentSchedule studentSchedule = new StudentSchedule();
-            studentSchedule.setStudent(student);
-            studentSchedule.setDayOfWeek(session.getDayOfWeek());
-            studentSchedule.setStartTime(session.getStartTime().atZone(ZoneId.systemDefault()).toLocalTime());
-            studentSchedule.setEndTime(session.getEndTime().atZone(ZoneId.systemDefault()).toLocalTime());
-            studentScheduleRepository.save(studentSchedule);
+            Schedule schedule = new Schedule();
+            schedule.setUser(student);
+            schedule.setSession(session);
+            schedule.setDayOfWeek(session.getDayOfWeek());
+            scheduleRepository.save(schedule);
         }
 
         // 8. Return DTO
         return StudentSessionMapper.toDTO(studentSession);
     }
+
+    @Override
+    public List<StudentSessionDTO> getWeekSchedule(Integer studentId, Integer weekOffset) {
+        // Kiểm tra student có tồn tại không
+        if (!userRepository.existsById(studentId)) {
+            throw new DataNotFoundExceptions("Student not found with id: " + studentId);
+        }
+
+        // Tính toán thời điểm bắt đầu và kết thúc của tuần
+        Instant now = Instant.now();
+        ZoneId zoneId = ZoneId.systemDefault();
+
+        // Chuyển sang LocalDate để tính toán
+        java.time.LocalDate currentDate = now.atZone(zoneId).toLocalDate();
+
+        // Tìm ngày đầu tuần (Monday)
+        java.time.LocalDate startOfCurrentWeek = currentDate.with(java.time.DayOfWeek.MONDAY);
+
+        // Áp dụng offset
+        java.time.LocalDate startOfTargetWeek = startOfCurrentWeek.plusWeeks(weekOffset);
+        java.time.LocalDate endOfTargetWeek = startOfTargetWeek.plusDays(7);
+
+        // Chuyển về Instant (lấy từ 00:00:00)
+        Instant startOfWeek = startOfTargetWeek.atStartOfDay(zoneId).toInstant();
+        Instant endOfWeek = endOfTargetWeek.atStartOfDay(zoneId).toInstant();
+
+        // Query các StudentSession đã được CONFIRMED trong tuần
+        List<StudentSession> studentSessions = studentSessionRepository.findStudentConfirmedSessionsInWeek(
+                studentId,
+                StudentSessionStatus.CONFIRMED,
+                startOfWeek,
+                endOfWeek
+        );
+
+        return StudentSessionMapper.toDTOList(studentSessions);
+    }
 }
+

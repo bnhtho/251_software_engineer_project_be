@@ -10,6 +10,8 @@ import HCMUT.TutorSytem.repo.*;
 import HCMUT.TutorSytem.service.SessionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -32,15 +34,10 @@ public class SessionServiceImp implements SessionService {
     private SessionStatusRepository sessionStatusRepository;
 
 
-    @Autowired
-    private TutorScheduleRepository tutorScheduleRepository;
-
     @Override
-    public List<SessionDTO> getAllSessions() {
-        List<Session> sessions = sessionRepository.findAll();
-        return sessions.stream()
-                .map(SessionMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<SessionDTO> getAllSessions(Pageable pageable) {
+        Page<Session> sessionsPage = sessionRepository.findAll(pageable);
+        return sessionsPage.map(SessionMapper::toDTO);
     }
 
     @Override

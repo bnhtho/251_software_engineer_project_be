@@ -245,9 +245,9 @@ CREATE TABLE `feedback_student` (
 
 -- 1) ROLE
 INSERT INTO role (id, name, description) VALUES
-(1, 'admin',  'System administrator'),
-(2, 'tutor',  'Tutor / Mentor'),
-(3, 'student','Student');
+(1, 'ADMIN',  'System administrator'),
+(2, 'TUTOR',  'Tutor / Mentor'),
+(3, 'STUDENT','Student');
 
 -- 2) DATACORE (core profile, gán role_id đúng FK)
 INSERT INTO datacore
@@ -269,11 +269,11 @@ INSERT INTO hcmut_sso (id, email, password, hcmut_id) VALUES
 INSERT INTO `user`
 (id, status, created_date, update_date, last_login, role, hcmut_id, first_name, last_name, profile_image, faculty, academic_status, dob, phone, other_method_contact)
 VALUES
-(1, 'ACTIVE',  NOW(), NULL, NULL, 'admin',  'NV001',    'Nguyễn Thị', 'Loan', NULL, 'Office of Student Affairs', 'Staff',        '1985-05-12', '0903000001', NULL),
-(2, 'ACTIVE',  NOW(), NULL, NULL, 'tutor',  'GV001',    'Lê Văn',     'Minh', NULL, 'Applied Science',            'Faculty',      '1978-09-21', '0903000002', NULL),
-(3, 'ACTIVE',  NOW(), NULL, NULL, 'tutor',  '17123456', 'Phạm Minh',  'Tâm',  NULL, 'CSE',                        'Graduate',     '1997-02-14', '0903000003', NULL),
-(4, 'ACTIVE',  NOW(), NULL, NULL, 'student','20123456', 'Nguyễn Văn', 'An',   NULL, 'CSE',                        'Undergraduate','2004-08-10', '0903000004', 'Zalo: an.cse'),
-(5, 'ACTIVE',  NOW(), NULL, NULL, 'student','20125678', 'Trần Thị',   'Bình', NULL, 'Mechanical Engineering',     'Undergraduate','2006-01-18', '0903000005', NULL);
+(1, 'ACTIVE',  NOW(), NULL, NULL, 'ADMIN',  'NV001',    'Nguyễn Thị', 'Loan', NULL, 'Office of Student Affairs', 'Staff',        '1985-05-12', '0903000001', NULL),
+(2, 'ACTIVE',  NOW(), NULL, NULL, 'TUTOR',  'GV001',    'Lê Văn',     'Minh', NULL, 'Applied Science',            'Faculty',      '1978-09-21', '0903000002', NULL),
+(3, 'ACTIVE',  NOW(), NULL, NULL, 'TUTOR',  '17123456', 'Phạm Minh',  'Tâm',  NULL, 'CSE',                        'Graduate',     '1997-02-14', '0903000003', NULL),
+(4, 'ACTIVE',  NOW(), NULL, NULL, 'STUDENT','20123456', 'Nguyễn Văn', 'An',   NULL, 'CSE',                        'Undergraduate','2004-08-10', '0903000004', 'Zalo: an.cse'),
+(5, 'ACTIVE',  NOW(), NULL, NULL, 'STUDENT','20125678', 'Trần Thị',   'Bình', NULL, 'Mechanical Engineering',     'Undergraduate','2006-01-18', '0903000005', NULL);
 
 -- 5) SUBJECT
 INSERT INTO `subject`
@@ -316,20 +316,29 @@ VALUES
 (4, 5, 3, '13:00:00', '17:00:00', 'FREE', NOW(), NULL); -- Bình: Wed chiều
 
 -- 10) SESSION (mỗi buổi gán 1 tutor_id & 1 student_id)
+-- Ngày hiện tại: 2025-11-25
+-- COMPLETED: thời gian ở quá khứ
+-- SCHEDULED: thời gian ở tương lai
+-- Khoảng cách start_time và end_time: 1-2 giờ (không quá 24h)
 INSERT INTO `session`
 (id, tutor_id, student_id, subject_id, start_time, end_time, `format`, location, status, created_date, updated_date)
 VALUES
-(1, 2, 4, 1, '2025-10-14 09:00:00', '2025-10-14 10:30:00', 'offline', 'B10-201', 'COMPLETED', NOW(), NULL), -- GV Minh ↔ SV An (Calculus)
-(2, 3, 4, 2, '2025-10-15 14:00:00', '2025-10-15 15:00:00', 'online',  'Zoom',    'COMPLETED', NOW(), NULL), -- Thầy Tâm ↔ An (CS101)
-(3, 3, 5, 2, '2025-10-20 14:00:00', '2025-10-20 15:00:00', 'offline', 'B6-204',  'COMPLETED', NOW(), NULL); -- Thầy Tâm ↔ Bình (CS101)
+-- Session 1: COMPLETED - đã diễn ra 1 tuần trước (2025-11-18)
+(1, 2, 4, 1, '2025-11-18 09:00:00', '2025-11-18 10:30:00', 'offline', 'B10-201', 'COMPLETED', '2025-11-15 10:00:00', '2025-11-18 10:30:00'),
+
+-- Session 2: SCHEDULED - sẽ diễn ra 2 ngày sau (2025-11-27)
+(2, 3, 4, 2, '2025-11-27 14:00:00', '2025-11-27 15:30:00', 'online',  'Zoom',    'SCHEDULED', '2025-11-20 14:00:00', '2025-11-20 14:00:00'),
+
+-- Session 3: SCHEDULED - sẽ diễn ra 5 ngày sau (2025-11-30)
+(3, 3, 5, 2, '2025-11-30 14:00:00', '2025-11-30 16:00:00', 'offline', 'B6-204',  'SCHEDULED', '2025-11-22 09:00:00', '2025-11-22 09:00:00');
 
 -- 11) NOTIFICATION
 INSERT INTO notification
 (id, user_id, related_session_id, type, title, message, is_read, sent_at, created_date)
 VALUES
-(1, 4, 1, 'REMIND', 'Nhắc lịch buổi học', 'Bạn có buổi Calculus I lúc 09:00 14/10/2025 tại B10-201.', 1, '2025-10-13 18:00:00', NOW()),
-(2, 3, 2, 'FEEDBACK', 'Phản hồi mới', 'SV Nguyễn Văn An đã gửi feedback cho buổi 15/10/2025.', 1, '2025-10-15 16:30:00', NOW()),
-(3, 1, NULL, 'REPORT', 'Báo cáo tháng 10', 'Đã hoàn thành 3 buổi tutor trong 10/2025.', 0, '2025-10-31 20:00:00', NOW());
+(1, 4, 1, 'REMIND', 'Nhắc lịch buổi học', 'Bạn có buổi Calculus I lúc 09:00 18/11/2025 tại B10-201.', 1, '2025-11-17 18:00:00', '2025-11-17 18:00:00'),
+(2, 4, 2, 'REMIND', 'Nhắc lịch buổi học', 'Bạn có buổi CS101 lúc 14:00 27/11/2025 trên Zoom.', 0, '2025-11-26 18:00:00', '2025-11-25 10:00:00'),
+(3, 5, 3, 'REMIND', 'Nhắc lịch buổi học', 'Bạn có buổi CS101 lúc 14:00 30/11/2025 tại B6-204.', 0, '2025-11-29 18:00:00', '2025-11-25 10:00:00');
 
 -- 12) REPORTOF_TUTOR (báo cáo sau buổi)
 INSERT INTO reportof_tutor
@@ -340,9 +349,8 @@ VALUES
 (3, 3, 'Cần chậm lại phần cú pháp C++ cho SV Bình.',               'Tiếp thu được phần cơ bản.',      'Trung bình', 'Prog 101 - Textbook');
 
 -- 13) FEEDBACK_STUDENT (đánh giá của SV)
+-- Chỉ có feedback cho session đã COMPLETED
 INSERT INTO feedback_student
 (id, session_id, student_id, overall_rating, content_quality, teaching_effectiveness, communication, comment, suggestion, would_recommend, created_date)
 VALUES
-(1, 1, 4, 5, 5, 5, 5, 'Buổi học rất rõ ràng, em tự tin hơn.',          'Cho thêm bài tập ứng dụng.', 1, '2025-10-14 12:00:00'),
-(2, 2, 4, 5, 5, 5, 5, 'Tutor hướng dẫn nhiệt tình, dễ hiểu.',           'Giữ nhịp độ như hiện tại.',   1, '2025-10-15 16:20:00'),
-(3, 3, 5, 3, 3, 3, 3, 'Hơi nhanh, em cần thêm ví dụ minh hoạ.',         'Giảm tốc độ giảng, thêm ví dụ.', 1, '2025-10-20 16:10:00');
+(1, 1, 4, 5, 5, 5, 5, 'Buổi học rất rõ ràng, em tự tin hơn.', 'Cho thêm bài tập ứng dụng.', 1, '2025-11-18 12:00:00');

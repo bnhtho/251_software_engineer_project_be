@@ -1,5 +1,6 @@
 package HCMUT.TutorSytem.model;
 
+import HCMUT.TutorSytem.Enum.TutorStatus;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -10,9 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter

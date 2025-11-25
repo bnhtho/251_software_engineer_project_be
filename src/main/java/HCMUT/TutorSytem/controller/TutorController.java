@@ -1,13 +1,19 @@
 package HCMUT.TutorSytem.controller;
 
+import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.dto.StudentSessionDTO;
 import HCMUT.TutorSytem.dto.TutorDTO;
 import HCMUT.TutorSytem.dto.TutorDetailDTO;
+import HCMUT.TutorSytem.payload.request.TutorProfileCreateRequest;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
-import HCMUT.TutorSytem.payload.request.TutorRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
+import HCMUT.TutorSytem.service.TutorProfileService;
 import HCMUT.TutorSytem.service.TutorService;
+import HCMUT.TutorSytem.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tutors")
@@ -23,39 +30,40 @@ public class TutorController {
     @Autowired
     private TutorService tutorService;
 
+    @Autowired
+    private TutorProfileService tutorProfileService;
+
     /**
-     * Get all tutors (without pagination)
+     * Get all tutors (with pagination)
      * Public endpoint - anyone can view tutor list
+     * Mặc định: 10 items per page
+     *
+     * @param page Số trang (bắt đầu từ 0, mặc định = 0)
      */
     @GetMapping
-    public ResponseEntity<BaseResponse> getAllTutors() {
-        List<TutorDTO> tutors = tutorService.getAllTutors();
+    public ResponseEntity<BaseResponse> getAllTutors(@RequestParam(defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<TutorDTO> tutorsPage = tutorService.getAllTutors(pageable);
+        Map<String, Object> paginatedData = PaginationUtil.createPaginationResponse(tutorsPage);
+
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
         response.setMessage("Tutors retrieved successfully");
-        response.setData(tutors);
+        response.setData(paginatedData);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Get detailed tutor profile by user ID
+     * Get detailed tutor profile
      * Includes: teaching schedule, certifications (academic status), experience years, subjects
      * Tutors can only view their own detailed profile
+     * userId lấy từ token authentication
      */
-    @GetMapping("/profile/{userId}")
-    public ResponseEntity<BaseResponse> getTutorDetail(@PathVariable Integer userId) {
-        // Check ownership: only the tutor can view their own detailed profile
+    @GetMapping("/profile")
+    public ResponseEntity<BaseResponse> getTutorDetail() {
+        // Lấy tutorId từ authentication (token)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Integer currentUserId = getCurrentUserId(authentication);
-            if (!currentUserId.equals(userId)) {
-                BaseResponse response = new BaseResponse();
-                response.setStatusCode(403);
-                response.setMessage("Access denied: You can only view your own detailed profile");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-            }
-        }
+        Integer userId = getCurrentUserId(authentication);
 
         TutorDetailDTO tutorDetail = tutorService.getTutorDetail(userId);
         BaseResponse response = new BaseResponse();
@@ -68,23 +76,14 @@ public class TutorController {
     /**
      * Update tutor profile (detailed)
      * Tutors can only update their own profile
+     * userId lấy từ token authentication
      */
-    @PutMapping("/profile/{userId}")
+    @PutMapping("/profile")
     public ResponseEntity<BaseResponse> updateTutorProfile(
-            @PathVariable Integer userId,
             @RequestBody TutorProfileUpdateRequest request) {
-        // Check ownership: only the tutor can update their own profile
+        // Lấy tutorId từ authentication (token)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Integer currentUserId = getCurrentUserId(authentication);
-            if (!currentUserId.equals(userId)) {
-                BaseResponse response = new BaseResponse();
-                response.setStatusCode(403);
-                response.setMessage("Access denied: You can only update your own profile");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-            }
-        }
+        Integer userId = getCurrentUserId(authentication);
 
         TutorDetailDTO tutorDetail = tutorService.updateTutorProfile(userId, request);
         BaseResponse response = new BaseResponse();
@@ -95,151 +94,107 @@ public class TutorController {
     }
 
     /**
-     * Create a new tutor profile
-     * This endpoint can be used by authenticated users to become a tutor
-     */
-    @PostMapping
-    public ResponseEntity<BaseResponse> createTutor(@RequestBody TutorRequest tutorRequest) {
-        TutorDTO tutor = tutorService.createTutor(tutorRequest);
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Tutor created successfully");
-        response.setData(tutor);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Update tutor profile by tutor profile ID
-     * Tutors can only update their own profile
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse> updateTutor(@PathVariable Integer id, @RequestBody TutorRequest tutorRequest) {
-        // Check ownership: only the tutor owner can update their profile
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Integer currentUserId = getCurrentUserId(authentication);
-            Integer profileUserId = tutorService.getUserIdFromTutorProfile(id);
-
-            if (!currentUserId.equals(profileUserId)) {
-                BaseResponse response = new BaseResponse();
-                response.setStatusCode(403);
-                response.setMessage("Access denied: You can only update your own tutor profile");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-            }
-        }
-
-        TutorDTO tutor = tutorService.updateTutor(id, tutorRequest);
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Tutor updated successfully");
-        response.setData(tutor);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Soft delete tutor profile by tutor profile ID (set status to INACTIVE)
-     * Tutors can only delete their own profile
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponse> deleteTutor(@PathVariable Integer id) {
-        // Check ownership: only the tutor owner can delete their profile
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Integer currentUserId = getCurrentUserId(authentication);
-            Integer profileUserId = tutorService.getUserIdFromTutorProfile(id);
-
-            if (!currentUserId.equals(profileUserId)) {
-                BaseResponse response = new BaseResponse();
-                response.setStatusCode(403);
-                response.setMessage("Access denied: You can only delete your own tutor profile");
-                response.setData(null);
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-            }
-        }
-
-        tutorService.deleteTutor(id);
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Tutor profile deactivated successfully");
-        response.setData(null);
-        return ResponseEntity.ok(response);
-    }
-
-
-    /**
-     * Lấy danh sách yêu cầu đăng ký đang chờ duyệt
+     * Lấy danh sách yêu cầu đăng ký đang chờ duyệt (with pagination)
      * Tutor chỉ xem được yêu cầu của các session mình tạo
+     * Mặc định: 10 items per page
+     *
+     * @param page Số trang (bắt đầu từ 0, mặc định = 0)
      */
     @GetMapping("/pending-registrations")
-    public ResponseEntity<BaseResponse> getPendingStudentSessions() {
+    public ResponseEntity<BaseResponse> getPendingStudentSessions(@RequestParam(defaultValue = "0") int page) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Integer tutorId = getCurrentUserId(authentication);
 
-        List<StudentSessionDTO> pendingSessions = tutorService.getPendingStudentSessions(tutorId);
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<StudentSessionDTO> pendingSessionsPage = tutorService.getPendingStudentSessions(tutorId, pageable);
+        Map<String, Object> paginatedData = PaginationUtil.createPaginationResponse(pendingSessionsPage);
+
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
         response.setMessage("Pending student sessions retrieved successfully");
-        response.setData(pendingSessions);
+        response.setData(paginatedData);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Duyệt một yêu cầu đăng ký
-     * Tham khảo pattern từ AdminController.updateSessionStatus
+     * Duyệt yêu cầu đăng ký (một hoặc nhiều)
+     * Dùng @RequestBody với List<Integer> để nhận danh sách ID của các yêu cầu đăng ký
+     * Nếu duyệt 1 người thì gửi list có 1 phần tử
      *
-     * @param studentSessionId ID của yêu cầu đăng ký (StudentSession)
+     * @param studentSessionIds Danh sách ID của các yêu cầu đăng ký (StudentSession)
      */
-    @PutMapping("/student-sessions/{studentSessionId}/approve")
-    public ResponseEntity<BaseResponse> approveStudentSession(@PathVariable Integer studentSessionId) {
+    @PutMapping("/student-sessions/approve")
+    public ResponseEntity<BaseResponse> approveStudentSessions(@RequestBody List<Integer> studentSessionIds) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Integer tutorId = getCurrentUserId(authentication);
 
-        StudentSessionDTO studentSession = tutorService.approveStudentSession(tutorId, studentSessionId);
+        List<StudentSessionDTO> results = tutorService.approveStudentSessions(tutorId, studentSessionIds);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
-        response.setMessage("Đã duyệt đăng ký cho sinh viên");
-        response.setData(studentSession);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Từ chối một yêu cầu đăng ký
-     *
-     * @param studentSessionId ID của yêu cầu đăng ký (StudentSession)
-     */
-    @PutMapping("/student-sessions/{studentSessionId}/reject")
-    public ResponseEntity<BaseResponse> rejectStudentSession(@PathVariable Integer studentSessionId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Integer tutorId = getCurrentUserId(authentication);
-
-        StudentSessionDTO studentSession = tutorService.rejectStudentSession(tutorId, studentSessionId);
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Đã từ chối yêu cầu đăng ký");
-        response.setData(studentSession);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Duyệt nhiều yêu cầu đăng ký cùng lúc
-     * Dùng @RequestBody với List<Integer> thay vì tạo DTO riêng vì chỉ cần danh sách ID
-     *
-     * @param studentSessionIds Danh sách ID của các yêu cầu đăng ký
-     */
-    @PutMapping("/student-sessions/batch-approve")
-    public ResponseEntity<BaseResponse> batchApproveStudentSessions(@RequestBody List<Integer> studentSessionIds) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Integer tutorId = getCurrentUserId(authentication);
-
-        List<StudentSessionDTO> results = tutorService.batchApproveStudentSessions(tutorId, studentSessionIds);
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Đã xử lý các yêu cầu đăng ký");
+        response.setMessage("Đã duyệt " + results.size() + " yêu cầu đăng ký");
         response.setData(results);
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Từ chối yêu cầu đăng ký (một hoặc nhiều)
+     * Dùng @RequestBody với List<Integer> để nhận danh sách ID của các yêu cầu đăng ký
+     * Nếu từ chối 1 người thì gửi list có 1 phần tử
+     *
+     * @param studentSessionIds Danh sách ID của các yêu cầu đăng ký (StudentSession)
+     */
+    @PutMapping("/student-sessions/reject")
+    public ResponseEntity<BaseResponse> rejectStudentSessions(@RequestBody List<Integer> studentSessionIds) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer tutorId = getCurrentUserId(authentication);
+
+        List<StudentSessionDTO> results = tutorService.rejectStudentSessions(tutorId, studentSessionIds);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Đã từ chối " + results.size() + " yêu cầu đăng ký");
+        response.setData(results);
+        return ResponseEntity.ok(response);
+    }
+
+
+    /**
+     * Lấy lịch giảng dạy trong tuần của tutor
+     * Tutor chỉ có thể xem lịch của chính mình (tutorId lấy từ token)
+     *
+     * @param weekOffset Offset tuần (0 = tuần hiện tại, 1 = tuần sau, -1 = tuần trước)
+     */
+    @GetMapping("/schedule/{weekOffset}")
+    public ResponseEntity<BaseResponse> getWeekSchedule(@PathVariable Integer weekOffset) {
+        // Lấy tutorId từ authentication (token)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer tutorId = getCurrentUserId(authentication);
+
+        List<SessionDTO> schedule = tutorService.getWeekSchedule(tutorId, weekOffset);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Lịch giảng dạy trong tuần lấy thành công");
+        response.setData(schedule);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    public ResponseEntity<BaseResponse> registerTutorProfile(
+            @RequestBody TutorProfileCreateRequest request
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer currentUserId = getCurrentUserId(authentication);
+        TutorDTO tutorProfile = tutorProfileService.registerTutorProfile(currentUserId, request);
+
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(201);
+        response.setMessage("Tutor profile created successfully");
+        response.setData(tutorProfile);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    /**
+     * Helper method để lấy user ID từ authentication
+     */
     private Integer getCurrentUserId(Authentication authentication) {
         return (Integer) authentication.getPrincipal();
     }

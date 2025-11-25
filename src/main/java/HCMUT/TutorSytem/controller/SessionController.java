@@ -4,7 +4,11 @@ import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.payload.request.SessionRequest;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
 import HCMUT.TutorSytem.service.SessionService;
+import HCMUT.TutorSytem.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/sessions")
@@ -21,15 +26,21 @@ public class SessionController {
     private SessionService sessionService;
 
     /**
-     * Get all sessions (without pagination)
+     * Get all sessions (with pagination)
+     * Mặc định: 10 items per page
+     *
+     * @param page Số trang (bắt đầu từ 0, mặc định = 0)
      */
     @GetMapping
-    public ResponseEntity<BaseResponse> getAllSessions() {
-        List<SessionDTO> sessions = sessionService.getAllSessions();
+    public ResponseEntity<BaseResponse> getAllSessions(@RequestParam(defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<SessionDTO> sessionsPage = sessionService.getAllSessions(pageable);
+        Map<String, Object> paginatedData = PaginationUtil.createPaginationResponse(sessionsPage);
+
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
         response.setMessage("Sessions retrieved successfully");
-        response.setData(sessions);
+        response.setData(paginatedData);
         return ResponseEntity.ok(response);
     }
 
@@ -103,6 +114,7 @@ public class SessionController {
         response.setData(null);
         return ResponseEntity.ok(response);
     }
+
 
     private Integer getCurrentUserId(Authentication authentication) {
         return (Integer) authentication.getPrincipal();

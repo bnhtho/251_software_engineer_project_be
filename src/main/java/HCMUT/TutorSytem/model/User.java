@@ -71,14 +71,12 @@ public class User {
     @OneToMany(mappedBy = "tutor")
     private Set<Session> sessions = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "student")
-    private Set<StudentSchedule> studentSchedules = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "user")
+    private Set<Schedule> schedules = new LinkedHashSet<>();
 
     @OneToOne(mappedBy = "user")
     private TutorProfile tutorProfile;
 
-    @OneToMany(mappedBy = "tutor")
-    private Set<TutorSchedule> tutorSchedules = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "student")
     private Set<StudentSession> studentSessions = new LinkedHashSet<>();

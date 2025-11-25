@@ -22,6 +22,8 @@ import HCMUT.TutorSytem.service.AdminService;
 import HCMUT.TutorSytem.service.StudentService;
 import HCMUT.TutorSytem.service.TutorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,16 +57,9 @@ public class AdminServiceImp implements AdminService {
 
     @Override
     @Transactional
-    public StudentDTO updateStudentProfileByAdmin(Integer userId, StudentProfileUpdateRequest request) {
-        // Admin can update any student profile
-        return studentService.updateStudentProfile(userId, request);
-    }
-
-    @Override
-    @Transactional
-    public void deleteStudentProfile(Integer userId) {
+    public void deleteUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Student not found with id: " + userId));
+                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
 
         // Soft delete: set status to INACTIVE
         Status inactiveStatus = statusRepository.findByName("INACTIVE")
@@ -72,39 +67,16 @@ public class AdminServiceImp implements AdminService {
 
         user.setStatus(inactiveStatus);
         userRepository.save(user);
+
+        // Log để biết đã xóa user nào (student hay tutor)
+        String userType = user.getRole() != null ? user.getRole() : "Unknown";
+        System.out.println("Admin deleted user profile - UserId: " + userId + ", Role: " + userType);
     }
 
     @Override
-    @Transactional
-    public TutorDetailDTO updateTutorProfileByAdmin(Integer userId, TutorProfileUpdateRequest request) {
-        // Admin can update any tutor profile
-        return tutorService.updateTutorProfile(userId, request);
-    }
-
-    @Override
-    @Transactional
-    public void deleteTutorProfile(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + userId));
-
-        // Check if tutor profile exists
-        tutorProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
-
-        // Soft delete: set status to INACTIVE
-        Status inactiveStatus = statusRepository.findByName("INACTIVE")
-                .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
-
-        user.setStatus(inactiveStatus);
-        userRepository.save(user);
-    }
-
-    @Override
-    public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(UserMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAll(pageable);
+        return usersPage.map(UserMapper::toDTO);
     }
 
     @Override
@@ -149,6 +121,15 @@ public class AdminServiceImp implements AdminService {
 
         // Map sang SessionDTO và trả về
         return SessionMapper.toDTO(session);
+    }
+
+    @Override
+    public Page<SessionDTO> getPendingSessions(Pageable pageable) {
+        // Lấy các session có status = PENDING (id = 1)
+        Page<Session> pendingSessionsPage = sessionRepository.findBySessionStatusId(SessionStatus.PENDING, pageable);
+
+        // Map sang SessionDTO
+        return pendingSessionsPage.map(SessionMapper::toDTO);
     }
 }
 
