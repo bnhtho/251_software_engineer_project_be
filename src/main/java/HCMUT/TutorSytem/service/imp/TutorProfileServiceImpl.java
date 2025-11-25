@@ -10,7 +10,7 @@ import HCMUT.TutorSytem.mapper.TutorProfileResponseMapper;
 import HCMUT.TutorSytem.model.Major;
 import HCMUT.TutorSytem.model.Subject;
 import HCMUT.TutorSytem.model.TutorProfile;
-import HCMUT.TutorSytem.Enum.TutorStatus;
+import HCMUT.TutorSytem.model.TutorStatus;
 import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.payload.request.TutorProfileCreateRequest;
 import HCMUT.TutorSytem.repo.MajorRepository;

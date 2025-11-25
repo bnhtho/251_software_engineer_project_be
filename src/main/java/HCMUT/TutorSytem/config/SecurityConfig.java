@@ -74,6 +74,11 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
 
+                    // Tutor profile registration
+                    request.requestMatchers(HttpMethod.POST, "/api/tutor-profiles").hasRole("STUDENT");
+                    request.requestMatchers(HttpMethod.PATCH, "/api/admin/tutor_profiles/**").hasRole("admin");
+                    request.requestMatchers(HttpMethod.GET, "/api/admin/tutor_profiles/**").hasRole("admin");
+
                     // 9. Default - AUTHENTICATED
                     // Tất cả requests khác yêu cầu authentication
                     request.anyRequest().authenticated();
