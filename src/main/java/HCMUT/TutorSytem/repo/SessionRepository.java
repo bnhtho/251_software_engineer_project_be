@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 @Repository
@@ -37,6 +39,8 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
      * Tìm sessions theo tutor ID
      */
     List<Session> findByTutorId(Integer tutorId);
+
+    Page<Session> findBySessionStatusId(Byte statusId, Pageable pageable);
 
         /**
          * Find tutor sessions within a specific time range with a given session status id.

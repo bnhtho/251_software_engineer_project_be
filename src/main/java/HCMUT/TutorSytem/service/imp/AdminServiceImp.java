@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,11 +102,38 @@ public class AdminServiceImp implements AdminService {
     }
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(UserMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAll(pageable);
+        return usersPage.map(UserMapper::toDTO);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserProfile(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
+
+        String role = user.getRole();
+        if (role == null) {
+            // default to soft delete
+            Status inactiveStatus = statusRepository.findByName("INACTIVE")
+                    .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
+            user.setStatus(inactiveStatus);
+            userRepository.save(user);
+            return;
+        }
+
+        if (role.equalsIgnoreCase("STUDENT")) {
+            deleteStudentProfile(userId);
+        } else if (role.equalsIgnoreCase("TUTOR")) {
+            deleteTutorProfile(userId);
+        } else {
+            // For other roles (ADMIN etc.) still allow soft delete
+            Status inactiveStatus = statusRepository.findByName("INACTIVE")
+                    .orElseThrow(() -> new DataNotFoundExceptions("Status INACTIVE not found"));
+            user.setStatus(inactiveStatus);
+            userRepository.save(user);
+        }
     }
 
     @Override
@@ -149,6 +178,12 @@ public class AdminServiceImp implements AdminService {
 
         // Map sang SessionDTO và trả về
         return SessionMapper.toDTO(session);
+    }
+
+    @Override
+    public Page<SessionDTO> getPendingSessions(Pageable pageable) {
+        Page<Session> page = sessionRepository.findBySessionStatusId(SessionStatus.PENDING, pageable);
+        return page.map(SessionMapper::toDTO);
     }
 }
 

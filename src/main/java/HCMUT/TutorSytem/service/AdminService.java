@@ -8,6 +8,8 @@ import HCMUT.TutorSytem.payload.request.StudentProfileUpdateRequest;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface AdminService {
     // Student management
@@ -19,9 +21,12 @@ public interface AdminService {
     void deleteTutorProfile(Integer userId);
 
     // User management
-    List<UserDTO> getAllUsers();
+    Page<UserDTO> getAllUsers(Pageable pageable);
+    void deleteUserProfile(Integer userId); // Admin delete either student or tutor profile
 
     // Session management
     SessionDTO updateSessionStatus(Integer sessionId, Integer adminId, String setStatus);
+
+    Page<SessionDTO> getPendingSessions(Pageable pageable);
 }
 
