@@ -67,4 +67,13 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
             @Param("startOfWeek") Instant startOfWeek,
             @Param("endOfWeek") Instant endOfWeek
     );
+
+    /**
+     * Tìm sessions theo status ID với phân trang
+     * @param statusId ID của status (PENDING = 1, SCHEDULED = 2, ...)
+     * @param pageable Thông tin phân trang
+     * @return Page of sessions
+     */
+    @Query("SELECT s FROM Session s WHERE s.sessionStatus.id = :statusId ORDER BY s.createdDate DESC")
+    Page<Session> findBySessionStatusId(@Param("statusId") Byte statusId, Pageable pageable);
 }

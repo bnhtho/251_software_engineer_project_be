@@ -20,5 +20,6 @@ public interface AdminService {
 
     // Session management
     SessionDTO updateSessionStatus(Integer sessionId, Integer adminId, String setStatus);
+    Page<SessionDTO> getPendingSessions(Pageable pageable); // Lấy danh sách session đang chờ duyệt
 }
 
