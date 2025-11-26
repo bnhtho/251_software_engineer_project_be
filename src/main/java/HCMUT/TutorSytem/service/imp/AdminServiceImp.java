@@ -122,14 +122,5 @@ public class AdminServiceImp implements AdminService {
         // Map sang SessionDTO và trả về
         return SessionMapper.toDTO(session);
     }
-
-    @Override
-    public Page<SessionDTO> getPendingSessions(Pageable pageable) {
-        // Lấy các session có status = PENDING (id = 1)
-        Page<Session> pendingSessionsPage = sessionRepository.findBySessionStatusId(SessionStatus.PENDING, pageable);
-
-        // Map sang SessionDTO
-        return pendingSessionsPage.map(SessionMapper::toDTO);
-    }
 }
 

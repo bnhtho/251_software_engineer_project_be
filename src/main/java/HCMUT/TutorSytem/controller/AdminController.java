@@ -71,26 +71,6 @@ public class AdminController {
     }
 
     /**
-     * Admin: Lấy danh sách các session đang chờ duyệt (with pagination)
-     * Chỉ lấy các session có status = PENDING
-     * Mặc định: 10 items per page
-     *
-     * @param page Số trang (bắt đầu từ 0, mặc định = 0)
-     */
-    @GetMapping("/sessions/pending")
-    public ResponseEntity<BaseResponse> getPendingSessions(@RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<SessionDTO> pendingSessionsPage = adminService.getPendingSessions(pageable);
-        Map<String, Object> paginatedData = PaginationUtil.createPaginationResponse(pendingSessionsPage);
-
-        BaseResponse response = new BaseResponse();
-        response.setStatusCode(200);
-        response.setMessage("Pending sessions retrieved successfully");
-        response.setData(paginatedData);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
      * Admin: Approve hoặc Reject Session
      *
      * URL: /admin/sessions/{sessionId}?setStatus=SCHEDULED (approve)
@@ -173,3 +153,4 @@ public class AdminController {
         return (Integer) authentication.getPrincipal();
     }
 }
+

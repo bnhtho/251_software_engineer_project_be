@@ -6,7 +6,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 {
   "statusCode": 200,
   "message": "Success message",
-  "data": { ... }
+  "data": {}
 }
 ```
 
@@ -38,18 +38,20 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 - **Request Body** (`LoginRequest`):
 ```json
 {
-  "email": "string",        // Required
-  "password": "string"      // Required
+  "email": "string",
+  "password": "string"
 }
 ```
+**Lưu ý**: email và password đều Required
 - **Response Success** (200):
 ```json
 {
   "statusCode": 200,
   "message": "Login successful",
-  "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // JWT token
+  "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
+**Lưu ý**: `data` là JWT token để sử dụng cho các request khác
 - **Response Error** (401):
 ```json
 {
@@ -131,46 +133,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 }
 ```
 
-### 2.3. Lấy danh sách sessions đang chờ duyệt (có phân trang)
-- **Endpoint**: `GET /admin/sessions/pending?page={page}`
-- **Quyền**: ROLE_ADMIN
-- **Query Params**: 
-  - `page` (int, default = 0): Số trang (bắt đầu từ 0)
-- **Response Success** (200): Pagination object chứa `SessionDTO[]`
-```json
-{
-  "statusCode": 200,
-  "message": "Pending sessions retrieved successfully",
-  "data": {
-    "content": [
-      {
-        "id": 1,
-        "tutorName": "string",
-        "studentNames": [],
-        "subjectName": "string",
-        "startTime": "2024-01-01T10:00:00Z",
-        "endTime": "2024-01-01T12:00:00Z",
-        "format": "string",
-        "location": "string",
-        "maxQuantity": 10,
-        "currentQuantity": 0,
-        "updatedDate": "2024-01-01T00:00:00Z"
-      }
-    ],
-    "pagination": {
-      "currentPage": 0,
-      "totalPages": 5,
-      "totalItems": 50,
-      "pageSize": 10,
-      "hasNext": true,
-      "hasPrevious": false
-    }
-  }
-}
-```
-- **Mô tả**: Lấy danh sách các session có status = PENDING (chờ admin duyệt), sắp xếp theo ngày tạo mới nhất
-
-### 2.4. Duyệt hoặc từ chối Session
+### 2.3. Duyệt hoặc từ chối Session
 - **Endpoint**: `PUT /admin/sessions/{sessionId}?setStatus={status}`
 - **Quyền**: ROLE_ADMIN
 - **Path Variable**: `sessionId` (Integer) - ID của session cần duyệt/từ chối
@@ -180,7 +143,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 ```json
 {
   "statusCode": 200,
-  "message": "Session approved successfully", // hoặc "Session rejected"
+  "message": "Session approved successfully",
   "data": {
     "id": 1,
     "tutorName": "string",
@@ -281,7 +244,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 }
 ```
 
-### 2.6. Duyệt tutor profile
+### 2.5. Duyệt tutor profile
 - **Endpoint**: `PATCH /admin/{userId}/approve`
 - **Quyền**: ROLE_ADMIN
 - **Path Variable**: `userId` (Integer) - ID của user (tutor) cần duyệt
@@ -298,8 +261,8 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
     "totalSessionsCompleted": 10,
     "isAvailable": true,
     "status": "APPROVED",
-    "subjects": [...],
-    "user": {...}
+    "subjects": [],
+    "user": {}
   }
 }
 ```
@@ -321,7 +284,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 ```
 - **Mô tả**: Duyệt profile của tutor, set status = APPROVED
 
-### 2.7. Từ chối tutor profile
+### 2.6. Từ chối tutor profile
 - **Endpoint**: `PATCH /admin/{userId}/reject`
 - **Quyền**: ROLE_ADMIN
 - **Path Variable**: `userId` (Integer) - ID của user (tutor) cần từ chối
@@ -338,8 +301,8 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
     "totalSessionsCompleted": 10,
     "isAvailable": true,
     "status": "REJECTED",
-    "subjects": [...],
-    "user": {...}
+    "subjects": [],
+    "user": {}
   }
 }
 ```
@@ -404,13 +367,19 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 - **Request Body** (`TutorProfileCreateRequest`):
 ```json
 {
-  "title": "string",                  // Optional - Học vị/chức danh
-  "majorId": 1,                       // Required - ID của chuyên ngành
-  "description": "string",            // Optional - Mô tả về tutor
-  "subjects": [1, 2, 3],             // Required - Danh sách ID môn học
-  "experienceYears": 3                // Optional - Số năm kinh nghiệm
+  "title": "string",
+  "majorId": 1,
+  "description": "string",
+  "subjects": [1, 2, 3],
+  "experienceYears": 3
 }
 ```
+**Lưu ý**: 
+- `majorId` và `subjects` là Required
+- `title`, `description`, `experienceYears` là Optional
+- `title`: Học vị/chức danh
+- `description`: Mô tả về tutor
+- `experienceYears`: Số năm kinh nghiệm
 - **Response Success** (201):
 ```json
 {
@@ -421,10 +390,13 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
     "hcmutId": "string",
     "firstName": "string",
     "lastName": "string",
-    // ... (giống TutorDTO)
-    "status": "PENDING"  // Mặc định là PENDING, chờ admin duyệt
+    "status": "PENDING"
   }
 }
+```
+**Lưu ý**: 
+- Response data giống TutorDTO
+- `status` mặc định là PENDING, chờ admin duyệt
 ```
 - **Response Error** (404 - Major not found):
 ```json
@@ -525,30 +497,41 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 - **Request Body** (`TutorProfileUpdateRequest`):
 ```json
 {
-  "firstName": "string",              // Optional
-  "lastName": "string",               // Optional
-  "profileImage": "string",           // Optional - URL ảnh đại diện
-  "academicStatus": "string",         // Optional - Trạng thái học vấn
-  "dob": "2000-01-01",               // Optional - Ngày sinh
-  "phone": "string",                  // Optional - Số điện thoại
-  "otherMethodContact": "string",     // Optional - Phương thức liên hệ khác
-  "majorId": 1,                       // Optional - ID chuyên ngành
-  "bio": "string",                    // Optional - Tiểu sử/giới thiệu
-  "subjectIds": [1, 2, 3],           // Optional - Danh sách ID môn học
-  "experienceYears": 3,               // Optional - Số năm kinh nghiệm
-  "isAvailable": true                 // Optional - Trạng thái sẵn sàng
+  "firstName": "string",
+  "lastName": "string",
+  "profileImage": "string",
+  "academicStatus": "string",
+  "dob": "2000-01-01",
+  "phone": "string",
+  "otherMethodContact": "string",
+  "majorId": 1,
+  "bio": "string",
+  "subjectIds": [1, 2, 3],
+  "experienceYears": 3,
+  "isAvailable": true
 }
 ```
+**Lưu ý**: Tất cả các trường đều Optional
+- `profileImage`: URL ảnh đại diện
+- `academicStatus`: Trạng thái học vấn
+- `dob`: Ngày sinh (LocalDate)
+- `phone`: Số điện thoại
+- `otherMethodContact`: Phương thức liên hệ khác
+- `majorId`: ID chuyên ngành
+- `bio`: Tiểu sử/giới thiệu
+- `subjectIds`: Danh sách ID môn học
+- `experienceYears`: Số năm kinh nghiệm
+- `isAvailable`: Trạng thái sẵn sàng
+
 - **Response Success** (200):
 ```json
 {
   "statusCode": 200,
   "message": "Tutor profile updated successfully",
-  "data": {
-    // TutorDetailDTO (giống 3.3)
-  }
+  "data": {}
 }
 ```
+**Lưu ý**: Response data là TutorDetailDTO (giống 3.3)
 - **Response Error** (404 - User not found):
 ```json
 {
@@ -638,8 +621,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
       "studentName": "string",
       "sessionId": 1,
       "status": "CONFIRMED",
-      "confirmedDate": "2024-01-01T10:00:00Z",
-      // ... (StudentSessionDTO)
+      "confirmedDate": "2024-01-01T10:00:00Z"
     }
   ]
 }
@@ -705,15 +687,14 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 ```json
 {
   "statusCode": 200,
-  "message": "Đã từ chối {n} yêu cầu đăng ký",  // n = số lượng yêu cầu đã từ chối (results.size())
+  "message": "Đã từ chối {n} yêu cầu đăng ký",
   "data": [
     {
       "id": 1,
       "studentId": 1,
       "studentName": "string",
       "sessionId": 1,
-      "status": "REJECTED",
-      // ... (StudentSessionDTO)
+      "status": "REJECTED"
     }
   ]
 }
@@ -733,7 +714,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 {
   "statusCode": 200,
   "message": "Lịch giảng dạy trong tuần lấy thành công",
-  "data": [  // List<SessionDTO> trực tiếp, KHÔNG có phân trang
+  "data": [
     {
       "id": 1,
       "tutorName": "string",
@@ -806,26 +787,33 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 - **Request Body** (`StudentProfileUpdateRequest`):
 ```json
 {
-  "firstName": "string",              // Optional
-  "lastName": "string",               // Optional
-  "profileImage": "string",           // Optional - URL ảnh đại diện
-  "academicStatus": "string",         // Optional - Trạng thái học vấn
-  "dob": "2000-01-01",               // Optional - Ngày sinh (LocalDate)
-  "phone": "string",                  // Optional - Số điện thoại
-  "otherMethodContact": "string",     // Optional - Phương thức liên hệ khác
-  "majorId": 1                        // Optional - ID chuyên ngành
+  "firstName": "string",
+  "lastName": "string",
+  "profileImage": "string",
+  "academicStatus": "string",
+  "dob": "2000-01-01",
+  "phone": "string",
+  "otherMethodContact": "string",
+  "majorId": 1
 }
 ```
+**Lưu ý**: Tất cả các trường đều Optional
+- `profileImage`: URL ảnh đại diện
+- `academicStatus`: Trạng thái học vấn
+- `dob`: Ngày sinh (LocalDate)
+- `phone`: Số điện thoại
+- `otherMethodContact`: Phương thức liên hệ khác
+- `majorId`: ID chuyên ngành
+
 - **Response Success** (200):
 ```json
 {
   "statusCode": 200,
   "message": "Student profile updated successfully",
-  "data": {
-    // StudentDTO (giống 4.1)
-  }
+  "data": {}
 }
 ```
+**Lưu ý**: Response data là StudentDTO (giống 4.1)
 - **Response Error** (404 - Student not found):
 ```json
 {
@@ -1010,7 +998,7 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 {
   "statusCode": 200,
   "message": "Lịch học trong tuần lấy thành công",
-  "data": [  // List<StudentSessionDTO> trực tiếp, KHÔNG có phân trang
+  "data": [
     {
       "id": 1,
       "studentId": 1,
@@ -1083,16 +1071,22 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 - **Request Body** (`SessionRequest`):
 ```json
 {
-  "tutorId": 1,                       // Required - ID của tutor
-  "subjectId": 1,                     // Required - ID của môn học
-  "startTime": "2024-01-01T10:00:00Z", // Required - Thời gian bắt đầu (Instant)
-  "endTime": "2024-01-01T12:00:00Z",   // Required - Thời gian kết thúc (Instant)
-  "format": "string",                 // Optional - Hình thức (online/offline)
-  "location": "string",               // Optional - Địa điểm
-  "maxQuantity": 10,                  // Optional - Số lượng tối đa (default = 50)
-  "dayOfWeek": 1,                     // Optional - 0=Chủ nhật, 1=Thứ hai, ..., 6=Thứ bảy
-  "sessionStatusId": 1                // Optional - ID trạng thái session
+  "tutorId": 1,
+  "subjectId": 1,
+  "startTime": "2024-01-01T10:00:00Z",
+  "endTime": "2024-01-01T12:00:00Z",
+  "format": "string",
+  "location": "string",
+  "maxQuantity": 10,
+  "dayOfWeek": 1,
+  "sessionStatusId": 1
 }
+```
+**Lưu ý**: 
+- Required: `tutorId`, `subjectId`, `startTime`, `endTime`
+- Optional: `format`, `location`, `maxQuantity` (default=50), `dayOfWeek`, `sessionStatusId`
+- `startTime`, `endTime`: Thời gian (Instant)
+- `dayOfWeek`: 0=Chủ nhật, 1=Thứ hai, ..., 6=Thứ bảy
 ```
 - **Response Success** (200):
 ```json
@@ -1163,15 +1157,15 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 - **Request Body** (`SessionRequest`): giống như tạo mới, tất cả các field đều optional
 ```json
 {
-  "tutorId": 1,                       // Optional
-  "subjectId": 1,                     // Optional
-  "startTime": "2024-01-01T10:00:00Z", // Optional
-  "endTime": "2024-01-01T12:00:00Z",   // Optional
-  "format": "string",                 // Optional
-  "location": "string",               // Optional
-  "maxQuantity": 10,                  // Optional
-  "dayOfWeek": 1,                     // Optional
-  "sessionStatusId": 1                // Optional
+  "tutorId": 1,
+  "subjectId": 1,
+  "startTime": "2024-01-01T10:00:00Z",
+  "endTime": "2024-01-01T12:00:00Z",
+  "format": "string",
+  "location": "string",
+  "maxQuantity": 10,
+  "dayOfWeek": 1,
+  "sessionStatusId": 1
 }
 ```
 - **Response Success** (200):
@@ -1179,11 +1173,10 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 {
   "statusCode": 200,
   "message": "Session updated successfully",
-  "data": {
-    // SessionDTO
-  }
+  "data": {}
 }
 ```
+**Lưu ý**: Response data là SessionDTO
 - **Response Error** (404 - Session not found):
 ```json
 {
@@ -1377,17 +1370,25 @@ Tất cả các response đều có cấu trúc theo `BaseResponse`:
 Hầu hết các endpoint có phân trang đều trả về cấu trúc sau trong `data`:
 ```json
 {
-  "content": [...],  // Mảng các object theo DTO tương ứng
+  "content": [],
   "pagination": {
-    "currentPage": 0,        // Trang hiện tại (bắt đầu từ 0)
-    "totalPages": 10,        // Tổng số trang
-    "totalItems": 100,       // Tổng số phần tử
-    "pageSize": 10,          // Số phần tử mỗi trang
-    "hasNext": true,         // Còn trang tiếp theo?
-    "hasPrevious": false     // Có trang trước đó?
+    "currentPage": 0,
+    "totalPages": 10,
+    "totalItems": 100,
+    "pageSize": 10,
+    "hasNext": true,
+    "hasPrevious": false
   }
 }
 ```
+**Lưu ý**:
+- `content`: Mảng các object theo DTO tương ứng
+- `currentPage`: Trang hiện tại (bắt đầu từ 0)
+- `totalPages`: Tổng số trang
+- `totalItems`: Tổng số phần tử
+- `pageSize`: Số phần tử mỗi trang
+- `hasNext`: Còn trang tiếp theo?
+- `hasPrevious`: Có trang trước đó?
 
 **Áp dụng cho**:
 - GET /admin/users
@@ -1401,13 +1402,13 @@ Hầu hết các endpoint có phân trang đều trả về cấu trúc sau tron
 Một số endpoint trả về `Page<T>` trực tiếp (KHÔNG qua PaginationUtil):
 ```json
 {
-  "content": [...],
-  "pageable": {...},
+  "content": [],
+  "pageable": {},
   "totalPages": 10,
   "totalElements": 100,
   "size": 10,
   "number": 0,
-  "sort": {...},
+  "sort": {},
   "numberOfElements": 10,
   "first": true,
   "last": false,
@@ -1451,10 +1452,10 @@ Một số endpoint trả về `Page<T>` trực tiếp (KHÔNG qua PaginationUti
 ## Thống kê API Endpoints
 
 ### Tổng quan
-- **Tổng số endpoints**: 32
+- **Tổng số endpoints**: 31
 - **Phân loại theo module**:
   - Authentication: 1 endpoint
-  - Admin: 7 endpoints
+  - Admin: 6 endpoints
   - Tutor: 8 endpoints  
   - Student: 6 endpoints
   - Session: 4 endpoints
@@ -1493,11 +1494,10 @@ Một số endpoint trả về `Page<T>` trực tiếp (KHÔNG qua PaginationUti
   - PUT /sessions/{id}
   - DELETE /sessions/{id}
 
-- **ROLE_ADMIN**: 7 endpoints
+- **ROLE_ADMIN**: 6 endpoints
   - /admin/** (tất cả admin endpoints)
   - DELETE /admin/users/{userId}
   - GET /admin/users
-  - GET /admin/sessions/pending
   - PUT /admin/sessions/{sessionId}
   - GET /admin/tutor/pending
   - PATCH /admin/{userId}/approve
