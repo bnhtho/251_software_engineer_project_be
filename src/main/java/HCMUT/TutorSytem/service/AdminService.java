@@ -11,6 +11,7 @@ public interface AdminService {
 
     // User management
     Page<UserDTO> getAllUsers(Pageable pageable); // Chỉ dùng pagination
+    UserDTO getUserProfile(Integer userId); // Lấy thông tin profile của user theo userId
 
     // Session management
     SessionDTO updateSessionStatus(Integer sessionId, Integer adminId, String setStatus);

@@ -69,6 +69,13 @@ public class AdminServiceImp implements AdminService {
     }
 
     @Override
+    public UserDTO getUserProfile(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
+        return UserMapper.toDTO(user);
+    }
+
+    @Override
     @Transactional
     public SessionDTO updateSessionStatus(Integer sessionId, Integer adminId, String setStatus) {
         // Kiểm tra quyền admin

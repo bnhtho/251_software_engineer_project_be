@@ -1,394 +1,295 @@
-# So sánh API Documentation vs Code thực tế
-
-> **Ngày tạo:** 27/11/2025
-> 
-> **File được so sánh:**
-> - `API_ENDPOINTS_DOCUMENTATION.md` (Tài liệu cũ)
-> - `ACTUAL_API_ENDPOINTS.md` (Code thực tế từ Controllers)
-
----
+# So sánh API Endpoints: ACTUAL vs DOCUMENTATION
 
 ## Tổng quan
-
-| Tiêu chí | API_ENDPOINTS_DOCUMENTATION.md | Code thực tế |
-|----------|-------------------------------|--------------|
-| **Tổng số endpoints** | ~43 endpoints | 37 endpoints |
-| **Số Controllers** | 10 controllers | 10 controllers |
-| **Có pagination** | Có | Có (chuẩn hơn) |
-| **Response format** | BaseResponse | BaseResponse |
+File này so sánh sự khác biệt giữa:
+- **ACTUAL_API_ENDPOINTS.md**: API thực tế từ code AdminController.java
+- **API_ENDPOINTS_DOCUMENTATION.md**: Tài liệu API đã có trước đó
 
 ---
 
-## Chi tiết từng Controller
+## 1. Endpoint: Xóa user
 
-### 1. AuthenticationController (`/auth`)
+### ✅ GIỐNG NHAU
+- **HTTP Method**: `DELETE`
+- **Path**: `/admin/users/{userId}`
+- **Quyền**: ROLE_ADMIN
+- **Response structure**: Giống nhau
 
-#### ✅ Giống nhau:
-- `POST /auth/login` - Đăng nhập
-
-#### ⚠️ Khác biệt:
-- **Documentation:** Không có mô tả chi tiết
-- **Code thực tế:** Có đầy đủ request/response structure
-
-#### ❌ Thiếu trong code:
-- Không có endpoint nào bị thiếu
+### ⚠️ KHÁC BIỆT
+**Không có khác biệt**
 
 ---
 
-### 2. AdminController (`/admin`)
+## 2. Endpoint: Lấy danh sách users
 
-#### ✅ Giống nhau:
-- `DELETE /admin/users/{userId}` - Xóa user
-- `GET /admin/users` - Lấy danh sách users
-- `GET /admin/sessions/pending` - Lấy sessions đang chờ duyệt
-- `PUT /admin/sessions/{sessionId}` - Duyệt/từ chối session
-- `GET /admin/tutor/pending` - Lấy tutors đang chờ duyệt
-- `PATCH /admin/{userId}/approve` - Duyệt tutor
-- `PATCH /admin/{userId}/reject` - Từ chối tutor
+### ✅ GIỐNG NHAU
+- **HTTP Method**: `GET`
+- **Path**: `/admin/users`
+- **Query param**: `page` (default = 0)
+- **Quyền**: ROLE_ADMIN
+- **Response structure**: Giống nhau (sử dụng PaginationUtil)
+- **Page size**: 10 items
 
-#### ⚠️ Khác biệt:
-
-**1. `DELETE /admin/users/{userId}`**
-- **Documentation:** 
-  - Có 2 endpoints riêng: `/admin/students/{studentId}` và `/admin/tutors/{tutorId}`
-  - Cần chỉ định rõ student hay tutor
-- **Code thực tế:** 
-  - Chỉ có 1 endpoint chung: `/admin/users/{userId}`
-  - Tự động xác định student/tutor dựa trên role trong database
-  - **Đơn giản hơn và linh hoạt hơn**
-
-**2. `PUT /admin/sessions/{sessionId}`**
-- **Documentation:** 
-  - Query param: `action=approve` hoặc `action=reject`
-- **Code thực tế:**
-  - Query param: `setStatus=SCHEDULED` hoặc `setStatus=CANCELLED`
-  - **Rõ ràng hơn về trạng thái**
-
-**3. `GET /admin/tutor/pending`**
-- **Documentation:** 
-  - Response: Array of TutorDTO
-- **Code thực tế:**
-  - Response: Page<TutorProfileResponse> (có pagination)
-  - **Chuẩn hơn với pagination**
-
-#### ❌ Thiếu trong code:
-- Không có endpoint nào trong documentation bị thiếu
+### ⚠️ KHÁC BIỆT
+**Không có khác biệt**
 
 ---
 
-### 3. DepartmentController (`/departments`)
+## 3. Endpoint: Lấy thông tin chi tiết user theo userId
 
-#### ✅ Giống nhau:
-- `GET /departments` - Lấy danh sách departments
+### ✅ MỚI THÊM (KHÔNG CÓ TRONG API_ENDPOINTS_DOCUMENTATION.md)
 
-#### ⚠️ Khác biệt:
-- **Documentation:** Không có chi tiết
-- **Code thực tế:** Có đầy đủ response structure với DepartmentDTO
+- **HTTP Method**: `GET`
+- **Path**: `/admin/users/{userId}`
+- **Quyền**: ROLE_ADMIN
+- **Path Variable**: `userId` (Integer)
+- **Response Success** (200):
+```json
+{
+  "statusCode": 200,
+  "message": "User profile retrieved successfully",
+  "data": {
+    "id": 1,
+    "hcmutId": "string",
+    "firstName": "string",
+    "lastName": "string",
+    "profileImage": "string",
+    "academicStatus": "string",
+    "dob": "2000-01-01",
+    "phone": "string",
+    "otherMethodContact": "string",
+    "role": "string",
+    "majorId": 1,
+    "majorName": "string",
+    "department": "string",
+    "statusId": 1,
+    "statusName": "string",
+    "createdDate": "2024-01-01T00:00:00Z",
+    "updateDate": "2024-01-01T00:00:00Z",
+    "lastLogin": "2024-01-01T00:00:00Z"
+  }
+}
+```
+- **Response Error** (404):
+```json
+{
+  "statusCode": 404,
+  "message": "User not found with id: {userId}",
+  "data": null
+}
+```
 
----
-
-### 4. MajorController (`/majors`)
-
-#### ✅ Giống nhau:
-- `GET /majors` - Lấy tất cả majors
-- `GET /majors/by-department/{departmentId}` - Lấy majors theo department
-
-#### ⚠️ Khác biệt:
-- **Documentation:** Response không rõ structure
-- **Code thực tế:** Response đầy đủ với MajorDTO (có departmentId, departmentName, majorCode, programCode, note)
-
----
-
-### 5. SessionController (`/sessions`)
-
-#### ✅ Giống nhau:
-- `GET /sessions` - Lấy danh sách sessions
-- `POST /sessions` - Tạo session mới
-- `PUT /sessions/{id}` - Cập nhật session
-- `DELETE /sessions/{id}` - Xóa session
-
-#### ⚠️ Khác biệt:
-
-**1. `GET /sessions`**
-- **Documentation:** 
-  - Có filter: `status`, `tutorId`, `subjectId`
-- **Code thực tế:**
-  - Không có filter parameters
-  - Chỉ có pagination
-  - **⚠️ CẦN BỔ SUNG filter trong code**
-
-**2. `PUT /sessions/{id}` và `DELETE /sessions/{id}`**
-- **Documentation:** 
-  - Không đề cập ownership check
-- **Code thực tế:**
-  - Có kiểm tra ownership: chỉ tutor tạo session mới được update/delete
-  - Response 403 nếu không phải owner
-  - **Bảo mật tốt hơn**
-
----
-
-### 6. SessionStatusController (`/session-statuses`)
-
-#### ✅ Giống nhau:
-- `GET /session-statuses` - Lấy danh sách session statuses
-
-#### ⚠️ Khác biệt:
-- **Documentation:** Không có chi tiết
-- **Code thực tế:** Response đầy đủ với SessionStatusDTO
+**📝 GHI CHÚ**: 
+- Endpoint này **MỚI ĐƯỢC THÊM** vào code thực tế
+- File `API_ENDPOINTS_DOCUMENTATION.md` **KHÔNG CÓ** endpoint này
+- Endpoint này được tạo theo yêu cầu "thêm endpoint get profile cho admin"
 
 ---
 
-### 7. StudentController (`/students`)
+## 4. Endpoint: Lấy danh sách sessions pending
 
-#### ✅ Giống nhau:
-- `GET /students/profile` - Xem profile
-- `PUT /students/profile` - Cập nhật profile
-- `GET /students/history` - Xem lịch sử sessions
-- `GET /students/available-sessions` - Xem sessions khả dụng
-- `POST /students/register-session` - Đăng ký session
-- `GET /students/schedule/{weekOffset}` - Xem lịch học tuần
+### ✅ GIỐNG NHAU
+- **HTTP Method**: `GET`
+- **Path**: `/admin/sessions/pending`
+- **Query param**: `page` (default = 0)
+- **Quyền**: ROLE_ADMIN
+- **Response structure**: Giống nhau (sử dụng PaginationUtil)
+- **Page size**: 10 items
 
-#### ⚠️ Khác biệt:
-
-**1. `GET /students/profile`**
-- **Documentation:** 
-  - Endpoint: `GET /students/{studentId}/profile`
-  - StudentId trong URL
-- **Code thực tế:**
-  - Endpoint: `GET /students/profile`
-  - StudentId lấy từ token authentication
-  - **Bảo mật hơn, student chỉ xem được profile của mình**
-
-**2. `PUT /students/profile`**
-- **Documentation:** 
-  - Endpoint: `PUT /students/{studentId}/profile`
-- **Code thực tế:**
-  - Endpoint: `PUT /students/profile`
-  - StudentId lấy từ token
-  - **Bảo mật hơn**
-
-**3. `GET /students/history`**
-- **Documentation:** 
-  - Endpoint: `GET /students/{studentId}/history`
-- **Code thực tế:**
-  - Endpoint: `GET /students/history`
-  - StudentId lấy từ token
-  - **Bảo mật hơn**
-
-**4. `POST /students/register-session`**
-- **Documentation:** 
-  - Request body có `studentId` và `sessionId`
-- **Code thực tế:**
-  - Chỉ cần `sessionId` trong query param
-  - StudentId lấy từ token
-  - **Đơn giản hơn và bảo mật hơn**
-
-**5. `GET /students/schedule/{weekOffset}`**
-- **Documentation:** 
-  - Endpoint: `GET /students/{studentId}/schedule/{weekOffset}`
-- **Code thực tế:**
-  - Endpoint: `GET /students/schedule/{weekOffset}`
-  - StudentId lấy từ token
-  - **Bảo mật hơn**
-
-#### ❌ Thiếu trong code:
-- Không có endpoint nào bị thiếu
+### ⚠️ KHÁC BIỆT
+**Không có khác biệt**
 
 ---
 
-### 8. StudentSessionStatusController (`/student-session-statuses`)
+## 5. Endpoint: Duyệt/từ chối Session
 
-#### ✅ Giống nhau:
-- `GET /student-session-statuses` - Lấy danh sách student session statuses
+### ✅ GIỐNG NHAU
+- **HTTP Method**: `PUT`
+- **Path**: `/admin/sessions/{sessionId}`
+- **Query param**: `setStatus` (required)
+- **Quyền**: ROLE_ADMIN
+- **Response structure**: Giống nhau
+- **Logic**: 
+  - `setStatus=SCHEDULED` → approve
+  - `setStatus=CANCELLED` → reject
 
-#### ⚠️ Khác biệt:
-- **Documentation:** Không có chi tiết
-- **Code thực tế:** Response đầy đủ với StudentSessionStatusDTO
-
----
-
-### 9. SubjectController (`/subjects`)
-
-#### ✅ Giống nhau:
-- `GET /subjects` - Lấy danh sách subjects
-
-#### ⚠️ Khác biệt:
-- **Documentation:** Không có chi tiết
-- **Code thực tế:** Response đầy đủ với SubjectDTO
+### ⚠️ KHÁC BIỆT
+**Không có khác biệt**
 
 ---
 
-### 10. TutorController (`/tutors`)
+## 6. Endpoint: Lấy danh sách tutor pending
 
-#### ✅ Giống nhau:
-- `GET /tutors` - Lấy danh sách tutors
-- `GET /tutors/profile` - Xem profile chi tiết
-- `PUT /tutors/profile` - Cập nhật profile
-- `GET /tutors/pending-registrations` - Xem yêu cầu đăng ký chờ duyệt
-- `PUT /tutors/student-sessions/approve` - Duyệt yêu cầu đăng ký
-- `PUT /tutors/student-sessions/reject` - Từ chối yêu cầu đăng ký
-- `GET /tutors/schedule/{weekOffset}` - Xem lịch giảng dạy
-- `POST /tutors` - Đăng ký làm tutor
+### ✅ GIỐNG NHAU
+- **HTTP Method**: `GET`
+- **Path**: `/admin/tutor/pending`
+- **Query param**: `page` (default = 0)
+- **Quyền**: ROLE_ADMIN
+- **Page size**: 10 items
 
-#### ⚠️ Khác biệt:
+### ⚠️ KHÁC BIỆT
 
-**1. `GET /tutors`**
-- **Documentation:** 
-  - Có filter: `subjectId`, `minRating`, `maxPrice`
-- **Code thực tế:**
-  - Không có filter parameters
-  - Chỉ có pagination
-  - **⚠️ CẦN BỔ SUNG filter trong code**
+#### Trong API_ENDPOINTS_DOCUMENTATION.md (Section 2.4):
+```markdown
+### 2.4. Lấy danh sách tutor pending (chờ duyệt)
+```
 
-**2. `GET /tutors/profile`**
-- **Documentation:** 
-  - Endpoint: `GET /tutors/{tutorId}`
-  - TutorId trong URL
-  - Public endpoint (ai cũng xem được)
-- **Code thực tế:**
-  - Endpoint: `GET /tutors/profile`
-  - TutorId lấy từ token
-  - Chỉ tutor xem được profile của chính mình
-  - **Khác hoàn toàn về mục đích sử dụng**
+#### Trong ACTUAL_API_ENDPOINTS.md (Section 6):
+```markdown
+### 6. Lấy danh sách tutor pending (chờ duyệt)
+```
 
-**3. `PUT /tutors/profile`**
-- **Documentation:** 
-  - Endpoint: `PUT /tutors/{tutorId}`
-- **Code thực tế:**
-  - Endpoint: `PUT /tutors/profile`
-  - TutorId lấy từ token
-  - **Bảo mật hơn**
-
-**4. `GET /tutors/pending-registrations`**
-- **Documentation:** 
-  - Endpoint: `GET /tutors/{tutorId}/pending-students`
-- **Code thực tế:**
-  - Endpoint: `GET /tutors/pending-registrations`
-  - TutorId lấy từ token
-  - **Bảo mật hơn**
-
-**5. `PUT /tutors/student-sessions/approve`**
-- **Documentation:** 
-  - Endpoint: `PUT /tutors/{tutorId}/students/approve`
-  - Request body có `studentIds`
-- **Code thực tế:**
-  - Endpoint: `PUT /tutors/student-sessions/approve`
-  - Request body: array of `studentSessionIds` (không phải studentIds)
-  - TutorId lấy từ token
-  - **Chính xác hơn vì approve StudentSession, không phải Student**
-
-**6. `PUT /tutors/student-sessions/reject`**
-- **Documentation:** 
-  - Endpoint: `PUT /tutors/{tutorId}/students/reject`
-  - Request body có `studentIds`
-- **Code thực tế:**
-  - Endpoint: `PUT /tutors/student-sessions/reject`
-  - Request body: array of `studentSessionIds`
-  - TutorId lấy từ token
-  - **Chính xác hơn**
-
-**7. `GET /tutors/schedule/{weekOffset}`**
-- **Documentation:** 
-  - Endpoint: `GET /tutors/{tutorId}/schedule/{weekOffset}`
-- **Code thực tế:**
-  - Endpoint: `GET /tutors/schedule/{weekOffset}`
-  - TutorId lấy từ token
-  - **Bảo mật hơn**
-
-**8. `POST /tutors`**
-- **Documentation:** 
-  - Endpoint: `POST /tutors/{userId}/register` hoặc tương tự
-- **Code thực tế:**
-  - Endpoint: `POST /tutors`
-  - UserId lấy từ token
-  - Request body: TutorProfileCreateRequest
-  - **Đơn giản và chuẩn RESTful hơn**
-
-#### ❌ Thiếu trong code:
-- **`GET /tutors/{tutorId}`** - Public endpoint để xem chi tiết 1 tutor cụ thể
-  - **⚠️ CẦN BỔ SUNG: Endpoint public để student/guest xem chi tiết tutor**
+**📝 GHI CHÚ**: 
+- Chỉ khác số thứ tự section (2.4 vs 6)
+- **Cấu trúc response khác nhau**:
+  - DOCUMENTATION: Mô tả là "Page of TutorProfileResponse (Spring Data Page format)"
+  - ACTUAL: Xác nhận trả về Spring Data Page format với đầy đủ các field: `content`, `pageable`, `totalPages`, `totalElements`, `size`, `number`, `sort`, `numberOfElements`, `first`, `last`, `empty`
 
 ---
 
-## Tổng kết các điểm khác biệt chính
+## 7. Endpoint: Duyệt tutor profile
 
-### 1. **Cách lấy userId/studentId/tutorId**
+### ✅ GIỐNG NHAU
+- **HTTP Method**: `PATCH`
+- **Path**: `/admin/{userId}/approve`
+- **Quyền**: ROLE_ADMIN
+- **Path Variable**: `userId` (Integer)
+- **Response structure**: Giống nhau
+- **Logic**: Set status = APPROVED
 
-| API Documentation | Code thực tế |
-|-------------------|--------------|
-| Truyền trong URL path: `/students/{studentId}/profile` | Lấy từ token authentication: `/students/profile` |
-| ❌ Có thể truy cập dữ liệu của người khác | ✅ Chỉ truy cập dữ liệu của chính mình |
-| Kém bảo mật | **Bảo mật tốt hơn** |
+### ⚠️ KHÁC BIỆT
 
-### 2. **Pagination**
+#### Trong API_ENDPOINTS_DOCUMENTATION.md (Section 2.6):
+```markdown
+### 2.6. Duyệt tutor profile
+```
 
-| API Documentation | Code thực tế |
-|-------------------|--------------|
-| Không rõ ràng về format | Chuẩn với cấu trúc: `{content, page, size, totalElements, totalPages}` |
-| Một số endpoint không có pagination | Hầu hết list endpoint đều có pagination |
+#### Trong ACTUAL_API_ENDPOINTS.md (Section 7):
+```markdown
+### 7. Duyệt tutor profile
+```
 
-### 3. **Admin endpoints**
-
-| API Documentation | Code thực tế |
-|-------------------|--------------|
-| Có endpoint riêng cho student và tutor: `/admin/students/{id}`, `/admin/tutors/{id}` | Chỉ 1 endpoint chung: `/admin/users/{userId}`, tự động xác định role |
-| Phức tạp hơn | **Đơn giản và linh hoạt hơn** |
-
-### 4. **Approve/Reject student sessions**
-
-| API Documentation | Code thực tế |
-|-------------------|--------------|
-| Request body: `studentIds` | Request body: `studentSessionIds` |
-| Không chính xác (approve student, không phải session) | **Chính xác (approve StudentSession entity)** |
-
-### 5. **Query parameters**
-
-| API Documentation | Code thực tế |
-|-------------------|--------------|
-| Admin session: `action=approve\|reject` | `setStatus=SCHEDULED\|CANCELLED` |
-| Không rõ ràng | **Rõ ràng hơn về trạng thái** |
+**📝 GHI CHÚ**: Chỉ khác số thứ tự section (2.6 vs 7)
 
 ---
 
-## Các điểm cần bổ sung trong code
+## 8. Endpoint: Từ chối tutor profile
 
-### ⚠️ Thiếu hoàn toàn:
+### ✅ GIỐNG NHAU
+- **HTTP Method**: `PATCH`
+- **Path**: `/admin/{userId}/reject`
+- **Quyền**: ROLE_ADMIN
+- **Path Variable**: `userId` (Integer)
+- **Response structure**: Giống nhau
+- **Logic**: Set status = REJECTED
 
-1. **`GET /tutors/{tutorId}`** - Public endpoint
-   - Để student/guest xem chi tiết 1 tutor cụ thể
-   - Response: TutorDetailDTO
-   - **Quan trọng:** Cần có để student có thể xem thông tin tutor trước khi đăng ký
+### ⚠️ KHÁC BIỆT
 
-### ⚠️ Thiếu filter/search:
+#### Trong API_ENDPOINTS_DOCUMENTATION.md (Section 2.7):
+```markdown
+### 2.7. Từ chối tutor profile
+```
 
-2. **`GET /sessions`** - Thiếu filter parameters:
-   - `status` - Lọc theo trạng thái
-   - `tutorId` - Lọc sessions của tutor
-   - `subjectId` - Lọc theo môn học
+#### Trong ACTUAL_API_ENDPOINTS.md (Section 8):
+```markdown
+### 8. Từ chối tutor profile
+```
 
-3. **`GET /tutors`** - Thiếu filter parameters:
-   - `subjectId` - Lọc tutor dạy môn cụ thể
-   - `minRating` - Lọc tutor có rating tối thiểu
-   - `experienceYears` - Lọc theo kinh nghiệm
+**📝 GHI CHÚ**: Chỉ khác số thứ tự section (2.7 vs 8)
 
 ---
 
-## Kết luận
+## Tổng kết so sánh
 
-### ✅ Code thực tế tốt hơn Documentation ở:
-1. **Bảo mật:** Lấy userId từ token thay vì URL
-2. **Đơn giản:** Ít endpoint hơn nhưng linh hoạt hơn (vd: 1 endpoint `/admin/users/{userId}` thay vì 2)
-3. **Chính xác:** Approve `studentSessionIds` thay vì `studentIds`
-4. **Chuẩn hóa:** Pagination format rõ ràng, consistent
-5. **Ownership check:** Kiểm tra quyền sở hữu khi update/delete
+### 📊 Thống kê
+| Loại | Số lượng | Endpoints |
+|------|----------|-----------|
+| **Giống nhau hoàn toàn** | 7 | DELETE /admin/users/{userId}<br>GET /admin/users<br>GET /admin/sessions/pending<br>PUT /admin/sessions/{sessionId}<br>GET /admin/tutor/pending<br>PATCH /admin/{userId}/approve<br>PATCH /admin/{userId}/reject |
+| **Mới thêm** | 1 | GET /admin/users/{userId} |
+| **Khác biệt** | 0 | - |
+| **Bị xóa** | 0 | - |
 
-### ⚠️ Cần bổ sung trong code:
-1. **Public endpoint:** `GET /tutors/{tutorId}` để xem chi tiết tutor
-2. **Filter/Search:** Thêm query parameters để filter trong `GET /sessions` và `GET /tutors`
-3. **Documentation:** Cập nhật API_ENDPOINTS_DOCUMENTATION.md để match với code thực tế
+### ✨ Điểm khác biệt chính
 
-### 📝 Khuyến nghị:
-- **Ưu tiên:** Implement `GET /tutors/{tutorId}` public endpoint
-- **Nên có:** Thêm filter cho sessions và tutors
-- **Update docs:** Cập nhật API_ENDPOINTS_DOCUMENTATION.md theo code thực tế
+#### 1. **Endpoint mới: GET /admin/users/{userId}**
+- **Trạng thái**: ✅ MỚI THÊM
+- **Mục đích**: Lấy thông tin chi tiết của 1 user theo userId
+- **Lý do**: Đáp ứng yêu cầu "thêm endpoint get profile cho admin"
+- **Impact**: Frontend cần implement thêm logic để gọi endpoint này khi admin muốn xem chi tiết 1 user cụ thể
+
+#### 2. **Số thứ tự section**
+- File DOCUMENTATION đánh số từ 2.1 đến 2.7 (trong section ADMIN ENDPOINTS)
+- File ACTUAL đánh số từ 1 đến 8 (độc lập)
+- **Impact**: Không ảnh hưởng đến functionality
+
+#### 3. **Response format của GET /admin/tutor/pending**
+- DOCUMENTATION: Mô tả Spring Data Page format nhưng không chi tiết
+- ACTUAL: Liệt kê đầy đủ tất cả các field của Spring Data Page
+- **Impact**: Frontend cần chú ý parse đúng các field như `number` (thay vì `currentPage`), `totalElements` (thay vì `totalItems`)
+
+### 🔍 Phân tích chi tiết
+
+#### API_ENDPOINTS_DOCUMENTATION.md
+- **Phạm vi**: Bao gồm TẤT CẢ các module (Auth, Admin, Tutor, Student, Session, Lookup)
+- **Số lượng endpoints**: 32 endpoints
+- **Admin endpoints**: 7 endpoints (sections 2.1 - 2.7)
+- **Format**: Theo cấu trúc tài liệu hoàn chỉnh với best practices, business flow, security notes
+
+#### ACTUAL_API_ENDPOINTS.md
+- **Phạm vi**: CHỈ Admin endpoints từ AdminController.java
+- **Số lượng endpoints**: 8 endpoints
+- **Format**: Tài liệu chi tiết từ code thực tế, không có phần giải thích về business flow
+
+### ⚠️ Lưu ý quan trọng
+
+1. **Endpoint mới GET /admin/users/{userId}**:
+   - Cần cập nhật vào `API_ENDPOINTS_DOCUMENTATION.md` section 2
+   - Cần thông báo cho team Frontend để implement
+   - Cần test kỹ response structure và error handling
+
+2. **Response format của tutor pending**:
+   - Frontend cần chú ý parse đúng Spring Data Page format
+   - Không dùng `PaginationUtil` như các endpoint khác
+   - Field mapping: `number` = currentPage, `totalElements` = totalItems
+
+3. **Consistency**:
+   - 7/7 endpoints cũ giữ nguyên structure và logic
+   - Không có breaking changes
+   - Backward compatible
+
+---
+
+## Khuyến nghị
+
+### 📝 Cập nhật tài liệu
+1. **Thêm endpoint mới vào API_ENDPOINTS_DOCUMENTATION.md**:
+   - Thêm section 2.3: "Lấy thông tin chi tiết user theo userId"
+   - Đánh lại số thứ tự cho các section sau (2.3 → 2.4, 2.4 → 2.5, ...)
+
+2. **Chi tiết hóa response format**:
+   - Section 2.5 (cũ 2.4): Làm rõ Spring Data Page format cho GET /admin/tutor/pending
+   - Thêm mapping table giữa Spring Data Page fields và custom pagination fields
+
+### 🧪 Testing
+1. Test endpoint mới: `GET /admin/users/{userId}`
+   - Test với userId hợp lệ
+   - Test với userId không tồn tại (404)
+   - Test với userId của các role khác nhau (STUDENT, TUTOR, ADMIN)
+
+2. Verify backward compatibility
+   - Tất cả 7 endpoints cũ vẫn hoạt động bình thường
+   - Response structure không đổi
+
+### 👥 Communication
+1. Thông báo team Frontend về endpoint mới
+2. Cập nhật Postman collection (nếu có)
+3. Cập nhật API documentation tool (Swagger/OpenAPI)
+
+---
+
+**Version**: 1.0  
+**Last Updated**: November 28, 2025  
+**Compared Files**: 
+- ACTUAL_API_ENDPOINTS.md (from AdminController.java)
+- API_ENDPOINTS_DOCUMENTATION.md (existing documentation)
 

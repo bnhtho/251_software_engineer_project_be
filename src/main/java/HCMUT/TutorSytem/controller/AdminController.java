@@ -69,6 +69,23 @@ public class AdminController {
     }
 
     /**
+     * Admin: Get User Profile by userId
+     * Lấy thông tin chi tiết của 1 user theo userId
+     *
+     * @param userId ID của user cần lấy thông tin
+     */
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<BaseResponse> getUserProfile(@PathVariable Integer userId) {
+        UserDTO userDTO = adminService.getUserProfile(userId);
+
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("User profile retrieved successfully");
+        response.setData(userDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Admin: Lấy danh sách các session đang chờ duyệt (with pagination)
      * Chỉ lấy các session có status = PENDING
      * Mặc định: 10 items per page
