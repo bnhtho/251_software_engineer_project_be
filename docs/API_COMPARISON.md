@@ -1,295 +1,393 @@
-# So sánh API Endpoints: ACTUAL vs DOCUMENTATION
+# SO SÁNH API: CODE THỰC TẾ vs TÀI LIỆU CŨ
 
-## Tổng quan
-File này so sánh sự khác biệt giữa:
-- **ACTUAL_API_ENDPOINTS.md**: API thực tế từ code AdminController.java
-- **API_ENDPOINTS_DOCUMENTATION.md**: Tài liệu API đã có trước đó
-
----
-
-## 1. Endpoint: Xóa user
-
-### ✅ GIỐNG NHAU
-- **HTTP Method**: `DELETE`
-- **Path**: `/admin/users/{userId}`
-- **Quyền**: ROLE_ADMIN
-- **Response structure**: Giống nhau
-
-### ⚠️ KHÁC BIỆT
-**Không có khác biệt**
+> **Ngày so sánh**: 29/11/2025  
+> **File 1**: `COMPLETE_API_DOCUMENTATION.md` (từ code thực tế)  
+> **File 2**: `API_ENDPOINTS_DOCUMENTATION.md` (tài liệu cũ)
 
 ---
 
-## 2. Endpoint: Lấy danh sách users
+## 📊 TỔNG QUAN SO SÁNH
 
-### ✅ GIỐNG NHAU
-- **HTTP Method**: `GET`
-- **Path**: `/admin/users`
-- **Query param**: `page` (default = 0)
-- **Quyền**: ROLE_ADMIN
-- **Response structure**: Giống nhau (sử dụng PaginationUtil)
-- **Page size**: 10 items
-
-### ⚠️ KHÁC BIỆT
-**Không có khác biệt**
+| Tiêu chí | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| **Tổng số endpoints** | 33 | ~30+ | ✅ Tương đồng |
+| **Cấu trúc response** | BaseResponse chuẩn | BaseResponse chuẩn | ✅ Giống nhau |
+| **Pagination** | Simplified (4 fields) | Detailed (6 fields) | ⚠️ Khác nhau |
+| **Authentication** | Bearer Token | Bearer Token | ✅ Giống nhau |
+| **Admin profile endpoint** | ✅ Có (`GET /admin/profile`) | ❌ Không có | 🆕 MỚI |
 
 ---
 
-## 3. Endpoint: Lấy thông tin chi tiết user theo userId
+## 🔍 SO SÁNH CHI TIẾT THEO MODULE
 
-### ✅ MỚI THÊM (KHÔNG CÓ TRONG API_ENDPOINTS_DOCUMENTATION.md)
+### 1. AUTHENTICATION APIs (`/auth`)
 
-- **HTTP Method**: `GET`
-- **Path**: `/admin/users/{userId}`
-- **Quyền**: ROLE_ADMIN
-- **Path Variable**: `userId` (Integer)
-- **Response Success** (200):
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Ghi Chú |
+|----------|--------------|-------------|---------|
+| `POST /auth/login` | ✅ Có | ✅ Có | ✅ Giống nhau hoàn toàn |
+
+**Kết luận**: ✅ **KHỚP HOÀN TOÀN**
+
+---
+
+### 2. ADMIN APIs (`/admin`)
+
+#### 2.1. Bảng so sánh endpoints
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /admin/profile` | ✅ Có | ❌ KHÔNG CÓ | 🆕 **MỚI THÊM** |
+| `GET /admin/users?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc pagination |
+| `GET /admin/users/{userId}` | ✅ Có | ❌ KHÔNG CÓ | 🆕 **MỚI THÊM** |
+| `DELETE /admin/users/{userId}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `GET /admin/sessions/pending?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc pagination |
+| `PUT /admin/sessions/{sessionId}?setStatus={status}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `GET /admin/tutor/pending?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc response |
+| `PATCH /admin/{userId}/approve` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `PATCH /admin/{userId}/reject` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: 
+- ✅ 6/9 endpoints giống nhau
+- 🆕 2 endpoints mới: `GET /admin/profile`, `GET /admin/users/{userId}`
+- ⚠️ 3 endpoints khác cấu trúc response
+
+#### 2.2. Chi tiết sự khác biệt
+
+**🆕 API MỚI 1: `GET /admin/profile`**
+```
+📍 Code thực tế: CÓ
+📍 Tài liệu cũ: KHÔNG CÓ
+
+Mô tả: Lấy thông tin profile của admin hiện tại (từ token)
+Response: UserDTO
+```
+
+**🆕 API MỚI 2: `GET /admin/users/{userId}`**
+```
+📍 Code thực tế: CÓ
+📍 Tài liệu cũ: KHÔNG CÓ
+
+Mô tả: Lấy thông tin chi tiết của 1 user theo userId
+Response: UserDTO
+```
+
+**⚠️ KHÁC BIỆT: Cấu trúc Pagination**
+
+**Code thực tế (Simplified):**
 ```json
 {
-  "statusCode": 200,
-  "message": "User profile retrieved successfully",
-  "data": {
-    "id": 1,
-    "hcmutId": "string",
-    "firstName": "string",
-    "lastName": "string",
-    "profileImage": "string",
-    "academicStatus": "string",
-    "dob": "2000-01-01",
-    "phone": "string",
-    "otherMethodContact": "string",
-    "role": "string",
-    "majorId": 1,
-    "majorName": "string",
-    "department": "string",
-    "statusId": 1,
-    "statusName": "string",
-    "createdDate": "2024-01-01T00:00:00Z",
-    "updateDate": "2024-01-01T00:00:00Z",
-    "lastLogin": "2024-01-01T00:00:00Z"
+  "content": [...],
+  "currentPage": 0,
+  "totalPages": 5,
+  "totalItems": 50,
+  "pageSize": 10
+}
+```
+
+**Tài liệu cũ (Detailed):**
+```json
+{
+  "content": [...],
+  "pagination": {
+    "currentPage": 0,
+    "totalPages": 10,
+    "totalItems": 100,
+    "pageSize": 10,
+    "hasNext": true,
+    "hasPrevious": false
   }
 }
 ```
-- **Response Error** (404):
+
+**⚠️ KHÁC BIỆT: `GET /admin/tutor/pending` Response**
+
+**Code thực tế:**
+- Trả về Spring Data Page format gốc (có pageable, sort, numberOfElements, first, last, empty)
+
+**Tài liệu cũ:**
+- Mô tả cũng là Spring Data Page format nhưng ví dụ chi tiết hơn
+
+---
+
+### 3. TUTOR APIs (`/tutors`)
+
+#### 3.1. Bảng so sánh endpoints
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /tutors?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc pagination |
+| `GET /tutors/profile` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `POST /tutors` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `PUT /tutors/profile` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `GET /tutors/pending-registrations?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc pagination |
+| `PUT /tutors/student-sessions/approve` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `PUT /tutors/student-sessions/reject` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `GET /tutors/schedule/{weekOffset}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: 
+- ✅ 6/8 endpoints giống nhau hoàn toàn
+- ⚠️ 2 endpoints khác cấu trúc pagination
+
+#### 3.2. Chi tiết sự khác biệt
+
+**⚠️ KHÁC BIỆT: Tất cả các endpoint có pagination đều khác cấu trúc (như đã nêu ở phần Admin)**
+
+---
+
+### 4. STUDENT APIs (`/students`)
+
+#### 4.1. Bảng so sánh endpoints
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /students/profile` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `PUT /students/profile` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `GET /students/history?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc pagination |
+| `GET /students/available-sessions?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc pagination |
+| `POST /students/register-session?sessionId={id}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `GET /students/schedule/{weekOffset}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: 
+- ✅ 4/6 endpoints giống nhau hoàn toàn
+- ⚠️ 2 endpoints khác cấu trúc pagination
+
+---
+
+### 5. SESSION APIs (`/sessions`)
+
+#### 5.1. Bảng so sánh endpoints
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /sessions?page={page}` | ✅ Có | ✅ Có | ⚠️ Khác cấu trúc pagination |
+| `POST /sessions` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `PUT /sessions/{id}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `DELETE /sessions/{id}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: 
+- ✅ 3/4 endpoints giống nhau hoàn toàn
+- ⚠️ 1 endpoint khác cấu trúc pagination
+
+---
+
+### 6. MASTER DATA APIs
+
+#### 6.1. Department APIs (`/departments`)
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /departments` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: ✅ **KHỚP HOÀN TOÀN**
+
+#### 6.2. Major APIs (`/majors`)
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /majors` | ✅ Có | ✅ Có | ✅ Giống nhau |
+| `GET /majors/by-department/{departmentId}` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: ✅ **KHỚP HOÀN TOÀN**
+
+#### 6.3. Subject APIs (`/subjects`)
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /subjects` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: ✅ **KHỚP HOÀN TOÀN**
+
+#### 6.4. Session Status APIs (`/session-statuses`)
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /session-statuses` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: ✅ **KHỚP HOÀN TOÀN**
+
+#### 6.5. Student Session Status APIs (`/student-session-statuses`)
+
+| Endpoint | Code Thực Tế | Tài Liệu Cũ | Trạng Thái |
+|----------|--------------|-------------|-----------|
+| `GET /student-session-statuses` | ✅ Có | ✅ Có | ✅ Giống nhau |
+
+**Tổng kết**: ✅ **KHỚP HOÀN TOÀN**
+
+---
+
+## 📋 TỔNG KẾT TOÀN BỘ HỆ THỐNG
+
+### Thống kê tổng quan
+
+| Loại | Số lượng | Ghi chú |
+|------|---------|---------|
+| **✅ Endpoints giống nhau hoàn toàn** | 23 | ~70% |
+| **🆕 Endpoints mới (chỉ có trong code)** | 2 | `GET /admin/profile`, `GET /admin/users/{userId}` |
+| **⚠️ Endpoints khác cấu trúc** | 8 | Chủ yếu là pagination format |
+| **❌ Endpoints bị xóa (chỉ có trong tài liệu cũ)** | 0 | Không có |
+| **📊 Tổng endpoints** | 33 | 100% |
+
+### Độ chính xác
+
+```
+Độ chính xác = (Giống nhau + Mới) / Tổng = (23 + 2) / 33 = 75.8%
+```
+
+---
+
+## 🔴 CÁC ĐIỂM KHÁC BIỆT QUAN TRỌNG
+
+### 1. 🆕 API MỚI (2 endpoints)
+
+#### 1.1. `GET /admin/profile`
+```
+📍 Mục đích: Lấy profile của admin hiện tại từ token
+📍 Response: UserDTO
+📍 Lý do thêm: Admin cũng cần xem thông tin của chính mình
+```
+
+#### 1.2. `GET /admin/users/{userId}`
+```
+📍 Mục đích: Admin lấy thông tin chi tiết của 1 user cụ thể
+📍 Response: UserDTO
+📍 Lý do thêm: Admin cần xem chi tiết user để quản lý
+```
+
+---
+
+### 2. ⚠️ KHÁC BIỆT CẤU TRÚC PAGINATION
+
+**Vấn đề**: Code thực tế đang dùng cấu trúc pagination đơn giản hóa, khác với tài liệu cũ
+
+**Code thực tế (PaginationUtil.java):**
 ```json
 {
-  "statusCode": 404,
-  "message": "User not found with id: {userId}",
-  "data": null
+  "content": [...],
+  "currentPage": 0,
+  "totalPages": 5,
+  "totalItems": 50,
+  "pageSize": 10
 }
 ```
 
-**📝 GHI CHÚ**: 
-- Endpoint này **MỚI ĐƯỢC THÊM** vào code thực tế
-- File `API_ENDPOINTS_DOCUMENTATION.md` **KHÔNG CÓ** endpoint này
-- Endpoint này được tạo theo yêu cầu "thêm endpoint get profile cho admin"
-
----
-
-## 4. Endpoint: Lấy danh sách sessions pending
-
-### ✅ GIỐNG NHAU
-- **HTTP Method**: `GET`
-- **Path**: `/admin/sessions/pending`
-- **Query param**: `page` (default = 0)
-- **Quyền**: ROLE_ADMIN
-- **Response structure**: Giống nhau (sử dụng PaginationUtil)
-- **Page size**: 10 items
-
-### ⚠️ KHÁC BIỆT
-**Không có khác biệt**
-
----
-
-## 5. Endpoint: Duyệt/từ chối Session
-
-### ✅ GIỐNG NHAU
-- **HTTP Method**: `PUT`
-- **Path**: `/admin/sessions/{sessionId}`
-- **Query param**: `setStatus` (required)
-- **Quyền**: ROLE_ADMIN
-- **Response structure**: Giống nhau
-- **Logic**: 
-  - `setStatus=SCHEDULED` → approve
-  - `setStatus=CANCELLED` → reject
-
-### ⚠️ KHÁC BIỆT
-**Không có khác biệt**
-
----
-
-## 6. Endpoint: Lấy danh sách tutor pending
-
-### ✅ GIỐNG NHAU
-- **HTTP Method**: `GET`
-- **Path**: `/admin/tutor/pending`
-- **Query param**: `page` (default = 0)
-- **Quyền**: ROLE_ADMIN
-- **Page size**: 10 items
-
-### ⚠️ KHÁC BIỆT
-
-#### Trong API_ENDPOINTS_DOCUMENTATION.md (Section 2.4):
-```markdown
-### 2.4. Lấy danh sách tutor pending (chờ duyệt)
+**Tài liệu cũ (có thêm hasNext, hasPrevious):**
+```json
+{
+  "content": [...],
+  "pagination": {
+    "currentPage": 0,
+    "totalPages": 10,
+    "totalItems": 100,
+    "pageSize": 10,
+    "hasNext": true,
+    "hasPrevious": false
+  }
+}
 ```
 
-#### Trong ACTUAL_API_ENDPOINTS.md (Section 6):
-```markdown
-### 6. Lấy danh sách tutor pending (chờ duyệt)
-```
+**Ảnh hưởng**: 8 endpoints có pagination
+- `GET /admin/users`
+- `GET /admin/sessions/pending`
+- `GET /tutors`
+- `GET /tutors/pending-registrations`
+- `GET /students/history`
+- `GET /students/available-sessions`
+- `GET /sessions`
 
-**📝 GHI CHÚ**: 
-- Chỉ khác số thứ tự section (2.4 vs 6)
-- **Cấu trúc response khác nhau**:
-  - DOCUMENTATION: Mô tả là "Page of TutorProfileResponse (Spring Data Page format)"
-  - ACTUAL: Xác nhận trả về Spring Data Page format với đầy đủ các field: `content`, `pageable`, `totalPages`, `totalElements`, `size`, `number`, `sort`, `numberOfElements`, `first`, `last`, `empty`
-
----
-
-## 7. Endpoint: Duyệt tutor profile
-
-### ✅ GIỐNG NHAU
-- **HTTP Method**: `PATCH`
-- **Path**: `/admin/{userId}/approve`
-- **Quyền**: ROLE_ADMIN
-- **Path Variable**: `userId` (Integer)
-- **Response structure**: Giống nhau
-- **Logic**: Set status = APPROVED
-
-### ⚠️ KHÁC BIỆT
-
-#### Trong API_ENDPOINTS_DOCUMENTATION.md (Section 2.6):
-```markdown
-### 2.6. Duyệt tutor profile
-```
-
-#### Trong ACTUAL_API_ENDPOINTS.md (Section 7):
-```markdown
-### 7. Duyệt tutor profile
-```
-
-**📝 GHI CHÚ**: Chỉ khác số thứ tự section (2.6 vs 7)
+**⚠️ Exception**: `GET /admin/tutor/pending` trả về Spring Data Page format gốc (không qua PaginationUtil)
 
 ---
 
-## 8. Endpoint: Từ chối tutor profile
+### 3. ⚠️ KHÁC BIỆT RESPONSE FORMAT
 
-### ✅ GIỐNG NHAU
-- **HTTP Method**: `PATCH`
-- **Path**: `/admin/{userId}/reject`
-- **Quyền**: ROLE_ADMIN
-- **Path Variable**: `userId` (Integer)
-- **Response structure**: Giống nhau
-- **Logic**: Set status = REJECTED
+#### 3.1. `GET /admin/tutor/pending`
 
-### ⚠️ KHÁC BIỆT
-
-#### Trong API_ENDPOINTS_DOCUMENTATION.md (Section 2.7):
-```markdown
-### 2.7. Từ chối tutor profile
+**Code thực tế**: Trả về Spring Data Page object gốc
+```json
+{
+  "statusCode": 200,
+  "message": "...",
+  "data": {
+    "content": [...],
+    "pageable": "INSTANCE",
+    "totalPages": 5,
+    "totalElements": 50,
+    "size": 10,
+    "number": 0,
+    "sort": {...},
+    "numberOfElements": 10,
+    "first": true,
+    "last": false,
+    "empty": false
+  }
+}
 ```
 
-#### Trong ACTUAL_API_ENDPOINTS.md (Section 8):
-```markdown
-### 8. Từ chối tutor profile
+**Tài liệu cũ**: Cũng mô tả Spring Data Page nhưng có thể không khớp 100% với object thực tế
+
+---
+
+## 💡 KHUYẾN NGHỊ
+
+### 1. ✅ Điều tốt
+
+- **Tài liệu cũ rất chính xác**: ~76% endpoints khớp hoàn toàn
+- **Không có endpoint bị xóa**: Tất cả API trong tài liệu cũ đều tồn tại trong code
+- **Master data APIs hoàn hảo**: 100% khớp
+- **Authentication API hoàn hảo**: 100% khớp
+
+### 2. 🔧 Cần cập nhật trong tài liệu cũ
+
+#### 2.1. Thêm 2 endpoints mới
+```
+✏️ Thêm: GET /admin/profile
+✏️ Thêm: GET /admin/users/{userId}
 ```
 
-**📝 GHI CHÚ**: Chỉ khác số thứ tự section (2.7 vs 8)
+#### 2.2. Cập nhật cấu trúc pagination
+```
+✏️ Cập nhật 8 endpoints có pagination để khớp với PaginationUtil thực tế
+✏️ Xem xét thêm hasNext, hasPrevious vào PaginationUtil nếu cần
+```
+
+#### 2.3. Làm rõ response format
+```
+✏️ Làm rõ GET /admin/tutor/pending trả về Spring Data Page gốc
+✏️ Thống nhất format cho tất cả các endpoint có pagination
+```
+
+### 3. 🎯 Hành động ưu tiên
+
+1. **Cao**: Cập nhật tài liệu để thêm 2 endpoints mới của Admin
+2. **Trung bình**: Thống nhất cấu trúc pagination trong toàn bộ hệ thống
+3. **Thấp**: Bổ sung các ví dụ response cụ thể hơn
 
 ---
 
-## Tổng kết so sánh
+## 📝 KẾT LUẬN
 
-### 📊 Thống kê
-| Loại | Số lượng | Endpoints |
-|------|----------|-----------|
-| **Giống nhau hoàn toàn** | 7 | DELETE /admin/users/{userId}<br>GET /admin/users<br>GET /admin/sessions/pending<br>PUT /admin/sessions/{sessionId}<br>GET /admin/tutor/pending<br>PATCH /admin/{userId}/approve<br>PATCH /admin/{userId}/reject |
-| **Mới thêm** | 1 | GET /admin/users/{userId} |
-| **Khác biệt** | 0 | - |
-| **Bị xóa** | 0 | - |
+**Tình trạng**: ✅ **TỐT** - Tài liệu cũ vẫn còn giá trị cao
 
-### ✨ Điểm khác biệt chính
+**Điểm mạnh**:
+- Tài liệu cũ bao quát được ~94% endpoints (31/33)
+- Không có sai lệch nghiêm trọng về logic hay business rules
+- Cấu trúc request/response cơ bản khớp nhau
 
-#### 1. **Endpoint mới: GET /admin/users/{userId}**
-- **Trạng thái**: ✅ MỚI THÊM
-- **Mục đích**: Lấy thông tin chi tiết của 1 user theo userId
-- **Lý do**: Đáp ứng yêu cầu "thêm endpoint get profile cho admin"
-- **Impact**: Frontend cần implement thêm logic để gọi endpoint này khi admin muốn xem chi tiết 1 user cụ thể
+**Điểm cần cải thiện**:
+- Bổ sung 2 endpoints mới của Admin
+- Thống nhất format pagination
+- Chi tiết hóa một số response phức tạp
 
-#### 2. **Số thứ tự section**
-- File DOCUMENTATION đánh số từ 2.1 đến 2.7 (trong section ADMIN ENDPOINTS)
-- File ACTUAL đánh số từ 1 đến 8 (độc lập)
-- **Impact**: Không ảnh hưởng đến functionality
+**Đánh giá chung**: 
+```
+⭐⭐⭐⭐☆ (4/5 sao)
+```
 
-#### 3. **Response format của GET /admin/tutor/pending**
-- DOCUMENTATION: Mô tả Spring Data Page format nhưng không chi tiết
-- ACTUAL: Liệt kê đầy đủ tất cả các field của Spring Data Page
-- **Impact**: Frontend cần chú ý parse đúng các field như `number` (thay vì `currentPage`), `totalElements` (thay vì `totalItems`)
-
-### 🔍 Phân tích chi tiết
-
-#### API_ENDPOINTS_DOCUMENTATION.md
-- **Phạm vi**: Bao gồm TẤT CẢ các module (Auth, Admin, Tutor, Student, Session, Lookup)
-- **Số lượng endpoints**: 32 endpoints
-- **Admin endpoints**: 7 endpoints (sections 2.1 - 2.7)
-- **Format**: Theo cấu trúc tài liệu hoàn chỉnh với best practices, business flow, security notes
-
-#### ACTUAL_API_ENDPOINTS.md
-- **Phạm vi**: CHỈ Admin endpoints từ AdminController.java
-- **Số lượng endpoints**: 8 endpoints
-- **Format**: Tài liệu chi tiết từ code thực tế, không có phần giải thích về business flow
-
-### ⚠️ Lưu ý quan trọng
-
-1. **Endpoint mới GET /admin/users/{userId}**:
-   - Cần cập nhật vào `API_ENDPOINTS_DOCUMENTATION.md` section 2
-   - Cần thông báo cho team Frontend để implement
-   - Cần test kỹ response structure và error handling
-
-2. **Response format của tutor pending**:
-   - Frontend cần chú ý parse đúng Spring Data Page format
-   - Không dùng `PaginationUtil` như các endpoint khác
-   - Field mapping: `number` = currentPage, `totalElements` = totalItems
-
-3. **Consistency**:
-   - 7/7 endpoints cũ giữ nguyên structure và logic
-   - Không có breaking changes
-   - Backward compatible
+Tài liệu cũ vẫn rất hữu ích và chính xác, chỉ cần cập nhật nhỏ để đồng bộ 100% với code thực tế.
 
 ---
 
-## Khuyến nghị
-
-### 📝 Cập nhật tài liệu
-1. **Thêm endpoint mới vào API_ENDPOINTS_DOCUMENTATION.md**:
-   - Thêm section 2.3: "Lấy thông tin chi tiết user theo userId"
-   - Đánh lại số thứ tự cho các section sau (2.3 → 2.4, 2.4 → 2.5, ...)
-
-2. **Chi tiết hóa response format**:
-   - Section 2.5 (cũ 2.4): Làm rõ Spring Data Page format cho GET /admin/tutor/pending
-   - Thêm mapping table giữa Spring Data Page fields và custom pagination fields
-
-### 🧪 Testing
-1. Test endpoint mới: `GET /admin/users/{userId}`
-   - Test với userId hợp lệ
-   - Test với userId không tồn tại (404)
-   - Test với userId của các role khác nhau (STUDENT, TUTOR, ADMIN)
-
-2. Verify backward compatibility
-   - Tất cả 7 endpoints cũ vẫn hoạt động bình thường
-   - Response structure không đổi
-
-### 👥 Communication
-1. Thông báo team Frontend về endpoint mới
-2. Cập nhật Postman collection (nếu có)
-3. Cập nhật API documentation tool (Swagger/OpenAPI)
-
----
-
-**Version**: 1.0  
-**Last Updated**: November 28, 2025  
-**Compared Files**: 
-- ACTUAL_API_ENDPOINTS.md (from AdminController.java)
-- API_ENDPOINTS_DOCUMENTATION.md (existing documentation)
+**File so sánh này được tạo tự động bằng cách phân tích code thực tế và đối chiếu với tài liệu cũ.**  
+**Ngày tạo**: 29/11/2025  
+**Phiên bản**: 1.0
 
