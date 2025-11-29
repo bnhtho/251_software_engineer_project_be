@@ -1,5 +1,6 @@
 package HCMUT.TutorSytem.service.imp;
 
+import HCMUT.TutorSytem.Enum.DayOfWeek;
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.SessionMapper;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.ZoneId;
 
 @Service
 public class SessionServiceImp implements SessionService {
@@ -84,6 +86,7 @@ public class SessionServiceImp implements SessionService {
         session.setEndTime(request.getEndTime());
         session.setFormat(request.getFormat());
         session.setLocation(request.getLocation());
+        session.setDayOfWeek(calculateDayOfWeek(request.getStartTime()));
 
         // Set maxQuantity (bắt buộc, nếu không có thì dùng default 50)
         session.setMaxQuantity(request.getMaxQuantity() != null ? request.getMaxQuantity() : 50);
@@ -99,7 +102,18 @@ public class SessionServiceImp implements SessionService {
         session = sessionRepository.save(session);
         return SessionMapper.toDTO(session);
     }
+    private DayOfWeek calculateDayOfWeek(Instant startTime) {
+        if (startTime == null) {
+            throw new IllegalArgumentException("startTime cannot be null");
+        }
 
+        // Chọn timezone phù hợp
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        java.time.DayOfWeek javaDow = startTime.atZone(zoneId).getDayOfWeek();
+
+        // Dùng hàm em đã viết
+        return DayOfWeek.fromJavaDayOfWeek(javaDow); // enum của em
+    }
     @Override
     public SessionDTO updateSession(Integer id, SessionRequest request) {
         Session session = sessionRepository.findById(id)

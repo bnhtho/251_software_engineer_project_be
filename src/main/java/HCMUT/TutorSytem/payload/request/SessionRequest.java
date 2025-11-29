@@ -13,7 +13,7 @@ public class SessionRequest {
     private String format;
     private String location;
     private Integer maxQuantity; // Bắt buộc nhập bởi tutor khi tạo session mới
-    private Integer dayOfWeek; // 0 - Chủ nhật, 1 - Thứ hai, ..., 6 - Thứ bảy
+//    private Integer dayOfWeek; // 0 - Chủ nhật, 1 - Thứ hai, ..., 6 - Thứ bảy
     private Byte sessionStatusId; // Trạng thái của session
 }
 
