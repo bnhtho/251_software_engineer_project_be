@@ -32,7 +32,22 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-
+    /**
+     * Admin: Get Admin Profile
+     * Lấy thông tin profile của admin hiện tại từ token authentication
+     */
+    @GetMapping("/profile")
+    public ResponseEntity<BaseResponse> getAdminProfile() {
+        // Lấy adminId từ authentication (token)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer adminId = getCurrentUserId(authentication);
+        UserDTO adminDTO = adminService.getUserProfile(adminId);
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Admin profile retrieved successfully");
+        response.setData(adminDTO);
+        return ResponseEntity.ok(response);
+    }
     /**
      * Admin: Soft delete user profile (set status to INACTIVE)
      * Tự động xác định user là student hay tutor dựa trên role trong database
