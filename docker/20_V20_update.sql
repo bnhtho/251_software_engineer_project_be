@@ -5,6 +5,9 @@ ALTER TABLE tutor_profile
 -- 2) Đổi tên bảng cho “generic” hơn, dùng chung cho
 --    cả đăng ký buổi học và đăng ký trở thành tutor
 RENAME TABLE student_session_status TO registration_status;
+ALTER TABLE registration_status
+    CONVERT TO CHARACTER SET utf8mb4
+    COLLATE utf8mb4_0900_ai_ci;
 
 -- 3) (Tuỳ chọn) Đổi mô tả để không nhắc riêng tới tutor,
 --    dùng chung cho mọi loại đăng ký / đơn xét duyệt
