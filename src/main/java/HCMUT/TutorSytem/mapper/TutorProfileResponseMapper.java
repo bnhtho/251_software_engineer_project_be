@@ -27,8 +27,6 @@ public final class TutorProfileResponseMapper {
         response.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : null);
         response.setRating(tutorProfile.getRating());
         response.setTotalSessionsCompleted(tutorProfile.getTotalSessionsCompleted());
-        response.setIsAvailable(tutorProfile.getIsAvailable());
-        response.setStatus(tutorProfile.getStatus());
         response.setSubjects(mapSubjects(tutorProfile.getSubjects()));
         response.setUser(mapUser(tutorProfile.getUser()));
         return response;
@@ -56,7 +54,7 @@ public final class TutorProfileResponseMapper {
         userResponse.setId(user.getId());
         userResponse.setFirstName(user.getFirstName());
         userResponse.setLastName(user.getLastName());
-        userResponse.setRole(user.getRole());
+        userResponse.setRole(user.getRole().getName());
         userResponse.setHcmutId(user.getHcmutId());
         userResponse.setAcademicStatus(user.getAcademicStatus());
         return userResponse;

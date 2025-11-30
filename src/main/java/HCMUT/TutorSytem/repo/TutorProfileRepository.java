@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.repo;
 
-import HCMUT.TutorSytem.Enum.TutorStatus;
 import HCMUT.TutorSytem.model.TutorProfile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +12,7 @@ import java.util.Optional;
 public interface TutorProfileRepository extends JpaRepository<TutorProfile, Integer> {
 
     Optional<TutorProfile> findByUserId(Integer userId);
-    Page<TutorProfile> findByStatus(TutorStatus status, Pageable pageable);
+
+    Page<TutorProfile> findByRegistrationStatusId(Byte statusId, Pageable pageable);
 
 }

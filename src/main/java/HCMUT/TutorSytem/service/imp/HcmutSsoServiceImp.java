@@ -4,6 +4,7 @@ import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.exception.MethodNotAllowExceptions;
 import HCMUT.TutorSytem.model.Datacore;
 import HCMUT.TutorSytem.model.HcmutSso;
+import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.payload.request.LoginRequest;
 import HCMUT.TutorSytem.repo.HcmutSsoRepository;
 import HCMUT.TutorSytem.service.HcmutSsoService;
@@ -36,8 +37,9 @@ public class HcmutSsoServiceImp implements HcmutSsoService {
         if(passwordEncoder.matches(password, user.getPassword())){
             Datacore data = user.getDatacore();
 //            System.out.println("Datacore data: " + data);
-            Integer userID = userService.getInfoFromHcmutSystem(data);
-            String roleName = data.getRole().getName().toUpperCase();
+            User userInfo = userService.getInfoFromHcmutSystem(data);
+            String roleName = userInfo.getRole().getName().toUpperCase();
+            Integer userID = userInfo.getId();
             return jwtHelper.generateToken(String.valueOf(userID), roleName);
         } else {
             throw new MethodNotAllowExceptions("Invalid password for user with email: " + email);

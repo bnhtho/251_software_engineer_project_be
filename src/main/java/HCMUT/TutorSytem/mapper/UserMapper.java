@@ -24,7 +24,7 @@ public class UserMapper {
         dto.setDob(user.getDob());
         dto.setPhone(user.getPhone());
         dto.setOtherMethodContact(user.getOtherMethodContact());
-        dto.setRole(user.getRole());
+        dto.setRole(user.getRole().getName());
         dto.setCreatedDate(user.getCreatedDate());
         dto.setUpdateDate(user.getUpdateDate());
         dto.setLastLogin(user.getLastLogin());

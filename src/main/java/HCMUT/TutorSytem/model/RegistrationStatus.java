@@ -10,12 +10,12 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "student_session_status",
-        uniqueConstraints = @UniqueConstraint(name = "uq_student_session_status_name", columnNames = "name"))
+@Table(name = "registration_status",
+        uniqueConstraints = @UniqueConstraint(name = "uq_registration_status_name", columnNames = "name"))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentSessionStatus {
+public class RegistrationStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,8 +32,11 @@ public class StudentSessionStatus {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "studentSessionStatus")
+    @OneToMany(mappedBy = "registrationStatus")
     private List<StudentSession> studentSessions;
+
+    @OneToMany(mappedBy = "registrationStatus")
+    private List<TutorProfile> tutorProfiles;
 
     // Constants for easy reference
     public static final byte PENDING = 1;

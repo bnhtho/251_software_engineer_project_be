@@ -1,9 +1,9 @@
 package HCMUT.TutorSytem.controller;
 
 import HCMUT.TutorSytem.dto.StudentSessionStatusDTO;
-import HCMUT.TutorSytem.model.StudentSessionStatus;
+import HCMUT.TutorSytem.model.RegistrationStatus;
 import HCMUT.TutorSytem.payload.response.BaseResponse;
-import HCMUT.TutorSytem.repo.StudentSessionStatusRepository;
+import HCMUT.TutorSytem.repo.RegistrationStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 public class StudentSessionStatusController {
 
     @Autowired
-    private StudentSessionStatusRepository studentSessionStatusRepository;
+    private RegistrationStatusRepository registrationStatusRepository;
 
     @GetMapping
     public ResponseEntity<BaseResponse> getAllStudentSessionStatuses() {
-        List<StudentSessionStatus> statuses = studentSessionStatusRepository.findAll();
+        List<RegistrationStatus> statuses = registrationStatusRepository.findAll();
 
         List<StudentSessionStatusDTO> statusDTOs = statuses.stream()
                 .map(status -> {

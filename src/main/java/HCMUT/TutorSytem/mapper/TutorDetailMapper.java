@@ -37,7 +37,7 @@ public class TutorDetailMapper {
         dto.setDob(user.getDob());
         dto.setPhone(user.getPhone());
         dto.setOtherMethodContact(user.getOtherMethodContact());
-        dto.setRole(user.getRole());
+        dto.setRole(user.getRole().getName());
         dto.setCreatedDate(user.getCreatedDate());
         dto.setUpdateDate(user.getUpdateDate());
         dto.setLastLogin(user.getLastLogin());
@@ -57,8 +57,6 @@ public class TutorDetailMapper {
         dto.setRating(tutorProfile.getRating());
         dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : null);
         dto.setTotalSessionsCompleted(tutorProfile.getTotalSessionsCompleted());
-        dto.setIsAvailable(tutorProfile.getIsAvailable());
-        dto.setStatus(tutorProfile.getStatus());
 
         // Subjects
         if (tutorProfile.getSubjects() != null) {

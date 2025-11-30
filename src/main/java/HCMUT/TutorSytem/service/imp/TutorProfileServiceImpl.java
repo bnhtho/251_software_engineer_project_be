@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.service.imp;
 
-import HCMUT.TutorSytem.Enum.TutorStatus;
 import HCMUT.TutorSytem.dto.TutorDTO;
 import HCMUT.TutorSytem.dto.TutorProfileResponse;
 import HCMUT.TutorSytem.exception.BadRequestException;
@@ -8,12 +7,10 @@ import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.exception.MethodNotAllowExceptions;
 import HCMUT.TutorSytem.mapper.TutorMapper;
 import HCMUT.TutorSytem.mapper.TutorProfileResponseMapper;
-import HCMUT.TutorSytem.model.Major;
-import HCMUT.TutorSytem.model.Subject;
-import HCMUT.TutorSytem.model.TutorProfile;
-import HCMUT.TutorSytem.model.User;
+import HCMUT.TutorSytem.model.*;
 import HCMUT.TutorSytem.payload.request.TutorProfileCreateRequest;
 import HCMUT.TutorSytem.repo.MajorRepository;
+import HCMUT.TutorSytem.repo.RegistrationStatusRepository;
 import HCMUT.TutorSytem.repo.SubjectRepository;
 import HCMUT.TutorSytem.repo.TutorProfileRepository;
 import HCMUT.TutorSytem.repo.UserRepository;
@@ -43,6 +40,9 @@ public class TutorProfileServiceImpl implements TutorProfileService {
     @Autowired
     private MajorRepository majorRepository;
 
+    @Autowired
+    private RegistrationStatusRepository registrationStatusRepository;
+
     @Override
     @Transactional
     public TutorDTO registerTutorProfile(Integer userId, TutorProfileCreateRequest request) {
@@ -59,8 +59,8 @@ public class TutorProfileServiceImpl implements TutorProfileService {
             user.setMajor(major);
         }
 
-        if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
-            user.setAcademicStatus(request.getTitle().trim());
+        if (request.getAcademicStatus() != null && !request.getAcademicStatus().trim().isEmpty()) {
+            user.setAcademicStatus(request.getAcademicStatus().trim());
         }
         userRepository.save(user);
 
@@ -69,7 +69,7 @@ public class TutorProfileServiceImpl implements TutorProfileService {
 
         TutorProfile tutorProfile = new TutorProfile();
         tutorProfile.setUser(user);
-        tutorProfile.setSubjects(new ArrayList<>(subjects));
+        tutorProfile.getSubjects().addAll(subjects);
 
         if (request.getExperienceYears() != null) {
             tutorProfile.setExperienceYears(request.getExperienceYears().shortValue());
@@ -79,8 +79,11 @@ public class TutorProfileServiceImpl implements TutorProfileService {
         tutorProfile.setRating(BigDecimal.ZERO);
         tutorProfile.setPriority(0);
         tutorProfile.setTotalSessionsCompleted(0);
-        tutorProfile.setIsAvailable(true);
-        tutorProfile.setStatus(TutorStatus.PENDING);
+
+        // Set registration status to PENDING by default
+        RegistrationStatus pendingStatus = registrationStatusRepository.findById(RegistrationStatus.PENDING)
+                .orElseThrow(() -> new DataNotFoundExceptions("Registration status PENDING not found"));
+        tutorProfile.setRegistrationStatus(pendingStatus);
 
         TutorProfile savedProfile = tutorProfileRepository.save(tutorProfile);
         return TutorMapper.toDTO(savedProfile);
@@ -100,39 +103,41 @@ public class TutorProfileServiceImpl implements TutorProfileService {
 
     @Override
     @Transactional
-    public TutorProfile approveTutorProfileByUserId(Integer userId) {
-        TutorProfile tutorProfile = tutorProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
+    public TutorProfile approveTutorProfileByUserId(Integer Id) {
+        TutorProfile tutorProfile = tutorProfileRepository.findById(Id)
+                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for id: " + Id));
         return approveTutorProfileInternal(tutorProfile);
     }
 
     @Override
     @Transactional
-    public TutorProfile rejectTutorProfileByUserId(Integer userId) {
-        TutorProfile tutorProfile = tutorProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
+    public TutorProfile rejectTutorProfileByUserId(Integer Id) {
+        TutorProfile tutorProfile = tutorProfileRepository.findById(Id)
+                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for id: " + Id));
         return rejectTutorProfileInternal(tutorProfile);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<TutorProfileResponse> getPendingTutorProfiles(Pageable pageable) {
-        Page<TutorProfile> page = tutorProfileRepository.findByStatus(TutorStatus.PENDING, pageable);
+        Page<TutorProfile> page = tutorProfileRepository.findByRegistrationStatusId(RegistrationStatus.PENDING, pageable);
         return page.map(TutorProfileResponseMapper::toResponse);
     }
 
     private TutorProfile approveTutorProfileInternal(TutorProfile tutorProfile) {
-        if (tutorProfile.getStatus() != TutorStatus.PENDING) {
-            throw new BadRequestException("Tutor profile is not in PENDING status");
-        }
+        // Ensure current status is PENDING
+        ensurePendingStatus(tutorProfile);
 
-        tutorProfile.setStatus(TutorStatus.APPROVED);
+        // Set registration status to CONFIRMED (approved)
+        RegistrationStatus confirmedStatus = registrationStatusRepository.findById(RegistrationStatus.CONFIRMED)
+                .orElseThrow(() -> new DataNotFoundExceptions("Registration status CONFIRMED not found"));
+        tutorProfile.setRegistrationStatus(confirmedStatus);
 
         User user = tutorProfile.getUser();
         if (user != null) {
-            String role = user.getRole();
+            String role = user.getRole().getName();
             if (role == null || "STUDENT".equalsIgnoreCase(role)) {
-                user.setRole("TUTOR");
+                user.setRole(new Role(2)); // Set role to TUTOR
                 userRepository.save(user);
             }
         }
@@ -141,21 +146,40 @@ public class TutorProfileServiceImpl implements TutorProfileService {
     }
 
     private TutorProfile rejectTutorProfileInternal(TutorProfile tutorProfile) {
-        if (tutorProfile.getStatus() != TutorStatus.PENDING) {
-            throw new BadRequestException("Tutor profile is not in PENDING status");
-        }
+        // Ensure current status is PENDING
+        ensurePendingStatus(tutorProfile);
 
-        tutorProfile.setStatus(TutorStatus.REJECTED);
+        // Set registration status to REJECTED
+        RegistrationStatus rejectedStatus = registrationStatusRepository.findById(RegistrationStatus.REJECTED)
+                .orElseThrow(() -> new DataNotFoundExceptions("Registration status REJECTED not found"));
+        tutorProfile.setRegistrationStatus(rejectedStatus);
+
         return tutorProfileRepository.save(tutorProfile);
     }
 
+    /**
+     * Đảm bảo tutorProfile hiện đang ở trạng thái PENDING.
+     */
+    private void ensurePendingStatus(TutorProfile tutorProfile) {
+        RegistrationStatus currentStatus = tutorProfile.getRegistrationStatus();
+        if (currentStatus == null ||
+                !Objects.equals(currentStatus.getId(), RegistrationStatus.PENDING)) {
+            throw new BadRequestException("Tutor profile is not in PENDING status");
+        }
+    }
+
+    /**
+     * Resolve danh sách môn học từ danh sách id.
+     * - Không cho phép id null
+     * - Ném exception nếu có id nào không tồn tại.
+     */
     private List<Subject> resolveSubjects(List<Integer> subjectIds) {
         if (subjectIds == null || subjectIds.isEmpty()) {
             return Collections.emptyList();
         }
 
-        boolean hasNullSubject = subjectIds.stream().anyMatch(Objects::isNull);
-        if (hasNullSubject) {
+        // Không cho phép null ngay từ đầu
+        if (subjectIds.stream().anyMatch(Objects::isNull)) {
             throw new MethodNotAllowExceptions("Subject id must not be null");
         }
 
@@ -165,13 +189,15 @@ public class TutorProfileServiceImpl implements TutorProfileService {
                 .collect(Collectors.toSet());
 
         List<Integer> missingIds = subjectIds.stream()
-                .filter(Objects::nonNull)
                 .filter(id -> !foundIds.contains(id))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
         if (!missingIds.isEmpty()) {
-            throw new DataNotFoundExceptions("Subject not found with id: " + missingIds.get(0));
+            String missingIdsStr = missingIds.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
+            throw new DataNotFoundExceptions("Subject not found with id(s): " + missingIdsStr);
         }
 
         return subjects;

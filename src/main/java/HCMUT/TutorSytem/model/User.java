@@ -1,11 +1,11 @@
 package HCMUT.TutorSytem.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -34,8 +34,10 @@ public class User {
     @Column(name = "last_login")
     private Instant lastLogin;
 
-    @Column(name = "role", length = 50)
-    private String role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     @Column(name = "hcmut_id", length = 50)
     private String hcmutId;

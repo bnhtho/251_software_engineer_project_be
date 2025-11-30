@@ -58,7 +58,7 @@ public class AdminServiceImp implements AdminService {
         userRepository.save(user);
 
         // Log để biết đã xóa user nào (student hay tutor)
-        String userType = user.getRole() != null ? user.getRole() : "Unknown";
+        String userType = user.getRole() != null ? user.getRole().getName() : "Unknown";
         System.out.println("Admin deleted user profile - UserId: " + userId + ", Role: " + userType);
     }
 
@@ -82,7 +82,7 @@ public class AdminServiceImp implements AdminService {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Admin not found with id: " + adminId));
 
-        if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
+        if (!"ADMIN".equalsIgnoreCase(admin.getRole().getName())) {
             throw new IllegalArgumentException("User does not have admin privileges");
         }
 

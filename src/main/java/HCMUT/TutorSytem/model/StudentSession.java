@@ -28,7 +28,7 @@ public class StudentSession {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "status_id", nullable = false)
-    private StudentSessionStatus studentSessionStatus;
+    private RegistrationStatus registrationStatus;
 
     @Column(name = "registered_date", nullable = false)
     @CreationTimestamp

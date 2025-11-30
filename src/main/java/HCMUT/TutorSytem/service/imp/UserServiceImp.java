@@ -2,6 +2,7 @@ package HCMUT.TutorSytem.service.imp;
 
 import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.model.Datacore;
+import HCMUT.TutorSytem.model.Role;
 import HCMUT.TutorSytem.model.Status;
 import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.repo.UserRepository;
@@ -19,37 +20,47 @@ public class UserServiceImp implements UserService {
 
     @Override
     @Transactional
-    public Integer getInfoFromHcmutSystem(Datacore data) {
-        if (data == null) throw new DataNotFoundExceptions("Datacore data not found");
+    public User getInfoFromHcmutSystem(Datacore data) {
+        if (data == null) {
+            throw new DataNotFoundExceptions("Datacore data not found");
+        }
 
+        // Tìm user theo hcmutId
         User user = userRepository.findByHcmutId(data.getHcmutId())
-                .orElseGet(User::new);
+                .orElse(null);
+
+        // Nếu user đã tồn tại: chỉ cập nhật lastLogin, KHÔNG sync từ Datacore nữa
+        if (user != null) {
+            user.setLastLogin(Instant.now());
+            userRepository.save(user);
+            return user;
+        }
+
+        // Lần đầu đăng nhập: tạo mới user từ Datacore
+        user = new User();
+        user.setHcmutId(data.getHcmutId());
         user.setLastLogin(Instant.now());
-        if (user.getId() == null) {
-            user.setHcmutId(data.getHcmutId());
-            if (user.getStatus() == null) user.setStatus(new Status(1)); // active
-        } else {
-            return user.getId();
+
+        // Trạng thái mặc định: ACTIVE (id = 1)
+        if (user.getStatus() == null) {
+            user.setStatus(new Status(1));
         }
 
-        // Map các trường từ Datacore -> User
-        // role của Datacore là entity Role; User.role là String => lấy name
-        if (data.getRole() != null && data.getRole().getName() != null) {
-            user.setRole(data.getRole().getName());
-        }
+        // Role mặc định: STUDENT (id = 3) – chỉ set lần đầu
+        user.setRole(new Role(3));
 
+        // Map dữ liệu từ Datacore (chỉ dùng lần đầu)
         user.setFirstName(data.getFirstName());
         user.setLastName(data.getLastName());
         user.setProfileImage(data.getProfileImage());
-        // Note: faculty removed - both User and Datacore now use major relationship
+        // faculty đã bỏ, dùng quan hệ major
         user.setMajor(data.getMajor());
         user.setAcademicStatus(data.getAcademicStatus());
         user.setDob(data.getDob());
         user.setPhone(data.getPhone());
         user.setOtherMethodContact(data.getOtherMethodContact());
 
-        // Các trường lifecycle (createdDate/updateDate) do @Creation/@UpdateTimestamp tự lo
-        userRepository.save(user);
-        return user.getId();
+        return userRepository.save(user);
     }
+
 }

@@ -51,7 +51,7 @@ public class TutorServiceImp implements TutorService {
     private StudentSessionRepository studentSessionRepository;
 
     @Autowired
-    private StudentSessionStatusRepository studentSessionStatusRepository;
+    private RegistrationStatusRepository registrationStatusRepository;
 
 
     @Override
@@ -111,7 +111,7 @@ public class TutorServiceImp implements TutorService {
     public Page<StudentSessionDTO> getPendingStudentSessions(Integer tutorId, Pageable pageable) {
         // Lấy các yêu cầu đăng ký đang PENDING cho các session của tutor với pagination
         Page<StudentSession> pendingSessionsPage = studentSessionRepository
-                .findPendingSessionsByTutorId(tutorId, (byte) StudentSessionStatus.PENDING, pageable);
+                .findPendingSessionsByTutorId(tutorId, (byte) RegistrationStatus.PENDING, pageable);
 
         return pendingSessionsPage.map(StudentSessionMapper::toDTO);
     }
@@ -131,9 +131,9 @@ public class TutorServiceImp implements TutorService {
                         .orElseThrow(() -> new DataNotFoundExceptions("Student session not found with id: " + studentSessionId));
 
                 // Reject yêu cầu này
-                StudentSessionStatus rejectedStatus = studentSessionStatusRepository.findById(StudentSessionStatus.REJECTED)
+                RegistrationStatus rejectedStatus = registrationStatusRepository.findById(RegistrationStatus.REJECTED)
                         .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus REJECTED not found"));
-                studentSession.setStudentSessionStatus(rejectedStatus);
+                studentSession.setRegistrationStatus(rejectedStatus);
                 studentSession = studentSessionRepository.save(studentSession);
 
                 // Xóa schedule đã thêm trước đó bằng userId và sessionId
@@ -159,7 +159,7 @@ public class TutorServiceImp implements TutorService {
         User tutor = userRepository.findById(tutorId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + tutorId));
 
-        if (!"TUTOR".equalsIgnoreCase(tutor.getRole())) {
+        if (!"TUTOR".equalsIgnoreCase(tutor.getRole().getName())) {
             throw new IllegalArgumentException("User does not have tutor privileges");
         }
 
@@ -175,15 +175,15 @@ public class TutorServiceImp implements TutorService {
                 }
 
                 // Kiểm tra trạng thái phải là PENDING
-                if (studentSession.getStudentSessionStatus().getId() != StudentSessionStatus.PENDING) {
+                if (studentSession.getRegistrationStatus().getId() != RegistrationStatus.PENDING) {
                     throw new IllegalStateException("Yêu cầu đăng ký không ở trạng thái chờ duyệt. Trạng thái hiện tại: "
-                            + studentSession.getStudentSessionStatus().getName());
+                            + studentSession.getRegistrationStatus().getName());
                 }
 
                 // Từ chối: chỉ update status, không tăng currentQuantity
-                StudentSessionStatus rejectedStatus = studentSessionStatusRepository.findById(StudentSessionStatus.REJECTED)
+                RegistrationStatus rejectedStatus = registrationStatusRepository.findById(RegistrationStatus.REJECTED)
                         .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus REJECTED not found"));
-                studentSession.setStudentSessionStatus(rejectedStatus);
+                studentSession.setRegistrationStatus(rejectedStatus);
 
                 // Save (updatedDate sẽ tự động update nhờ @UpdateTimestamp)
                 studentSession = studentSessionRepository.save(studentSession);
@@ -274,7 +274,7 @@ public class TutorServiceImp implements TutorService {
         User tutor = userRepository.findById(tutorId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor not found with id: " + tutorId));
 
-        if (!"TUTOR".equalsIgnoreCase(tutor.getRole())) {
+        if (!"TUTOR".equalsIgnoreCase(tutor.getRole().getName())) {
             throw new IllegalArgumentException("User does not have tutor privileges");
         }
 
@@ -288,9 +288,9 @@ public class TutorServiceImp implements TutorService {
         }
 
         // Kiểm tra trạng thái phải là PENDING (tương tự AdminService kiểm tra PENDING)
-        if (studentSession.getStudentSessionStatus().getId() != StudentSessionStatus.PENDING) {
+        if (studentSession.getRegistrationStatus().getId() != RegistrationStatus.PENDING) {
             throw new IllegalStateException("Yêu cầu đăng ký không ở trạng thái chờ duyệt. Trạng thái hiện tại: "
-                    + studentSession.getStudentSessionStatus().getName());
+                    + studentSession.getRegistrationStatus().getName());
         }
 
         // Lock session để tránh race condition khi update currentQuantity
@@ -300,9 +300,9 @@ public class TutorServiceImp implements TutorService {
         // Kiểm tra lần 2: session còn chỗ không
         if (session.getCurrentQuantity() >= session.getMaxQuantity()) {
             // Session đã đầy, từ chối yêu cầu này
-            StudentSessionStatus rejectedStatus = studentSessionStatusRepository.findById(StudentSessionStatus.REJECTED)
+            RegistrationStatus rejectedStatus = registrationStatusRepository.findById(RegistrationStatus.REJECTED)
                     .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus REJECTED not found"));
-            studentSession.setStudentSessionStatus(rejectedStatus);
+            studentSession.setRegistrationStatus(rejectedStatus);
             studentSessionRepository.save(studentSession);
 
             throw new IllegalStateException("Buổi học đã đủ số lượng, không thể duyệt thêm");
@@ -314,9 +314,9 @@ public class TutorServiceImp implements TutorService {
         sessionRepository.save(session);
 
         // 2. Update status của studentSession thành CONFIRMED
-        StudentSessionStatus confirmedStatus = studentSessionStatusRepository.findById(StudentSessionStatus.CONFIRMED)
+        RegistrationStatus confirmedStatus = registrationStatusRepository.findById(RegistrationStatus.CONFIRMED)
                 .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus CONFIRMED not found"));
-        studentSession.setStudentSessionStatus(confirmedStatus);
+        studentSession.setRegistrationStatus(confirmedStatus);
 
         // 3. Set confirmedDate
         studentSession.setConfirmedDate(Instant.now());
@@ -329,14 +329,14 @@ public class TutorServiceImp implements TutorService {
             List<StudentSession> remainingPending = studentSessionRepository
                     .findBySessionId(session.getId())
                     .stream()
-                    .filter(ss -> ss.getStudentSessionStatus().getId() == StudentSessionStatus.PENDING)
+                    .filter(ss -> ss.getRegistrationStatus().getId() == RegistrationStatus.PENDING)
                     .toList();
 
-            StudentSessionStatus rejectedStatus = studentSessionStatusRepository.findById(StudentSessionStatus.REJECTED)
+            RegistrationStatus rejectedStatus = registrationStatusRepository.findById(RegistrationStatus.REJECTED)
                     .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus REJECTED not found"));
 
             for (StudentSession pending : remainingPending) {
-                pending.setStudentSessionStatus(rejectedStatus);
+                pending.setRegistrationStatus(rejectedStatus);
                 studentSessionRepository.save(pending);
 
                 // Xóa schedule đã thêm trước đó bằng userId và sessionId

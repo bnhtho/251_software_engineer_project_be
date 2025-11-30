@@ -29,7 +29,7 @@ public class TutorMapper {
         dto.setDob(user.getDob());
         dto.setPhone(user.getPhone());
         dto.setOtherMethodContact(user.getOtherMethodContact());
-        dto.setRole(user.getRole());
+        dto.setRole(user.getRole().getName());
         dto.setCreatedDate(user.getCreatedDate());
         dto.setUpdateDate(user.getUpdateDate());
         dto.setLastLogin(user.getLastLogin());
@@ -65,8 +65,6 @@ public class TutorMapper {
         dto.setReviewCount(0); // Can be calculated from feedback_student table
         dto.setStudentCount(tutorProfile.getTotalSessionsCompleted() != null ? tutorProfile.getTotalSessionsCompleted().intValue() : 0);
         dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : 0);
-        dto.setIsAvailable(tutorProfile.getIsAvailable());
-        dto.setStatus(tutorProfile.getStatus());
 
         return dto;
     }

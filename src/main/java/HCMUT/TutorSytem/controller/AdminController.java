@@ -172,10 +172,10 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{userId}/approve")
+    @PatchMapping("/{Id}/approve")
 
-    public ResponseEntity<BaseResponse> approveTutorByUserId(@PathVariable Integer userId) {
-        TutorProfile updated = tutorProfileService.approveTutorProfile(userId);
+    public ResponseEntity<BaseResponse> approveTutorByUserId(@PathVariable Integer Id) {
+        TutorProfile updated = tutorProfileService.approveTutorProfile(Id);
         TutorProfileResponse data = TutorProfileResponseMapper.toResponse(updated);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);
@@ -184,10 +184,10 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{userId}/reject")
+    @PatchMapping("/{Id}/reject")
 
-    public ResponseEntity<BaseResponse> rejectTutorByUserId(@PathVariable Integer userId) {
-        TutorProfile updated = tutorProfileService.rejectTutorProfile(userId);
+    public ResponseEntity<BaseResponse> rejectTutorByUserId(@PathVariable Integer Id) {
+        TutorProfile updated = tutorProfileService.rejectTutorProfile(Id);
         TutorProfileResponse data = TutorProfileResponseMapper.toResponse(updated);
         BaseResponse response = new BaseResponse();
         response.setStatusCode(200);

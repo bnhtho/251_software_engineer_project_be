@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.model;
 
-import HCMUT.TutorSytem.Enum.TutorStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,12 +51,8 @@ public class TutorProfile {
     @Column(name = "total_sessions_completed", columnDefinition = "int UNSIGNED not null")
     private Integer totalSessionsCompleted;
 
-    @ColumnDefault("1")
-    @Column(name = "is_available", nullable = false)
-    private Boolean isAvailable = false;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private TutorStatus status = TutorStatus.PENDING;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id")
+    private RegistrationStatus registrationStatus;
 
 }

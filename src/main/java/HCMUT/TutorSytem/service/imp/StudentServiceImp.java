@@ -39,7 +39,7 @@ public class StudentServiceImp implements StudentService {
     private SessionRepository sessionRepository;
 
     @Autowired
-    private StudentSessionStatusRepository studentSessionStatusRepository;
+    private RegistrationStatusRepository registrationStatusRepository;
 
     @Autowired
     private ScheduleRepository scheduleRepository;
@@ -158,9 +158,9 @@ public class StudentServiceImp implements StudentService {
         studentSession.setStudent(student);
         studentSession.setSession(session);
 
-        StudentSessionStatus pendingStatus = studentSessionStatusRepository.findById(StudentSessionStatus.PENDING)
+        RegistrationStatus pendingStatus = registrationStatusRepository.findById(RegistrationStatus.PENDING)
                 .orElseThrow(() -> new DataNotFoundExceptions("StudentSessionStatus PENDING not found"));
-        studentSession.setStudentSessionStatus(pendingStatus);
+        studentSession.setRegistrationStatus(pendingStatus);
 
         // registeredDate sẽ tự động set bởi @CreationTimestamp
         studentSession = studentSessionRepository.save(studentSession);
@@ -207,7 +207,7 @@ public class StudentServiceImp implements StudentService {
         // Query các StudentSession đã được CONFIRMED trong tuần
         List<StudentSession> studentSessions = studentSessionRepository.findStudentConfirmedSessionsInWeek(
                 studentId,
-                StudentSessionStatus.CONFIRMED,
+                RegistrationStatus.CONFIRMED,
                 startOfWeek,
                 endOfWeek
         );

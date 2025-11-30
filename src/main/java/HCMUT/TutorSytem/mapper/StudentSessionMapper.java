@@ -22,8 +22,8 @@ public class StudentSessionMapper {
         dto.setConfirmedDate(studentSession.getConfirmedDate());
         dto.setUpdatedDate(studentSession.getUpdatedDate());
 
-        if (studentSession.getStudentSessionStatus() != null) {
-            dto.setStatus(studentSession.getStudentSessionStatus().getName());
+        if (studentSession.getRegistrationStatus() != null) {
+            dto.setStatus(studentSession.getRegistrationStatus().getName());
         }
 
         if (studentSession.getStudent() != null) {
@@ -72,8 +72,8 @@ public class StudentSessionMapper {
         dto.setUpdatedDate(studentSession.getUpdatedDate());
 
         // Thông tin trạng thái đăng ký
-        if (studentSession.getStudentSessionStatus() != null) {
-            dto.setRegistrationStatus(studentSession.getStudentSessionStatus().getName());
+        if (studentSession.getRegistrationStatus() != null) {
+            dto.setRegistrationStatus(studentSession.getRegistrationStatus().getName());
         }
 
         // Thông tin Session

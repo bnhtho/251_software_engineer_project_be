@@ -18,11 +18,6 @@ public class Datacore {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "role_id")
-    private Role role;
-
     @Column(name = "hcmut_id", nullable = false, length = 50)
     private String hcmutId;
 
