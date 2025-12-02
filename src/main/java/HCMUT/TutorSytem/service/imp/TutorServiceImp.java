@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class TutorServiceImp implements TutorService {
+    private final String TUTOR_PROFILE_CONFIRMED_STATUS = "CONFIRMED";
 
     @Autowired
     private TutorProfileRepository tutorProfileRepository;
@@ -68,8 +69,8 @@ public class TutorServiceImp implements TutorService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
 
-        TutorProfile tutorProfile = tutorProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
+        TutorProfile tutorProfile = tutorProfileRepository.findByUserIdAndRegistrationStatusName(user.getId(), TUTOR_PROFILE_CONFIRMED_STATUS)
+                .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + user.getId()));
 
         // Lấy schedules của tutor
         List<Schedule> schedules = scheduleRepository.findByUserId(user.getId());
@@ -83,7 +84,7 @@ public class TutorServiceImp implements TutorService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
 
-        TutorProfile tutorProfile = tutorProfileRepository.findByUserId(userId)
+        TutorProfile tutorProfile = tutorProfileRepository.findByUserIdAndRegistrationStatusName(user.getId(), TUTOR_PROFILE_CONFIRMED_STATUS)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
 
         // ...existing code...

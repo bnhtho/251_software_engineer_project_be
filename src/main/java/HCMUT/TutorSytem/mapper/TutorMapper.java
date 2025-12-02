@@ -65,7 +65,7 @@ public class TutorMapper {
         dto.setReviewCount(0); // Can be calculated from feedback_student table
         dto.setStudentCount(tutorProfile.getTotalSessionsCompleted() != null ? tutorProfile.getTotalSessionsCompleted().intValue() : 0);
         dto.setExperienceYears(tutorProfile.getExperienceYears() != null ? tutorProfile.getExperienceYears().intValue() : 0);
-
+        dto.setStatus(tutorProfile.getRegistrationStatus().getName());
         return dto;
     }
 

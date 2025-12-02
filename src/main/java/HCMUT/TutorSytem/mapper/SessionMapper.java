@@ -45,7 +45,7 @@ public class SessionMapper {
         dto.setMaxQuantity(session.getMaxQuantity());
         dto.setCurrentQuantity(session.getCurrentQuantity());
         dto.setUpdatedDate(session.getUpdatedDate());
-
+        dto.setStatus(session.getSessionStatus().getName());
         return dto;
     }
 

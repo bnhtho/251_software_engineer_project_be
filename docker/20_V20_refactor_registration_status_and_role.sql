@@ -2,7 +2,7 @@ ALTER TABLE tutor_profile
 	DROP COLUMN subject,
 	DROP COLUMN is_available;
 
--- 2) Đổi tên bảng cho “generic” hơn, dùng chung cho
+-- 2) Đổi tên bảng cho "generic" hơn, dùng chung cho
 --    cả đăng ký buổi học và đăng ký trở thành tutor
 RENAME TABLE student_session_status TO registration_status;
 ALTER TABLE registration_status
@@ -92,3 +92,4 @@ ALTER TABLE datacore
 -- 5) Xoá cột role_id ở bảng datacore
 ALTER TABLE datacore
     DROP COLUMN role_id CASCADE;
+

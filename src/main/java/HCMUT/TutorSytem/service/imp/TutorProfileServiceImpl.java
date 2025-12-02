@@ -27,7 +27,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class TutorProfileServiceImpl implements TutorProfileService {
-
+    private final String PENDING_STATUS_NAME = "PENDING";
+    private final String CONFIRMED_STATUS_NAME = "CONFIRMED";
+    private final String REJECTED_STATUS_NAME = "REJECTED";
     @Autowired
     private TutorProfileRepository tutorProfileRepository;
 
@@ -49,20 +51,19 @@ public class TutorProfileServiceImpl implements TutorProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundExceptions("User not found with id: " + userId));
 
-        tutorProfileRepository.findByUserId(userId).ifPresent(profile -> {
-            throw new MethodNotAllowExceptions("Tutor profile already exists for this user");
+        tutorProfileRepository.findByUserIdAndRegistrationStatusName(userId, CONFIRMED_STATUS_NAME).ifPresent(profile -> {
+            throw new MethodNotAllowExceptions("This user already has an approved tutor profile.");
         });
 
-        if (request.getMajorId() != null) {
-            Major major = majorRepository.findById(request.getMajorId())
-                    .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
-            user.setMajor(major);
-        }
-
-        if (request.getAcademicStatus() != null && !request.getAcademicStatus().trim().isEmpty()) {
-            user.setAcademicStatus(request.getAcademicStatus().trim());
-        }
-        userRepository.save(user);
+        tutorProfileRepository.findByUserIdAndRegistrationStatusName(userId, PENDING_STATUS_NAME).ifPresent(profile -> {
+            throw new MethodNotAllowExceptions("This user already has a pending tutor profile.");
+        });
+        tutorProfileRepository.findByUserIdAndRegistrationStatusName(userId, REJECTED_STATUS_NAME).ifPresent(profile -> {
+            int rejectedCount = tutorProfileRepository.countByUserIdAndRegistrationStatusName(userId, REJECTED_STATUS_NAME);
+            if (rejectedCount > 3) {
+                throw new MethodNotAllowExceptions("This user has reached the maximum number of tutor profile rejections.");
+            }
+        });
 
         List<Integer> subjectIds = request.getSubjects() != null ? request.getSubjects() : Collections.emptyList();
         List<Subject> subjects = resolveSubjects(subjectIds);
@@ -149,10 +150,14 @@ public class TutorProfileServiceImpl implements TutorProfileService {
         // Ensure current status is PENDING
         ensurePendingStatus(tutorProfile);
 
+        // Xóa các bản ghi liên kết trong bảng tutor_profile_subject
+        tutorProfile.getSubjects().clear();
+
         // Set registration status to REJECTED
         RegistrationStatus rejectedStatus = registrationStatusRepository.findById(RegistrationStatus.REJECTED)
                 .orElseThrow(() -> new DataNotFoundExceptions("Registration status REJECTED not found"));
         tutorProfile.setRegistrationStatus(rejectedStatus);
+
 
         return tutorProfileRepository.save(tutorProfile);
     }

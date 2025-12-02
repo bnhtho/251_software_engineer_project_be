@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.dto;
 
-import HCMUT.TutorSytem.Enum.TutorStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,7 +13,7 @@ public class TutorProfileResponse {
     private BigDecimal rating;
     private Integer totalSessionsCompleted;
     private Boolean isAvailable;
-    private TutorStatus status;
+    private String status;
     private List<SubjectDTO> subjects;
     private UserResponse user;
 }

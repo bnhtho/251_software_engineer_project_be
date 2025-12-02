@@ -1,6 +1,5 @@
 package HCMUT.TutorSytem.dto;
 
-import HCMUT.TutorSytem.Enum.TutorStatus;
 import lombok.Data;
 
 import java.time.Instant;
@@ -37,5 +36,5 @@ public class TutorDTO {
     private Integer studentCount;
     private Integer experienceYears;
     private Boolean isAvailable;
-    private TutorStatus status;
+    private String status;
 }

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 
 @Service
 public class SessionServiceImp implements SessionService {
@@ -185,6 +186,17 @@ public class SessionServiceImp implements SessionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new DataNotFoundExceptions("Session not found with id: " + sessionId));
         return session.getTutor() != null ? session.getTutor().getId() : null;
+    }
+
+    @Override
+    public Page<SessionDTO> getSessionsByTutorId(Integer tutorId, Pageable pageable) {
+        // Kiểm tra tutor có tồn tại không
+        if (!userRepository.existsById(tutorId)) {
+            throw new DataNotFoundExceptions("Tutor not found with id: " + tutorId);
+        }
+
+        Page<Session> sessionsPage = sessionRepository.findByTutorId(tutorId, pageable);
+        return sessionsPage.map(SessionMapper::toDTO);
     }
 }
 

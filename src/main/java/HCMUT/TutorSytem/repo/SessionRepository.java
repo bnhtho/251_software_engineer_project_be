@@ -49,6 +49,11 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     List<Session> findByTutorId(Integer tutorId);
 
     /**
+     * Tìm sessions theo tutor ID với phân trang
+     */
+    Page<Session> findByTutorId(Integer tutorId, Pageable pageable);
+
+    /**
      * Tìm các session của tutor trong khoảng thời gian và có status = SCHEDULED
      * @param tutorId ID của tutor
      * @param statusId ID của status (SCHEDULED = 2)

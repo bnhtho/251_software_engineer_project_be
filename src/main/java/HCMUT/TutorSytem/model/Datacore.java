@@ -1,5 +1,6 @@
 package HCMUT.TutorSytem.model;
 
+import HCMUT.TutorSytem.Enum.AcademicStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,8 +34,9 @@ public class Datacore {
     @Column(name = "profile_image")
     private String profileImage;
 
-    @Column(name = "academic_status", length = 100)
-    private String academicStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "academic_status")
+    private AcademicStatus academicStatus;
 
     @Column(name = "dob")
     private LocalDate dob;

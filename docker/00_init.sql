@@ -253,11 +253,20 @@ INSERT INTO role (id, name, description) VALUES
 INSERT INTO datacore
 (id, role_id, hcmut_id, email, first_name, last_name, profile_image, faculty, academic_status, dob, phone, other_method_contact)
 VALUES
-(1, 1, 'NV001',    'loannt@hcmut.edu.vn',  'Nguyễn Thị', 'Loan',  NULL, 'Office of Student Affairs', 'Staff',        '1985-05-12', '0903000001', NULL),
-(2, 2, 'GV001',    'minhlv@hcmut.edu.vn',  'Lê Văn',     'Minh',  NULL, 'Applied Science',           'Faculty',      '1978-09-21', '0903000002', NULL),
-(3, 2, '17123456', '17123456@hcmut.edu.vn','Phạm Minh',  'Tâm',   NULL, 'CSE',                      'Graduate',     '1997-02-14', '0903000003', NULL),
-(4, 3, '20123456', '20123456@hcmut.edu.vn','Nguyễn Văn', 'An',    NULL, 'CSE',                      'Undergraduate','2004-08-10', '0903000004', 'Zalo: an.cse'),
-(5, 3, '20125678', '20125678@hcmut.edu.vn','Trần Thị',   'Bình',  NULL, 'Mechanical Engineering',    'Undergraduate','2006-01-18', '0903000005', NULL);
+(1, 1, 'NV001',    'loannt@hcmut.edu.vn',  'Nguyễn Thị', 'Loan',  NULL,
+ 'Office of Student Affairs', 'TEACHER',  '1985-05-12', '0903000001', NULL),
+
+(2, 2, 'GV001',    'minhlv@hcmut.edu.vn',  'Lê Văn',     'Minh',  NULL,
+ 'Applied Science',           'GRADUATED',    '1978-09-21', '0903000002', NULL),
+
+(3, 2, '17123456', '17123456@hcmut.edu.vn','Phạm Minh',  'Tâm',   NULL,
+ 'CSE',                      'GRADUATED',   '1997-02-14', '0903000003', NULL),
+
+(4, 3, '20123456', '20123456@hcmut.edu.vn','Nguyễn Văn', 'An',    NULL,
+ 'CSE',                      'FRESHMAN',    '2004-08-10', '0903000004', 'Zalo: an.cse'),
+
+(5, 3, '20125678', '20125678@hcmut.edu.vn','Trần Thị',   'Bình',  NULL,
+ 'Mechanical Engineering',    'SOPHOMORE',  '2006-01-18', '0903000005', NULL);
 
 -- 3) HCMUT_SSO (đăng nhập tập trung)
 INSERT INTO hcmut_sso (id, email, password, hcmut_id) VALUES

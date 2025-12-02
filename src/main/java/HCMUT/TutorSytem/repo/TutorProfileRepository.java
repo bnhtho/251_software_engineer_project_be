@@ -11,8 +11,10 @@ import java.util.Optional;
 @Repository
 public interface TutorProfileRepository extends JpaRepository<TutorProfile, Integer> {
 
-    Optional<TutorProfile> findByUserId(Integer userId);
+    Optional<TutorProfile> findByUserIdAndRegistrationStatusName(Integer userId, String statusName);
 
     Page<TutorProfile> findByRegistrationStatusId(Byte statusId, Pageable pageable);
+
+    Integer countByUserIdAndRegistrationStatusName(Integer userId, String statusName);
 
 }

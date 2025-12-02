@@ -11,5 +11,6 @@ public interface SessionService {
     SessionDTO updateSession(Integer id, SessionRequest request);
     void deleteSession(Integer id);
     Integer getTutorIdFromSession(Integer sessionId); // Get tutor ID to check ownership
+    Page<SessionDTO> getSessionsByTutorId(Integer tutorId, Pageable pageable); // Lấy sessions theo tutor ID với phân trang
 }
 

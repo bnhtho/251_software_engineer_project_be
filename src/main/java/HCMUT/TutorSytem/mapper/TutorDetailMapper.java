@@ -78,7 +78,7 @@ public class TutorDetailMapper {
                     .collect(Collectors.toList());
             dto.setSchedules(scheduleDTOs);
         }
-
+        dto.setStatus(tutorProfile.getRegistrationStatus().getName());
         return dto;
     }
 

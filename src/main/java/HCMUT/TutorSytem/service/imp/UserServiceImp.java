@@ -55,7 +55,7 @@ public class UserServiceImp implements UserService {
         user.setProfileImage(data.getProfileImage());
         // faculty đã bỏ, dùng quan hệ major
         user.setMajor(data.getMajor());
-        user.setAcademicStatus(data.getAcademicStatus());
+        user.setAcademicStatus(data.getAcademicStatus().getDisplayName());
         user.setDob(data.getDob());
         user.setPhone(data.getPhone());
         user.setOtherMethodContact(data.getOtherMethodContact());

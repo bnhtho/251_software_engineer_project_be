@@ -72,7 +72,7 @@ public class SecurityConfig {
                     request.requestMatchers(HttpMethod.GET, "/majors/**").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/session-statuses").permitAll();
                     request.requestMatchers(HttpMethod.GET, "/student-session-statuses").permitAll();
-
+                    request.requestMatchers(HttpMethod.GET, "/sessions/tutor/**").permitAll();
                     // 9. Default - AUTHENTICATED
                     // Tất cả requests khác yêu cầu authentication
                     request.anyRequest().authenticated();

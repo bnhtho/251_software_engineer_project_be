@@ -1,6 +1,6 @@
 package HCMUT.TutorSytem.dto;
 
-import HCMUT.TutorSytem.Enum.TutorStatus;
+
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -37,7 +37,7 @@ public class TutorDetailDTO {
     private Integer experienceYears;
     private Integer totalSessionsCompleted;
     private Boolean isAvailable;
-    private TutorStatus status;
+    private String status;
 
     // Teaching schedule
     private List<ScheduleDTO> schedules;

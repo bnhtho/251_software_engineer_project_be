@@ -25,7 +25,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
       show-sql: true
       jdbc:
         time_zone: UTC
@@ -34,6 +34,7 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
   jackson:
+    time-zone: Asia/Ho_Chi_Minh
     serialization:
       write-dates-as-timestamps: false
 
@@ -60,6 +61,7 @@ spring:
     username: root
     password: admin123
   jackson:
+    time-zone: Asia/Ho_Chi_Minh
     serialization:
       write-dates-as-timestamps: false
 

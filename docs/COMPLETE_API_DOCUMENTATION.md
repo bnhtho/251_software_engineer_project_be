@@ -1208,6 +1208,68 @@
 }
 ```
 
+### 5.5. Get Sessions by Tutor ID (with Pagination)
+**Endpoint:** `GET /sessions/tutor/{tutorId}?page={page}`
+
+**Mô tả:** Lấy danh sách tất cả sessions của một tutor cụ thể với phân trang
+
+**Path Parameters:**
+- `tutorId`: ID của tutor
+
+**Query Parameters:**
+- `page` (optional, default=0): Số trang (bắt đầu từ 0)
+
+**Response:**
+```json
+{
+  "statusCode": 200,
+  "message": "Sessions retrieved successfully for tutor ID: 1",
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "tutorName": "Nguyễn Văn A",
+        "studentNames": ["student1", "student2"],
+        "subjectName": "Toán cao cấp",
+        "startTime": "2024-01-01T08:00:00Z",
+        "endTime": "2024-01-01T10:00:00Z",
+        "format": "ONLINE",
+        "location": "Google Meet",
+        "maxQuantity": 10,
+        "currentQuantity": 5,
+        "updatedDate": "2024-01-01T00:00:00Z"
+      },
+      {
+        "id": 2,
+        "tutorName": "Nguyễn Văn A",
+        "studentNames": ["student3"],
+        "subjectName": "Vật lý đại cương",
+        "startTime": "2024-01-02T14:00:00Z",
+        "endTime": "2024-01-02T16:00:00Z",
+        "format": "OFFLINE",
+        "location": "Room A101",
+        "maxQuantity": 15,
+        "currentQuantity": 8,
+        "updatedDate": "2024-01-02T00:00:00Z"
+      }
+    ],
+    "currentPage": 0,
+    "totalPages": 3,
+    "totalItems": 25,
+    "pageSize": 10
+  }
+}
+```
+
+**Response (Error - Tutor not found):**
+```json
+{
+  "statusCode": 404,
+  "message": "Tutor not found with id: 999",
+  "data": null
+}
+```
+
 ---
 
 ## 6. DEPARTMENT APIs

@@ -18,5 +18,6 @@ public class SessionDTO {
     private Integer maxQuantity; // Số lượng tối đa sinh viên
     private Integer currentQuantity; // Số lượng sinh viên đã được approved
     private Instant updatedDate;
+    private String status;
 }
 

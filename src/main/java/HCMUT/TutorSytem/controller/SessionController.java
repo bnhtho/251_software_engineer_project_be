@@ -44,6 +44,28 @@ public class SessionController {
     }
 
     /**
+     * Get sessions by tutor ID với phân trang
+     * Lấy tất cả sessions của một tutor cụ thể
+     *
+     * @param tutorId ID của tutor
+     * @param page Số trang (bắt đầu từ 0, mặc định = 0)
+     */
+    @GetMapping("/tutor/{tutorId}")
+    public ResponseEntity<BaseResponse> getSessionsByTutorId(
+            @PathVariable Integer tutorId,
+            @RequestParam(defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<SessionDTO> sessionsPage = sessionService.getSessionsByTutorId(tutorId, pageable);
+        Map<String, Object> paginatedData = PaginationUtil.createPaginationResponse(sessionsPage);
+
+        BaseResponse response = new BaseResponse();
+        response.setStatusCode(200);
+        response.setMessage("Sessions retrieved successfully for tutor ID: " + tutorId);
+        response.setData(paginatedData);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Create a new session
      */
     @PostMapping
