@@ -55,6 +55,10 @@ ALTER TABLE tutor_profile
         FOREIGN KEY (status_id) REFERENCES registration_status(id);
 ALTER TABLE tutor_profile
     ALTER COLUMN status_id SET DEFAULT 1;
+-- 4) Set status_id của các tutor_profile hiện có thành 2 (CONFIRMED)
+--    vì tất cả đều là tutor đã được duyệt
+UPDATE tutor_profile
+SET status_id = 2;
 
 ALTER TABLE student_session
     DROP FOREIGN KEY fk_student_session_status;
