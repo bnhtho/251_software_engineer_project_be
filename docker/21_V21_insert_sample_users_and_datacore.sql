@@ -86,3 +86,7 @@ ALTER TABLE datacore
         'TEACHER'
     ));
 
+ALTER TABLE session
+  ADD COLUMN day_of_week tinyint unsigned NULL;
+
+
