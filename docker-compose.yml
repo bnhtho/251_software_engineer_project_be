@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: mysql.Dockerfile # Chỉ định Dockerfile mới
     container_name: tutor_system_db
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin123
       MYSQL_DATABASE: tutor_system

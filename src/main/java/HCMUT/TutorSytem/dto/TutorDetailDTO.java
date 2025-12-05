@@ -36,7 +36,6 @@ public class TutorDetailDTO {
     private BigDecimal rating;
     private Integer experienceYears;
     private Integer totalSessionsCompleted;
-    private Boolean isAvailable;
     private String status;
 
     // Teaching schedule
