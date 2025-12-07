@@ -1,5 +1,16 @@
 package HCMUT.TutorSytem.service.imp;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import HCMUT.TutorSytem.dto.SessionDTO;
 import HCMUT.TutorSytem.dto.StudentSessionDTO;
 import HCMUT.TutorSytem.dto.TutorDTO;
@@ -8,20 +19,26 @@ import HCMUT.TutorSytem.exception.DataNotFoundExceptions;
 import HCMUT.TutorSytem.mapper.StudentSessionMapper;
 import HCMUT.TutorSytem.mapper.TutorDetailMapper;
 import HCMUT.TutorSytem.mapper.TutorMapper;
-import HCMUT.TutorSytem.model.*;
+import HCMUT.TutorSytem.model.Major;
+import HCMUT.TutorSytem.model.RegistrationStatus;
+import HCMUT.TutorSytem.model.Schedule;
+import HCMUT.TutorSytem.model.Session;
+import HCMUT.TutorSytem.model.SessionStatus;
+import HCMUT.TutorSytem.model.StudentSession;
+import HCMUT.TutorSytem.model.Subject;
+import HCMUT.TutorSytem.model.TutorProfile;
+import HCMUT.TutorSytem.model.User;
 import HCMUT.TutorSytem.payload.request.TutorProfileUpdateRequest;
-import HCMUT.TutorSytem.repo.*;
+import HCMUT.TutorSytem.repo.MajorRepository;
+import HCMUT.TutorSytem.repo.RegistrationStatusRepository;
+import HCMUT.TutorSytem.repo.ScheduleRepository;
+import HCMUT.TutorSytem.repo.SessionRepository;
+import HCMUT.TutorSytem.repo.StatusRepository;
+import HCMUT.TutorSytem.repo.StudentSessionRepository;
+import HCMUT.TutorSytem.repo.SubjectRepository;
+import HCMUT.TutorSytem.repo.TutorProfileRepository;
+import HCMUT.TutorSytem.repo.UserRepository;
 import HCMUT.TutorSytem.service.TutorService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TutorServiceImp implements TutorService {
@@ -87,22 +104,51 @@ public class TutorServiceImp implements TutorService {
         TutorProfile tutorProfile = tutorProfileRepository.findByUserIdAndRegistrationStatusName(user.getId(), TUTOR_PROFILE_CONFIRMED_STATUS)
                 .orElseThrow(() -> new DataNotFoundExceptions("Tutor profile not found for user id: " + userId));
 
-        // ...existing code...
-
-        // Update subjects if provided
-        if (request.getSubjectIds() != null && !request.getSubjectIds().isEmpty()) {
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getProfileImage() != null) {
+            user.setProfileImage(request.getProfileImage());
+        }
+        if (request.getAcademicStatus() != null) {
+            user.setAcademicStatus(request.getAcademicStatus());
+        }
+        if (request.getDob() != null) {
+            user.setDob(request.getDob());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getOtherMethodContact() != null) {
+            user.setOtherMethodContact(request.getOtherMethodContact());
+        }
+        if (request.getMajorId() != null) {
+            Major major = majorRepository.findById(request.getMajorId())
+                    .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
+            user.setMajor(major);
+        }
+        if (request.getBio() != null) {
+            tutorProfile.setBio(request.getBio());
+        }
+        if (request.getExperienceYears() != null) {
+            tutorProfile.setExperienceYears(request.getExperienceYears().shortValue());
+        }
+        if (request.getSubjectIds() != null) {
             tutorProfile.getSubjects().clear();
-            for (Integer subjectId : request.getSubjectIds()) {
-                Subject subject = subjectRepository.findById(subjectId)
-                        .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
-                tutorProfile.getSubjects().add(subject);
+            if (!request.getSubjectIds().isEmpty()) {
+                for (Integer subjectId : request.getSubjectIds()) {
+                    Subject subject = subjectRepository.findById(subjectId)
+                            .orElseThrow(() -> new DataNotFoundExceptions("Subject not found with id: " + subjectId));
+                    tutorProfile.getSubjects().add(subject);
+                }
             }
         }
 
         user = userRepository.save(user);
         tutorProfile = tutorProfileRepository.save(tutorProfile);
-
-        // Lấy schedules của tutor
         List<Schedule> schedules = scheduleRepository.findByUserId(user.getId());
 
         return TutorDetailMapper.toDTO(user, tutorProfile, schedules);
