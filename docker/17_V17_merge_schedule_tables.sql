@@ -9,7 +9,7 @@ ALTER TABLE schedule
 
 ALTER TABLE schedule
     ADD CONSTRAINT chk_schedule_day_of_week
-    CHECK (day_of_week BETWEEN 1 AND 7);
+    CHECK (day_of_week BETWEEN 0 AND 6);
 INSERT INTO schedule (
     user_id,
     day_of_week,
