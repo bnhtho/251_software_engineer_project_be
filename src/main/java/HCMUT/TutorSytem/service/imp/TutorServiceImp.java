@@ -130,16 +130,12 @@ public class TutorServiceImp implements TutorService {
                     .orElseThrow(() -> new DataNotFoundExceptions("Major not found with id: " + request.getMajorId()));
             user.setMajor(major);
         }
-
-        // Update TutorProfile specific fields
         if (request.getBio() != null) {
             tutorProfile.setBio(request.getBio());
         }
         if (request.getExperienceYears() != null) {
             tutorProfile.setExperienceYears(request.getExperienceYears().shortValue());
         }
-
-        // Update subjects if provided
         if (request.getSubjectIds() != null) {
             tutorProfile.getSubjects().clear();
             if (!request.getSubjectIds().isEmpty()) {
@@ -153,8 +149,6 @@ public class TutorServiceImp implements TutorService {
 
         user = userRepository.save(user);
         tutorProfile = tutorProfileRepository.save(tutorProfile);
-
-        // Lấy schedules của tutor
         List<Schedule> schedules = scheduleRepository.findByUserId(user.getId());
 
         return TutorDetailMapper.toDTO(user, tutorProfile, schedules);
