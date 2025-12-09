@@ -105,9 +105,4 @@ app:
     secret: ${JWT_SECRET:gixcprMftqxTdjUeWJ0dvTrAqoUPjcROc2U8YRiWbX0=}
     expiration: 43200000
   cors:
-    allowed-origins:
-      # Cho phép Frontend chạy local gọi lên (để test)
-      - http://localhost:5173
-      - http://localhost:3000
-      # QUAN TRỌNG: Thay dòng dưới bằng link frontend Netlify của bạn sau khi deploy xong
-      - https://your-app-name.netlify.app
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
