@@ -9,17 +9,8 @@ ALTER TABLE schedule
 
 ALTER TABLE schedule
     ADD CONSTRAINT chk_schedule_day_of_week
-    CHECK (day_of_week BETWEEN 1 AND 7);
-INSERT INTO schedule (
-    user_id,
-    day_of_week,
-    start_time,
-    end_time,
-    created_date,
-    update_date
-)
-VALUES
-(2, 2, '2000-01-01 09:00:00', '2000-01-01 11:00:00', NOW(), NULL), -- Tue
-(2, 4, '2000-01-01 14:00:00', '2000-01-01 16:00:00', NOW(), NULL), -- Thu
-(3, 3, '2000-01-01 14:00:00', '2000-01-01 15:00:00', NOW(), NULL), -- Wed
-(3, 6, '2000-01-01 09:00:00', '2000-01-01 11:00:00', NOW(), NULL); -- Sat
+    CHECK (day_of_week BETWEEN 0 AND 6);
+
+-- Không insert dữ liệu ở đây vì cấu trúc bảng sẽ thay đổi ở V19
+-- (thêm session_id, xóa start_time/end_time)
+-- Dữ liệu sẽ được tạo tự động khi student đăng ký session

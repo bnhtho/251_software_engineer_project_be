@@ -5,12 +5,12 @@ services:
       dockerfile: mysql.Dockerfile # Chỉ định Dockerfile mới
     container_name: tutor_system_db
     environment:
-      MYSQL_ROOT_PASSWORD: admin123
-      MYSQL_DATABASE: tutor_system
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
       SPRING_PROFILES_ACTIVE: docker
       TZ: Asia/Ho_Chi_Minh
     ports:
-      - "3307:3306"  # Host port : Container port
+      - "${MYSQL_LOCAL_PORT}:3306"  # Host port : Container port
     volumes:
       - db_data:/var/lib/mysql
       - ./docker:/docker-entrypoint-initdb.d:ro
@@ -27,20 +27,22 @@ services:
     container_name: tutor_system_api
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutor_system?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&useUnicode=UTF-8&characterEncoding=UTF-8
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: admin123
+      # Sử dụng biến từ .env
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_PROFILES_ACTIVE: docker
-      SERVER_PORT: 8081
-      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: ${SERVER_PORT}
+      APP_JWT_SECRET: ${JWT_SECRET} # Cần sửa thêm trong application.yml để nhận biến này
     ports:
-      - "8081:8081"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     depends_on:
       mysql:
         condition: service_healthy
-    command: ["java", "-jar", "/app/app.jar"]  # <-- thay cho entrypoint.sh
+    command: [ "java", "-jar", "/app/app.jar" ]
     networks:
       - tutor_net
+
 volumes:
   db_data:
 

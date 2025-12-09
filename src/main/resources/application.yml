@@ -73,4 +73,26 @@ server:
       charset: UTF-8
       enabled: true
       force: true
-
+---
+# ======================
+# PROFILE PROD (Dùng cho Render)
+# ======================
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    # Lấy giá trị từ biến môi trường máy chủ
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # Hoặc validate nếu db đã có dữ liệu
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+server:
+  # Ưu tiên lấy biến môi trường PORT (do Render cấp), nếu không có thì dùng 8080
+  port: ${PORT:8080}
+  address: 0.0.0.0
