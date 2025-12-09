@@ -113,7 +113,7 @@ public class SessionServiceImp implements SessionService {
         java.time.DayOfWeek javaDow = startTime.atZone(zoneId).getDayOfWeek();
 
         // Dùng hàm em đã viết
-        return DayOfWeek.fromJavaDayOfWeek(javaDow); // enum của em
+        return DayOfWeek.fromJavaDayOfWeek(javaDow); // enum
     }
     @Override
     public SessionDTO updateSession(Integer id, SessionRequest request) {
