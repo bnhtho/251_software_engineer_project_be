@@ -1,6 +1,6 @@
-# ======================
-# CẤU HÌNH MẶC ĐỊNH / DEV (chạy local)
-# ======================
+# =========================================================
+# 1. CẤU HÌNH MẶC ĐỊNH / DEV (Chạy Localhost)
+# =========================================================
 server:
   port: 8081
   address: 0.0.0.0
@@ -47,11 +47,10 @@ app:
       - http://localhost:5173
       - http://localhost:3000
 
-
 ---
-# ======================
-# PROFILE DOCKER (chạy trong Docker network)
-# ======================
+# =========================================================
+# 2. PROFILE DOCKER (Chạy trong Docker Network Local)
+# =========================================================
 spring:
   config:
     activate:
@@ -73,26 +72,42 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+
 ---
-# ======================
-# PROFILE PROD (Dùng cho Render)
-# ======================
+# =========================================================
+# 3. PROFILE PROD (Dùng cho Render + TiDB Cloud)
+# =========================================================
 spring:
   config:
     activate:
       on-profile: prod
   datasource:
-    # Lấy giá trị từ biến môi trường máy chủ
+    # Lấy giá trị từ biến môi trường trên Render
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update # Hoặc validate nếu db đã có dữ liệu
-    show-sql: false
+      ddl-auto: none
+    show-sql: false    # Tắt log SQL để đỡ rối log trên server
     database-platform: org.hibernate.dialect.MySQL8Dialect
+
 server:
-  # Ưu tiên lấy biến môi trường PORT (do Render cấp), nếu không có thì dùng 8080
+  # Render sẽ tự động bơm PORT vào, nếu không có thì dùng 8080
   port: ${PORT:8080}
   address: 0.0.0.0
+
+app:
+  jwt:
+    # Lấy secret từ biến môi trường JWT_SECRET trên Render.
+    # Nếu quên set, nó sẽ dùng chuỗi mặc định sau dấu : (để không bị lỗi)
+    secret: ${JWT_SECRET:gixcprMftqxTdjUeWJ0dvTrAqoUPjcROc2U8YRiWbX0=}
+    expiration: 43200000
+  cors:
+    allowed-origins:
+      # Cho phép Frontend chạy local gọi lên (để test)
+      - http://localhost:5173
+      - http://localhost:3000
+      # QUAN TRỌNG: Thay dòng dưới bằng link frontend Netlify của bạn sau khi deploy xong
+      - https://your-app-name.netlify.app
